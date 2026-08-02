@@ -44,7 +44,7 @@ import { InvoiceDocument } from "@/app/components/invoice-document";
 import { PaymentsSection } from "@/app/components/payments-section";
 import { ClientPicker } from "@/app/components/client-picker";
 import { StatusBadge } from "@/app/components/status-badge";
-import { useClients, useInvoices, readInvoiceById } from "@/lib/storage";
+import { useClients, useInvoices, fetchInvoiceById } from "@/lib/storage";
 import { createDefaultInvoice, newItem } from "@/lib/defaults";
 import { computeTotals, formatMoney } from "@/lib/totals";
 import { computeStatus } from "@/lib/invoice-status";
@@ -91,10 +91,15 @@ export function InvoiceEditor({ id }: { id?: string }) {
 
   useEffect(() => {
     if (!id) return;
-    const found = readInvoiceById(id);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (found) setData(found);
-    else setNotFound(true);
+    let cancelled = false;
+    fetchInvoiceById(id).then((found) => {
+      if (cancelled) return;
+      if (found) setData(found);
+      else setNotFound(true);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   const deferredData = useDeferredValue(data);

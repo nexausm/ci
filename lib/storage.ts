@@ -2,26 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { Client, InvoiceData } from "./types";
-import { sanitizeClient, sanitizeInvoice } from "./defaults";
 
-export const CLIENTS_KEY = "invoice-app-clients-v1";
-export const INVOICES_KEY = "invoice-app-invoices-v1";
-
-function readList<T>(key: string, sanitize: (raw: unknown) => T): T[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map(sanitize);
-  } catch {
-    return [];
-  }
-}
-
-function writeList<T>(key: string, list: T[]) {
-  window.localStorage.setItem(key, JSON.stringify(list));
+async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    ...init,
+    headers: init?.body ? { "Content-Type": "application/json" } : undefined,
+  });
+  if (!res.ok) throw new Error(`Request to ${url} failed: ${res.status}`);
+  return res.json();
 }
 
 export function useClients() {
@@ -29,36 +17,36 @@ export function useClients() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setClients(readList(CLIENTS_KEY, sanitizeClient));
-    setLoaded(true);
-  }, []);
-
-  const persist = useCallback((next: Client[]) => {
-    setClients(next);
-    writeList(CLIENTS_KEY, next);
+    let cancelled = false;
+    apiFetch<Client[]>("/api/clients").then((data) => {
+      if (cancelled) return;
+      setClients(data);
+      setLoaded(true);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const upsertClient = useCallback((client: Client) => {
     setClients((prev) => {
       const exists = prev.some((c) => c.id === client.id);
-      const next = exists
+      return exists
         ? prev.map((c) => (c.id === client.id ? client : c))
         : [...prev, client];
-      writeList(CLIENTS_KEY, next);
-      return next;
+    });
+    void apiFetch("/api/clients", {
+      method: "POST",
+      body: JSON.stringify(client),
     });
   }, []);
 
   const removeClient = useCallback((id: string) => {
-    setClients((prev) => {
-      const next = prev.filter((c) => c.id !== id);
-      writeList(CLIENTS_KEY, next);
-      return next;
-    });
+    setClients((prev) => prev.filter((c) => c.id !== id));
+    void apiFetch(`/api/clients/${id}`, { method: "DELETE" });
   }, []);
 
-  return { clients, loaded, upsertClient, removeClient, setClients: persist };
+  return { clients, loaded, upsertClient, removeClient };
 }
 
 export function useInvoices() {
@@ -66,39 +54,42 @@ export function useInvoices() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setInvoices(readList(INVOICES_KEY, sanitizeInvoice));
-    setLoaded(true);
+    let cancelled = false;
+    apiFetch<InvoiceData[]>("/api/invoices").then((data) => {
+      if (cancelled) return;
+      setInvoices(data);
+      setLoaded(true);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const upsertInvoice = useCallback((invoice: InvoiceData) => {
     setInvoices((prev) => {
       const exists = prev.some((i) => i.id === invoice.id);
-      const next = exists
+      return exists
         ? prev.map((i) => (i.id === invoice.id ? invoice : i))
         : [...prev, invoice];
-      writeList(INVOICES_KEY, next);
-      return next;
+    });
+    void apiFetch("/api/invoices", {
+      method: "POST",
+      body: JSON.stringify(invoice),
     });
   }, []);
 
   const removeInvoice = useCallback((id: string) => {
-    setInvoices((prev) => {
-      const next = prev.filter((i) => i.id !== id);
-      writeList(INVOICES_KEY, next);
-      return next;
-    });
+    setInvoices((prev) => prev.filter((i) => i.id !== id));
+    void apiFetch(`/api/invoices/${id}`, { method: "DELETE" });
   }, []);
 
   return { invoices, loaded, upsertInvoice, removeInvoice };
 }
 
-export function readInvoiceById(id: string): InvoiceData | null {
-  const invoices = readList(INVOICES_KEY, sanitizeInvoice);
-  return invoices.find((i) => i.id === id) ?? null;
-}
-
-export function readClientById(id: string): Client | null {
-  const clients = readList(CLIENTS_KEY, sanitizeClient);
-  return clients.find((c) => c.id === id) ?? null;
+export async function fetchInvoiceById(
+  id: string,
+): Promise<InvoiceData | null> {
+  const res = await fetch(`/api/invoices/${id}`);
+  if (!res.ok) return null;
+  return res.json();
 }
