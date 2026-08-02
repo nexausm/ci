@@ -8,9 +8,13 @@ export function computeTotals(data: InvoiceData): InvoiceTotals {
   const discount = data.discountEnabled ? Number(data.discountValue) || 0 : 0;
   const tax = data.taxEnabled ? Number(data.taxValue) || 0 : 0;
   const total = subtotal - discount + tax;
-  const balanceDue = total - (Number(data.amountPaid) || 0);
+  const amountPaid = data.payments.reduce(
+    (sum, p) => sum + (Number(p.amount) || 0),
+    0,
+  );
+  const balanceDue = total - amountPaid;
 
-  return { subtotal, discount, tax, total, balanceDue };
+  return { subtotal, discount, tax, total, amountPaid, balanceDue };
 }
 
 export function formatMoney(amount: number, currency: string): string {

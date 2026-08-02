@@ -17,14 +17,55 @@ export interface CompanyInfo {
   logoDataUri: string | null;
 }
 
+export type ClientType = "individual" | "organization";
+
+export interface Client {
+  id: string;
+  type: ClientType;
+  name: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  addressLines: string[];
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const PAYMENT_METHODS = [
+  "Cash",
+  "Bank Transfer",
+  "Card",
+  "Mobile Banking",
+  "Other",
+] as const;
+
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+export interface Payment {
+  id: string;
+  date: string;
+  amount: number;
+  method: PaymentMethod;
+  note: string;
+}
+
+export type InvoiceState = "draft" | "sent";
+
 export interface InvoiceData {
+  id: string;
   invoiceNumber: string;
   invoiceDate: string;
+  dueDate: string;
   currency: CurrencyCode;
 
+  clientId: string | null;
+  billToType: ClientType;
   billToName: string;
+  billToContactName: string;
   billToAddress: string;
   billToPhone: string;
+  billToEmail: string;
 
   items: LineItem[];
 
@@ -35,9 +76,13 @@ export interface InvoiceData {
   taxLabel: string;
   taxValue: number;
 
-  amountPaid: number;
+  payments: Payment[];
 
   notes: string;
+  state: InvoiceState;
+
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface InvoiceTotals {
@@ -45,5 +90,13 @@ export interface InvoiceTotals {
   discount: number;
   tax: number;
   total: number;
+  amountPaid: number;
   balanceDue: number;
+}
+
+export type InvoiceStatus = "draft" | "paid" | "partial" | "overdue" | "sent";
+
+export interface InvoiceStatusInfo {
+  key: InvoiceStatus;
+  label: string;
 }

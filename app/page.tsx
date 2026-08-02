@@ -1,7 +1,10 @@
-import { getCompanyInfo } from "@/lib/company";
-import { InvoiceForm } from "@/app/components/InvoiceForm";
+import { Suspense } from "react";
+import { Dashboard } from "@/app/components/dashboard";
 
-export default async function Home() {
-  const company = await getCompanyInfo();
-  return <InvoiceForm company={company} />;
+export default function Home() {
+  return (
+    <Suspense>
+      <Dashboard />
+    </Suspense>
+  );
 }
