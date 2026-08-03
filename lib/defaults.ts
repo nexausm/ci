@@ -91,8 +91,10 @@ export function createDefaultProduct(): Product {
     id: genId(),
     name: "",
     description: "",
-    basePrice: 0,
-    discountedPrice: null,
+    basePriceUsd: 0,
+    basePriceBdt: 0,
+    discountedPriceUsd: null,
+    discountedPriceBdt: null,
     createdAt: now,
     updatedAt: now,
   };
@@ -172,6 +174,11 @@ export function sanitizeClient(raw: unknown): Client {
   };
 }
 
+function sanitizeOptionalPrice(value: unknown): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  return Number(value) || 0;
+}
+
 export function sanitizeProduct(raw: unknown): Product {
   const defaults = createDefaultProduct();
   if (!raw || typeof raw !== "object") return defaults;
@@ -179,10 +186,9 @@ export function sanitizeProduct(raw: unknown): Product {
   return {
     ...defaults,
     ...stored,
-    basePrice: Number(stored.basePrice) || 0,
-    discountedPrice:
-      stored.discountedPrice === null || stored.discountedPrice === undefined
-        ? null
-        : Number(stored.discountedPrice) || 0,
+    basePriceUsd: Number(stored.basePriceUsd) || 0,
+    basePriceBdt: Number(stored.basePriceBdt) || 0,
+    discountedPriceUsd: sanitizeOptionalPrice(stored.discountedPriceUsd),
+    discountedPriceBdt: sanitizeOptionalPrice(stored.discountedPriceBdt),
   };
 }

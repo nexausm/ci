@@ -4,8 +4,10 @@ export interface Product {
   id: string;
   name: string;
   description: string;
-  basePrice: number;
-  discountedPrice: number | null;
+  basePriceUsd: number;
+  basePriceBdt: number;
+  discountedPriceUsd: number | null;
+  discountedPriceBdt: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -17,8 +19,10 @@ const productSchema = new Schema<ProductDoc>(
     _id: { type: String, required: true },
     name: { type: String, default: "" },
     description: { type: String, default: "" },
-    basePrice: { type: Number, default: 0 },
-    discountedPrice: { type: Number, default: null },
+    basePriceUsd: { type: Number, default: 0 },
+    basePriceBdt: { type: Number, default: 0 },
+    discountedPriceUsd: { type: Number, default: null },
+    discountedPriceBdt: { type: Number, default: null },
     createdAt: { type: String, default: "" },
     updatedAt: { type: String, default: "" },
   },

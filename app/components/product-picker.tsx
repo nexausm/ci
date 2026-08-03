@@ -22,13 +22,30 @@ import type { Product } from "@/lib/types";
 
 export function ProductPicker({
   products,
+  currency,
   onSelect,
 }: {
   products: Product[];
+  currency: "USD" | "BDT";
   onSelect: (product: Product) => void;
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
+
+  function priceFor(product: Product) {
+    const base =
+      currency === "USD"
+        ? Number(product.basePriceUsd) || 0
+        : Number(product.basePriceBdt) || 0;
+    const discounted =
+      currency === "USD"
+        ? product.discountedPriceUsd
+        : product.discountedPriceBdt;
+    if (discounted !== null && discounted !== undefined) {
+      return `${discounted} (was ${base})`;
+    }
+    return String(base);
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -71,10 +88,7 @@ export function ProductPicker({
                     )}
                   </div>
                   <span className="ml-auto shrink-0 text-xs tabular-nums text-muted-foreground">
-                    {product.discountedPrice !== null &&
-                    product.discountedPrice !== product.basePrice
-                      ? `${product.discountedPrice} (was ${product.basePrice})`
-                      : String(product.basePrice)}
+                    {priceFor(product)}
                   </span>
                 </CommandItem>
               ))}

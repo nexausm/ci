@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Plus, Users } from "lucide-react";
 import { FaUserFriends } from "react-icons/fa";
-import { BiPackage, BiSolidLayout } from "react-icons/bi";
+import { BiSolidLayout } from "react-icons/bi";
 import { AiFillProduct } from "react-icons/ai";
 
 import {

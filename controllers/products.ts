@@ -6,8 +6,10 @@ import { ProductModel } from "@/models/products";
 const PATCH_FIELDS = [
   "name",
   "description",
-  "basePrice",
-  "discountedPrice",
+  "basePriceUsd",
+  "basePriceBdt",
+  "discountedPriceUsd",
+  "discountedPriceBdt",
   "updatedAt",
 ] as const;
 

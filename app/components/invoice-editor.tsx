@@ -134,8 +134,13 @@ export function InvoiceEditor({ id }: { id?: string }) {
   }
 
   function addProductItem(product: Product) {
-    const basePrice = Number(product.basePrice) || 0;
-    const discounted = product.discountedPrice;
+    const usd = (data?.currency ?? "BDT") === "USD";
+    const basePrice = usd
+      ? Number(product.basePriceUsd) || 0
+      : Number(product.basePriceBdt) || 0;
+    const discounted = usd
+      ? product.discountedPriceUsd
+      : product.discountedPriceBdt;
     const rate =
       discounted !== null && discounted !== undefined
         ? Number(discounted) || 0
@@ -348,7 +353,11 @@ export function InvoiceEditor({ id }: { id?: string }) {
             <CardHeader className="flex-row items-center justify-between space-y-0">
               <CardTitle>Line items</CardTitle>
               <div className="flex items-center gap-2">
-                <ProductPicker products={products} onSelect={addProductItem} />
+                <ProductPicker
+                  products={products}
+                  currency={data.currency}
+                  onSelect={addProductItem}
+                />
                 <Button
                   type="button"
                   variant="outline"

@@ -16,6 +16,69 @@ import { Textarea } from "@/components/ui/textarea";
 import { createDefaultProduct } from "@/lib/defaults";
 import type { Product } from "@/lib/types";
 
+function PriceFields({
+  currency,
+  base,
+  discounted,
+  invalid,
+  onBaseChange,
+  onDiscountedChange,
+}: {
+  currency: "USD" | "BDT";
+  base: number;
+  discounted: number | null;
+  invalid: boolean;
+  onBaseChange: (value: number) => void;
+  onDiscountedChange: (value: number | null) => void;
+}) {
+  const symbol = currency === "USD" ? "$" : "৳";
+  return (
+    <div className="rounded-lg border p-3">
+      <Label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Price · {currency}
+      </Label>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor={`product-base-${currency}`}>Base price</Label>
+          <Input
+            id={`product-base-${currency}`}
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder={symbol}
+            value={base}
+            onChange={(e) => onBaseChange(Number(e.target.value))}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor={`product-discounted-${currency}`}>
+            Discounted (optional)
+          </Label>
+          <Input
+            id={`product-discounted-${currency}`}
+            type="number"
+            step="0.01"
+            min="0"
+            placeholder="Lower price"
+            value={discounted ?? ""}
+            onChange={(e) =>
+              onDiscountedChange(
+                e.target.value === "" ? null : Number(e.target.value),
+              )
+            }
+          />
+        </div>
+      </div>
+      {invalid && (
+        <p className="mt-2 text-xs font-medium text-destructive">
+          Discounted price should not exceed the {currency} base price.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function ProductFormDialog({
   open,
   onOpenChange,
@@ -42,8 +105,11 @@ export function ProductFormDialog({
     setForm((f) => ({ ...f, ...patch }));
   }
 
-  const invalidDiscount =
-    form.discountedPrice !== null && form.discountedPrice > form.basePrice;
+  const invalidUsd =
+    form.discountedPriceUsd !== null && form.discountedPriceUsd > form.basePriceUsd;
+  const invalidBdt =
+    form.discountedPriceBdt !== null &&
+    form.discountedPriceBdt > form.basePriceBdt;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -54,14 +120,16 @@ export function ProductFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>
               {product ? "Edit product" : "New product"}
             </DialogTitle>
             <DialogDescription>
-              Save a product once, then add it to any invoice.
+              Save a product once, then add it to any invoice. Provide prices for
+              both USD and BDT — the invoice&apos;s currency picks the matching
+              price.
             </DialogDescription>
           </DialogHeader>
 
@@ -90,48 +158,29 @@ export function ProductFormDialog({
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="product-base-price">Base price</Label>
-              <Input
-                id="product-base-price"
-                type="number"
-                step="0.01"
-                min="0"
-                value={form.basePrice}
-                onChange={(e) => update({ basePrice: Number(e.target.value) })}
-                required
-              />
-            </div>
+            <PriceFields
+              currency="USD"
+              base={form.basePriceUsd}
+              discounted={form.discountedPriceUsd}
+              invalid={invalidUsd}
+              onBaseChange={(v) => update({ basePriceUsd: v })}
+              onDiscountedChange={(v) => update({ discountedPriceUsd: v })}
+            />
 
-            <div className="space-y-1.5">
-              <Label htmlFor="product-discounted-price">
-                Discounted price (optional)
-              </Label>
-              <Input
-                id="product-discounted-price"
-                type="number"
-                step="0.01"
-                min="0"
-                value={form.discountedPrice ?? ""}
-                onChange={(e) =>
-                  update({
-                    discountedPrice:
-                      e.target.value === "" ? null : Number(e.target.value),
-                  })
-                }
-                placeholder="Lower price to charge"
-              />
-              <p className="text-xs text-muted-foreground">
-                When this product is added to an invoice, the discounted price
-                is used and the difference is shown as a discount on the
-                invoice.
-              </p>
-              {invalidDiscount && (
-                <p className="text-xs font-medium text-destructive">
-                  Discounted price should not exceed the base price.
-                </p>
-              )}
-            </div>
+            <PriceFields
+              currency="BDT"
+              base={form.basePriceBdt}
+              discounted={form.discountedPriceBdt}
+              invalid={invalidBdt}
+              onBaseChange={(v) => update({ basePriceBdt: v })}
+              onDiscountedChange={(v) => update({ discountedPriceBdt: v })}
+            />
+
+            <p className="text-xs text-muted-foreground">
+              When this product is added to an invoice, the discounted price for
+              the invoice&apos;s currency is used and the difference from the
+              base price is shown as a discount on the invoice.
+            </p>
           </div>
 
           <DialogFooter>

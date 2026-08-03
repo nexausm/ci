@@ -35,10 +35,29 @@ import { ProductFormDialog } from "@/app/components/product-form-dialog";
 import type { Product } from "@/lib/types";
 
 function formatPrice(value: number): string {
-  return value.toLocaleString("en-US", {
+  return (Number(value) || 0).toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+}
+
+function PriceCell({
+  base,
+  discounted,
+}: {
+  base: number;
+  discounted: number | null | undefined;
+}) {
+  return (
+    <div className="flex flex-col items-end">
+      <span className="tabular-nums">{formatPrice(base)}</span>
+      {discounted != null && (
+        <span className="text-xs tabular-nums text-muted-foreground">
+          disc. {formatPrice(discounted)}
+        </span>
+      )}
+    </div>
+  );
 }
 
 export function ProductsPage() {
@@ -117,12 +136,10 @@ export function ProductsPage() {
           <Table className="table-fixed">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[34%]">Name</TableHead>
+                <TableHead className="w-[30%]">Name</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead className="w-27.5 text-right">Base price</TableHead>
-                <TableHead className="w-27.5 text-right">
-                  Discounted price
-                </TableHead>
+                <TableHead className="w-25 text-right">USD price</TableHead>
+                <TableHead className="w-25 text-right">BDT price</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -169,16 +186,16 @@ export function ProductsPage() {
                       {product.description || "—"}
                     </TableCell>
                     <TableCell className="text-right">
-                      {formatPrice(Number(product.basePrice) || 0)}
+                      <PriceCell
+                        base={Number(product.basePriceUsd) || 0}
+                        discounted={product.discountedPriceUsd}
+                      />
                     </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
-                      {product.discountedPrice === null ? (
-                        "—"
-                      ) : (
-                        <span className="font-medium text-foreground">
-                          {formatPrice(Number(product.discountedPrice) || 0)}
-                        </span>
-                      )}
+                    <TableCell className="text-right">
+                      <PriceCell
+                        base={Number(product.basePriceBdt) || 0}
+                        discounted={product.discountedPriceBdt}
+                      />
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
