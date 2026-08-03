@@ -78,7 +78,15 @@ export async function createInvoice(req: Request) {
     { upsert: true },
   );
   await syncPayments(id, payments);
-  return NextResponse.json(invoice);
+  const doc = await InvoiceModel.findById(id).lean();
+  if (!doc) return NextResponse.json(invoice);
+  const paymentDocs = await PaymentModel.find({ invoiceId: id }).lean();
+  const storedPayments = paymentDocs.map(({ _id: paymentId, ...payment }) => ({
+    ...payment,
+    id: paymentId,
+  }));
+  const { _id, ...rest } = doc;
+  return NextResponse.json({ ...rest, id: _id, payments: storedPayments });
 }
 
 export async function updateInvoice(

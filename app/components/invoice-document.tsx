@@ -475,6 +475,22 @@ export function InvoiceDocument({
             </View>
           ) : null}
 
+          {data.items.some((item) => item.externalCost) ? (
+            <View style={styles.notes}>
+              <Text style={styles.notesLabel}>References</Text>
+              {data.items
+                .filter((item) => item.externalCost)
+                .map((item, i) => (
+                  <Text key={item.id} style={styles.notesText}>
+                    [{i + 1}] {item.externalCost?.vendor}
+                    {item.externalCost?.invoiceNumber
+                      ? ` ${item.externalCost.invoiceNumber}`
+                      : ""}
+                  </Text>
+                ))}
+            </View>
+          ) : null}
+
           <Text style={styles.footer}>
             Electronically generated. No signature required. Scan the QR code to
             verify authenticity.

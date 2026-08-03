@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { InvoiceDocument } from "@/app/components/invoice-document";
 import { PaymentsSection } from "@/app/components/payments-section";
+import { ReferencesSection } from "@/app/components/references-section";
 import { ClientPicker } from "@/app/components/client-picker";
 import { ProductPicker } from "@/app/components/product-picker";
 import { useClients, useInvoices, useProducts, fetchInvoiceById } from "@/lib/storage";
@@ -384,63 +385,65 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 <span className="text-right">Amount</span>
                 <span />
               </div>
-              {data.items.map((item) => {
-                const base = item.listRate ?? item.rate;
-                return (
-                  <div
-                    key={item.id}
-                    className="grid grid-cols-2 gap-2 rounded-md border p-2 sm:grid-cols-[1fr_120px_64px_96px_32px] sm:items-center sm:border-none sm:p-0"
-                  >
-                    <Input
-                      className="col-span-2 sm:col-span-1"
-                      placeholder="Description"
-                      value={item.description}
-                      onChange={(e) =>
-                        updateItem(item.id, { description: e.target.value })
-                      }
-                    />
-                    <Input
-                      type="number"
-                      className="text-right"
-                      placeholder="Rate"
-                      value={base}
-                      onChange={(e) => {
-                        const value = Number(e.target.value);
-                        if (item.listRate == null) {
-                          updateItem(item.id, { rate: value });
-                        } else {
-                          updateItem(item.id, { listRate: value });
-                        }
-                      }}
-                    />
-                    <Input
-                      type="number"
-                      className="text-right"
-                      placeholder="Qty"
-                      value={item.qty}
-                      onChange={(e) =>
-                        updateItem(item.id, { qty: Number(e.target.value) })
-                      }
-                    />
-                    <div className="flex items-center justify-end text-sm font-medium">
-                      {formatMoney(
-                        (Number(base) || 0) * (Number(item.qty) || 0),
-                        symbol,
-                      )}
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 justify-self-end text-muted-foreground hover:text-destructive"
-                      onClick={() => removeItem(item.id)}
-                      disabled={data.items.length === 1}
+              {data.items
+                .filter((item) => !item.externalCost)
+                .map((item) => {
+                  const base = item.listRate ?? item.rate;
+                  return (
+                    <div
+                      key={item.id}
+                      className="grid grid-cols-2 gap-2 rounded-md border p-2 sm:grid-cols-[1fr_120px_64px_96px_32px] sm:items-center sm:border-none sm:p-0"
                     >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </div>
-                );
-              })}
+                      <Input
+                        className="col-span-2 sm:col-span-1"
+                        placeholder="Description"
+                        value={item.description}
+                        onChange={(e) =>
+                          updateItem(item.id, { description: e.target.value })
+                        }
+                      />
+                      <Input
+                        type="number"
+                        className="text-right"
+                        placeholder="Rate"
+                        value={base}
+                        onChange={(e) => {
+                          const value = Number(e.target.value);
+                          if (item.listRate == null) {
+                            updateItem(item.id, { rate: value });
+                          } else {
+                            updateItem(item.id, { listRate: value });
+                          }
+                        }}
+                      />
+                      <Input
+                        type="number"
+                        className="text-right"
+                        placeholder="Qty"
+                        value={item.qty}
+                        onChange={(e) =>
+                          updateItem(item.id, { qty: Number(e.target.value) })
+                        }
+                      />
+                      <div className="flex items-center justify-end text-sm font-medium">
+                        {formatMoney(
+                          (Number(base) || 0) * (Number(item.qty) || 0),
+                          symbol,
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 justify-self-end text-muted-foreground hover:text-destructive"
+                        onClick={() => removeItem(item.id)}
+                        disabled={data.items.filter((it) => !it.externalCost).length === 1}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  );
+                })}
             </CardContent>
           </Card>
 
@@ -528,6 +531,16 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 value={data.notes}
                 onChange={(e) => update({ notes: e.target.value })}
                 placeholder="Payment terms, thank-you note, bank details…"
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent>
+              <ReferencesSection
+                items={data.items}
+                currencySymbol={symbol}
+                onChange={(items) => update({ items })}
               />
             </CardContent>
           </Card>

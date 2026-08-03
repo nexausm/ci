@@ -2,6 +2,12 @@ import { Schema, model, models, type Model } from "mongoose";
 import type { ClientType } from "./clients";
 import type { Payment } from "./payments";
 
+export interface ExternalCostInfo {
+  vendor: string;
+  invoiceNumber: string;
+  billedDate: string;
+}
+
 export interface LineItem {
   id: string;
   productId: string | null;
@@ -9,6 +15,7 @@ export interface LineItem {
   rate: number;
   listRate: number | null;
   qty: number;
+  externalCost?: ExternalCostInfo | null;
 }
 
 export type CurrencyCode = "BDT" | "USD";
@@ -53,6 +60,15 @@ type InvoiceDoc = InvoiceData & { _id: string };
 const CLIENT_TYPES: ClientType[] = ["individual", "organization"];
 const CURRENCIES: CurrencyCode[] = ["BDT", "USD"];
 
+const externalCostSchema = new Schema(
+  {
+    vendor: { type: String, default: "" },
+    invoiceNumber: { type: String, default: "" },
+    billedDate: { type: String, default: "" },
+  },
+  { id: false, _id: false },
+);
+
 const lineItemSchema = new Schema(
   {
     id: { type: String, required: true },
@@ -61,6 +77,7 @@ const lineItemSchema = new Schema(
     rate: { type: Number, default: 0 },
     listRate: { type: Number, default: null },
     qty: { type: Number, default: 1 },
+    externalCost: { type: externalCostSchema, default: null },
   },
   { id: false, _id: false },
 );

@@ -29,6 +29,19 @@ export function newItem(): LineItem {
     rate: 0,
     listRate: null,
     qty: 1,
+    externalCost: null,
+  };
+}
+
+export function newExternalCostItem(): LineItem {
+  return {
+    id: genId(),
+    productId: null,
+    description: "",
+    rate: 0,
+    listRate: 0,
+    qty: 1,
+    externalCost: { vendor: "", invoiceNumber: "", billedDate: todayISO() },
   };
 }
 
@@ -147,6 +160,10 @@ export function sanitizeLineItem(raw: unknown): LineItem {
   const defaults = newItem();
   if (!raw || typeof raw !== "object") return defaults;
   const stored = raw as Partial<LineItem>;
+  const externalCost = stored.externalCost as
+    | Partial<LineItem["externalCost"]>
+    | null
+    | undefined;
   return {
     ...defaults,
     ...stored,
@@ -157,6 +174,14 @@ export function sanitizeLineItem(raw: unknown): LineItem {
         ? null
         : Number(stored.listRate) || 0,
     qty: Number(stored.qty) || 0,
+    externalCost:
+      !externalCost || typeof externalCost !== "object"
+        ? null
+        : {
+            vendor: String(externalCost.vendor ?? ""),
+            invoiceNumber: String(externalCost.invoiceNumber ?? ""),
+            billedDate: String(externalCost.billedDate ?? ""),
+          },
   };
 }
 

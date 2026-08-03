@@ -3,6 +3,7 @@ export type { Payment, PaymentMethod } from "@/models/payments";
 export type { Product } from "@/models/products";
 export type {
   CurrencyCode,
+  ExternalCostInfo,
   InvoiceData,
   InvoiceState,
   LineItem,
