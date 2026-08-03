@@ -36,7 +36,7 @@ import { PaymentsSection } from "@/app/components/payments-section";
 import { ClientPicker } from "@/app/components/client-picker";
 import { ProductPicker } from "@/app/components/product-picker";
 import { useClients, useInvoices, useProducts, fetchInvoiceById } from "@/lib/storage";
-import { createDefaultInvoice, newItem } from "@/lib/defaults";
+import { createDefaultInvoice, newItem, productPriceFor } from "@/lib/defaults";
 import { genId } from "@/lib/id";
 import { computeTotals, formatMoney } from "@/lib/totals";
 import { CURRENCIES } from "@/lib/currency";
@@ -134,17 +134,10 @@ export function InvoiceEditor({ id }: { id?: string }) {
   }
 
   function addProductItem(product: Product) {
-    const usd = (data?.currency ?? "BDT") === "USD";
-    const basePrice = usd
-      ? Number(product.basePriceUsd) || 0
-      : Number(product.basePriceBdt) || 0;
-    const discounted = usd
-      ? product.discountedPriceUsd
-      : product.discountedPriceBdt;
-    const rate =
-      discounted !== null && discounted !== undefined
-        ? Number(discounted) || 0
-        : basePrice;
+    const { base, rate } = productPriceFor(
+      product,
+      data?.currency ?? "BDT",
+    );
     setData((d) =>
       d
         ? {
@@ -156,13 +149,27 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 productId: product.id,
                 description: product.name,
                 rate,
-                listRate: basePrice,
+                listRate: base,
                 qty: 1,
               },
             ],
           }
         : d,
     );
+  }
+
+  function changeCurrency(currency: CurrencyCode) {
+    setData((d) => {
+      if (!d || d.currency === currency) return d;
+      const items = d.items.map((item) => {
+        if (!item.productId) return item;
+        const product = products.find((p) => p.id === item.productId);
+        if (!product) return item;
+        const { base, rate } = productPriceFor(product, currency);
+        return { ...item, rate, listRate: base };
+      });
+      return { ...d, currency, items };
+    });
   }
 
   function clientToBillTo(client: Client) {
@@ -304,7 +311,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
               <Field label="Currency" htmlFor="currency">
                 <Select
                   value={data.currency}
-                  onValueChange={(v) => update({ currency: v as CurrencyCode })}
+                  onValueChange={(v) => changeCurrency(v as CurrencyCode)}
                 >
                   <SelectTrigger id="currency" className="w-full">
                     <SelectValue />

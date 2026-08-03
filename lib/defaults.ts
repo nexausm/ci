@@ -100,6 +100,24 @@ export function createDefaultProduct(): Product {
   };
 }
 
+export function productPriceFor(
+  product: Product,
+  currency: CurrencyCode,
+): { base: number; rate: number } {
+  const usd = currency === "USD";
+  const base = usd
+    ? Number(product.basePriceUsd) || 0
+    : Number(product.basePriceBdt) || 0;
+  const discounted = usd
+    ? product.discountedPriceUsd
+    : product.discountedPriceBdt;
+  const rate =
+    discounted !== null && discounted !== undefined
+      ? Number(discounted) || 0
+      : base;
+  return { base, rate };
+}
+
 export function newPayment(): Payment {
   return {
     id: genId(),
