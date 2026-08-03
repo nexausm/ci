@@ -164,10 +164,14 @@ export function Dashboard() {
     URL.revokeObjectURL(url);
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (!deleting) return;
-    removeInvoice(deleting.id);
-    toast.success("Invoice deleted");
+    try {
+      await removeInvoice(deleting.id);
+      toast.success("Invoice deleted");
+    } catch {
+      toast.error("Failed to delete invoice");
+    }
     setDeleting(null);
   }
 

@@ -160,12 +160,14 @@ export function InvoiceEditor({ id }: { id?: string }) {
         ...effectiveData,
         updatedAt: new Date().toISOString(),
       };
-      upsertInvoice(toSave);
+      await upsertInvoice(toSave);
       setData(toSave);
       toast.success("Invoice saved");
       if (mode === "new") {
         router.replace(`/invoices/${toSave.id}`);
       }
+    } catch {
+      toast.error("Failed to save invoice");
     } finally {
       setSaving(false);
     }
@@ -189,11 +191,15 @@ export function InvoiceEditor({ id }: { id?: string }) {
     }
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!effectiveData) return;
-    removeInvoice(effectiveData.id);
-    toast.success("Invoice deleted");
-    router.push("/");
+    try {
+      await removeInvoice(effectiveData.id);
+      toast.success("Invoice deleted");
+      router.push("/");
+    } catch {
+      toast.error("Failed to delete invoice");
+    }
   }
 
   if (notFound) {

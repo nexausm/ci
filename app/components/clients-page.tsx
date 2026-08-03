@@ -65,16 +65,24 @@ export function ClientsPage() {
     );
   }, [clients, query]);
 
-  function handleSaved(client: Client) {
+  async function handleSaved(client: Client) {
     const isNew = !clients.some((c) => c.id === client.id);
-    upsertClient(client);
-    toast.success(isNew ? "Client added" : "Client updated");
+    try {
+      await upsertClient(client);
+      toast.success(isNew ? "Client added" : "Client updated");
+    } catch {
+      toast.error("Failed to save client");
+    }
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (!deleting) return;
-    removeClient(deleting.id);
-    toast.success("Client deleted");
+    try {
+      await removeClient(deleting.id);
+      toast.success("Client deleted");
+    } catch {
+      toast.error("Failed to delete client");
+    }
     setDeleting(null);
   }
 
