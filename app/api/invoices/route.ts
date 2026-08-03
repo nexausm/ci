@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import { sanitizeInvoice } from "@/lib/defaults";
-import type { InvoiceData } from "@/lib/types";
-
-interface InvoiceDoc extends InvoiceData {
-  _id: string;
-}
+import type { InvoiceDoc } from "@/models";
 
 export async function GET() {
   const db = await getDb();

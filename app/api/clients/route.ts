@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import { sanitizeClient } from "@/lib/defaults";
-import type { Client } from "@/lib/types";
-
-interface ClientDoc extends Client {
-  _id: string;
-}
+import type { ClientDoc } from "@/models";
 
 export async function GET() {
   const db = await getDb();
