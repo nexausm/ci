@@ -117,11 +117,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   footer: {
-    marginTop: "auto",
+    marginTop: 10,
     textAlign: "center",
     fontSize: 9,
     color: TEXT,
-    paddingTop: 26,
+    paddingTop: 6,
   },
   sectionLabel: {
     fontFamily: FONT_BOLD,
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     marginBottom: 3.7,
   },
   table: {
-    marginTop: 23,
+    marginTop: 6,
   },
   tableHeader: {
     flexDirection: "row",
@@ -163,10 +163,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderBottomWidth: 0.75,
     borderBottomColor: COLORS.dividerGray,
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
   cellText: {
     fontSize: 10.5,
+  },
+  superscript: {
+    fontSize: 7,
+    verticalAlign: "super",
   },
   totalsWrap: {
     flexDirection: "row",
@@ -179,7 +183,7 @@ const styles = StyleSheet.create({
   totalsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 7,
   },
   totalsLabel: {
     fontFamily: FONT_BOLD,
@@ -192,17 +196,17 @@ const styles = StyleSheet.create({
   totalsDivider: {
     height: 0.75,
     backgroundColor: COLORS.dividerGray,
-    marginBottom: 12,
+    marginBottom: 9,
   },
   totalsDividerFinal: {
     height: 0.75,
     backgroundColor: COLORS.dividerGray,
-    marginTop: 10,
+    marginTop: 7,
   },
   totalsFinalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 7,
   },
   totalsFinalLabel: {
     fontFamily: FONT_BOLD,
@@ -217,7 +221,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     textTransform: "uppercase",
     textAlign: "right",
-    marginBottom: 11,
+    marginBottom: 9,
   },
   balanceDueValue: {
     fontFamily: FONT_BOLD,
@@ -299,6 +303,18 @@ export function InvoiceDocument({
 }) {
   const totals = computeTotals(data);
   const symbol = CURRENCIES[data.currency].symbol;
+
+  const externalIndex = useMemo(() => {
+    const map = new Map<string, number>();
+    let n = 0;
+    for (const item of data.items) {
+      if (item.externalCost) {
+        n += 1;
+        map.set(item.id, n);
+      }
+    }
+    return map;
+  }, [data.items]);
 
   return (
     <Document title={`Invoice ${data.invoiceNumber || ""}`.trim()}>
@@ -387,6 +403,12 @@ export function InvoiceDocument({
               <View key={item.id} style={styles.tableRow} wrap={false}>
                 <Text style={[styles.cellText, styles.colDescription]}>
                   {item.description || " "}
+                  {item.externalCost ? (
+                    <Text style={styles.superscript}>
+                      {" "}
+                      [{externalIndex.get(item.id)}]
+                    </Text>
+                  ) : null}
                 </Text>
                 <Text style={[styles.cellText, styles.colRate]}>
                   {formatMoney(Number(item.listRate ?? item.rate) || 0, symbol)}
