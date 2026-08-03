@@ -633,7 +633,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
         </div>
 
         <div className="h-150 w-full bg-muted p-4 lg:h-full lg:w-1/2 lg:flex-none">
-          <div className="mx-auto h-full aspect-210/297 overflow-hidden">
+          <div className="mx-auto h-full aspect-210/297 overflow-hidden shadow-2xl shadow-black/10 ring-1 ring-black/5">
             <PDFViewer>
               <InvoiceDocument data={deferredData ?? data} company={company} />
             </PDFViewer>
