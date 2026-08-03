@@ -37,34 +37,57 @@ export default async function PublicInvoicePage({
   const data = sanitizeInvoice({ ...invoice, id: _id, payments });
   const totals = computeTotals(data);
   const symbol = CURRENCIES[data.currency]?.symbol ?? "$";
+  const money = (amount: number) =>
+    `${data.currency} ${formatMoney(amount, symbol)}`;
 
   const installments = payments.length;
-  const lastPaid = installments > 0 ? payments[installments - 1].date : null;
+  const lastPayment = installments > 0 ? payments[installments - 1] : null;
+  const fullyPaid = totals.amountPaid > 0 && totals.balanceDue <= 0.005;
 
-  const line = [
-    "INVOICE",
-    data.invoiceNumber || "—",
-    "billed at",
-    formatDateLong(data.invoiceDate),
-    "price",
-    formatMoney(totals.total, symbol),
-    "and paid",
-    formatMoney(totals.amountPaid, symbol),
-    "amount",
-    lastPaid ? `till ${formatDateLong(lastPaid)}` : null,
-    `in ${installments} installments`,
-    "and",
-    formatMoney(totals.credits, symbol),
-    "credits applied",
-  ]
-    .filter((part): part is string => part !== null)
-    .join(" ");
+  const sentences = [
+    `Invoice ${data.invoiceNumber || "—"} was issued on ${formatDateLong(
+      data.invoiceDate,
+    )} for a total of ${money(totals.total)}.`,
+  ];
+
+  if (totals.credits > 0) {
+    sentences.push(`A credit of ${money(totals.credits)} has been applied.`);
+  }
+
+  if (totals.amountPaid <= 0) {
+    sentences.push("No payment has been received against this invoice.");
+  } else {
+    const installmentsText =
+      installments === 1
+        ? "payment"
+        : `${installments} payments`;
+    const lastText = lastPayment
+      ? ` The last was ${money(lastPayment.amount)} via ${
+          lastPayment.method
+        } on ${formatDateLong(lastPayment.date)}.`
+      : "";
+    sentences.push(
+      fullyPaid
+        ? `This invoice has been paid in full in ${installmentsText}.${lastText}`
+        : `${money(totals.amountPaid)} has been received in ${installmentsText}.${lastText}`,
+    );
+  }
+
+  if (fullyPaid) {
+    sentences.push("Nothing remains due.");
+  } else {
+    sentences.push(
+      `A balance of ${money(Math.max(totals.balanceDue, 0))} remains due.`,
+    );
+  }
 
   return (
     <main className="flex min-h-svh items-center justify-center px-4">
-      <p className="max-w-3xl text-center text-lg font-medium leading-relaxed text-foreground sm:text-xl">
-        {line}
-      </p>
+      <div className="max-w-xl space-y-3 text-base leading-relaxed text-foreground sm:text-lg">
+        {sentences.map((sentence) => (
+          <p key={sentence}>{sentence}</p>
+        ))}
+      </div>
     </main>
   );
 }
