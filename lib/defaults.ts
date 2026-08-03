@@ -72,6 +72,8 @@ export function createDefaultInvoice(): InvoiceData {
     taxLabel: "Tax",
     taxValue: 0,
 
+    adjustmentValue: 0,
+
     payments: [],
 
     notes: "",

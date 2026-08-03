@@ -46,6 +46,8 @@ export interface InvoiceData {
   taxLabel: string;
   taxValue: number;
 
+  adjustmentValue: number;
+
   payments: Payment[];
 
   notes: string;
@@ -106,6 +108,7 @@ const invoiceSchema = new Schema<InvoiceDoc>(
     taxEnabled: { type: Boolean, default: false },
     taxLabel: { type: String, default: "Tax" },
     taxValue: { type: Number, default: 0 },
+    adjustmentValue: { type: Number, default: 0 },
     notes: { type: String, default: "" },
     state: { type: String, enum: ["draft", "sent"], default: "draft" },
     createdAt: { type: String, default: "" },

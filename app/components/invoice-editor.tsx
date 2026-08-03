@@ -36,6 +36,7 @@ import { PaymentsSection } from "@/app/components/payments-section";
 import { ReferencesSection } from "@/app/components/references-section";
 import { ClientPicker } from "@/app/components/client-picker";
 import { ProductPicker } from "@/app/components/product-picker";
+import { SignedNumberInput } from "@/app/components/signed-number-input";
 import { useClients, useInvoices, useProducts, fetchInvoiceById } from "@/lib/storage";
 import { createDefaultInvoice, newItem, productPriceFor } from "@/lib/defaults";
 import { genId } from "@/lib/id";
@@ -512,6 +513,21 @@ export function InvoiceEditor({ id }: { id?: string }) {
                   </>
                 )}
               </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Label htmlFor="adjustmentValue" className="font-normal">
+                  Adjustment
+                </Label>
+                <SignedNumberInput
+                  id="adjustmentValue"
+                  aria-label="Adjustment amount"
+                  className="w-32"
+                  value={data.adjustmentValue ?? 0}
+                  onValueChange={(v) => update({ adjustmentValue: v })}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Enter a negative value to subtract, positive to add.
+                </p>
+              </div>
             </CardContent>
           </Card>
 
@@ -567,6 +583,12 @@ export function InvoiceEditor({ id }: { id?: string }) {
                     {data.taxLabel || "Tax"}
                   </span>
                   <span>{formatMoney(totals.tax, symbol)}</span>
+                </div>
+              )}
+              {totals.adjustment !== 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Adjustment</span>
+                  <span>{formatMoney(totals.adjustment, symbol)}</span>
                 </div>
               )}
               <Separator className="my-2" />

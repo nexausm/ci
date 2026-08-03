@@ -439,6 +439,15 @@ export function InvoiceDocument({
                 </View>
               ) : null}
 
+              {totals.adjustment !== 0 ? (
+                <View style={styles.totalsRow}>
+                  <Text style={styles.totalsLabel}>Adjustment</Text>
+                  <Text style={styles.totalsValue}>
+                    {formatMoney(totals.adjustment, symbol)}
+                  </Text>
+                </View>
+              ) : null}
+
               {totals.amountPaid ? (
                 <View style={styles.totalsRow}>
                   <Text style={styles.totalsLabel}>Amount Paid</Text>

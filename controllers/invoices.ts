@@ -23,6 +23,7 @@ const PATCH_FIELDS = [
   "taxEnabled",
   "taxLabel",
   "taxValue",
+  "adjustmentValue",
   "notes",
   "state",
   "updatedAt",

@@ -23,14 +23,15 @@ export function computeTotals(data: InvoiceData): InvoiceTotals {
     : 0;
   const discount = manualDiscount + itemDiscount;
   const tax = data.taxEnabled ? Number(data.taxValue) || 0 : 0;
-  const total = subtotal - discount + tax;
+  const adjustment = Number(data.adjustmentValue) || 0;
+  const total = subtotal - discount + tax + adjustment;
   const amountPaid = data.payments.reduce(
     (sum, p) => sum + (Number(p.amount) || 0),
     0,
   );
   const balanceDue = total - amountPaid;
 
-  return { subtotal, discount, tax, total, amountPaid, balanceDue };
+  return { subtotal, discount, tax, adjustment, total, amountPaid, balanceDue };
 }
 
 export function formatMoney(amount: number, currency: string): string {

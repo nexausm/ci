@@ -31,6 +31,7 @@ export interface InvoiceTotals {
   subtotal: number;
   discount: number;
   tax: number;
+  adjustment: number;
   total: number;
   amountPaid: number;
   balanceDue: number;
