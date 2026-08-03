@@ -1,6 +1,7 @@
 import type { Client, CurrencyCode, InvoiceData, Payment } from "./types";
 import { CURRENCIES } from "./currency";
 import { genId } from "./id";
+import { PAYMENT_METHODS } from "./types";
 
 export function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
@@ -77,6 +78,21 @@ export function newPayment(): Payment {
     amount: 0,
     method: "Cash",
     note: "",
+  };
+}
+
+export function sanitizePayment(raw: unknown): Payment {
+  const defaults = newPayment();
+  if (!raw || typeof raw !== "object") return defaults;
+  const stored = raw as Partial<Payment>;
+  const method = PAYMENT_METHODS.includes(stored.method as Payment["method"])
+    ? (stored.method as Payment["method"])
+    : defaults.method;
+  return {
+    ...defaults,
+    ...stored,
+    method,
+    amount: Number(stored.amount) || 0,
   };
 }
 

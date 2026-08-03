@@ -1,26 +1,22 @@
-import { MongoClient, type Db } from "mongodb";
+import mongoose from "mongoose";
 
 const uri = process.env.MONGO_URI;
 if (!uri) {
   throw new Error("MONGO_URI environment variable is not set");
 }
+const dbUri: string = uri;
 
 declare global {
-  var _mongoClientPromise: Promise<MongoClient> | undefined;
+  var _mongoosePromise: Promise<typeof mongoose> | undefined;
 }
 
-let clientPromise: Promise<MongoClient>;
-
-if (process.env.NODE_ENV === "development") {
-  if (!global._mongoClientPromise) {
-    global._mongoClientPromise = new MongoClient(uri).connect();
+export async function connectDb(): Promise<typeof mongoose> {
+  if (!global._mongoosePromise) {
+    global._mongoosePromise = mongoose.connect(dbUri);
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  clientPromise = new MongoClient(uri).connect();
+  return global._mongoosePromise;
 }
 
-export async function getDb(): Promise<Db> {
-  const client = await clientPromise;
-  return client.db();
+export async function getDb() {
+  return (await connectDb()).connection;
 }

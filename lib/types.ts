@@ -1,16 +1,19 @@
+export type { Client, ClientType } from "@/models/clients";
+export type { Payment, PaymentMethod } from "@/models/payments";
 export type {
-  Client,
-  ClientDoc,
-  ClientType,
   CurrencyCode,
   InvoiceData,
-  InvoiceDoc,
   InvoiceState,
   LineItem,
-  Payment,
-  PaymentMethod,
-} from "@/models";
-export { PAYMENT_METHODS } from "@/models";
+} from "@/models/invoices";
+
+export const PAYMENT_METHODS = [
+  "Cash",
+  "Bank Transfer",
+  "Card",
+  "Mobile Banking",
+  "Other",
+] as const;
 
 export interface CompanyInfo {
   companyName: string;
