@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Plus, Users } from "lucide-react";
+import { signOut } from "next-auth/react";
+import { LogOut, Plus } from "lucide-react";
 import { FaUserFriends } from "react-icons/fa";
 import { BiSolidLayout } from "react-icons/bi";
 import { AiFillProduct } from "react-icons/ai";
@@ -83,6 +84,15 @@ export function AppSidebar() {
             >
               <Plus />
               <span>New invoice</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              variant="outline"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+            >
+              <LogOut />
+              <span>Sign out</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
