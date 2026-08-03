@@ -79,7 +79,7 @@ export function ClientsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div className="w-full px-4 py-8 sm:px-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Clients</h1>
@@ -112,14 +112,14 @@ export function ClientsPage() {
 
       <Card className="mt-4 py-0">
         <CardContent className="p-0">
-          <Table>
+          <Table className="table-fixed">
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Type</TableHead>
+                <TableHead className="w-[26%]">Name</TableHead>
+                <TableHead className="w-35">Type</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead className="text-right">Invoices</TableHead>
+                <TableHead className="w-37.5">Phone</TableHead>
+                <TableHead className="w-22.5 text-right">Invoices</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -147,7 +147,7 @@ export function ClientsPage() {
               ) : (
                 filtered.map((client) => (
                   <TableRow key={client.id}>
-                    <TableCell className="font-medium">
+                    <TableCell className="truncate font-medium">
                       <Link
                         href={`/?clientId=${client.id}`}
                         className="hover:underline"
@@ -172,10 +172,10 @@ export function ClientsPage() {
                           : "Individual"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="truncate text-muted-foreground">
                       {client.email || "—"}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="truncate text-muted-foreground">
                       {client.phone || "—"}
                     </TableCell>
                     <TableCell className="text-right">

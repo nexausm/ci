@@ -53,7 +53,8 @@ import { useCompany } from "@/app/providers/company-provider";
 import type { Client, CurrencyCode, InvoiceData } from "@/lib/types";
 
 const PDFViewer = dynamic(
-  () => import("@react-pdf/renderer").then((m) => m.PDFViewer),
+  () =>
+    import("@/app/components/invoice-preview").then((m) => m.InvoicePreview),
   { ssr: false },
 );
 
@@ -220,8 +221,8 @@ export function InvoiceEditor({ id }: { id?: string }) {
   }
 
   return (
-    <div>
-      <div className="sticky top-14 z-10 flex items-center justify-between gap-4 border-b bg-background px-4 py-3 sm:px-6">
+    <div className="flex flex-col lg:h-full">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-b px-4 py-4 sm:px-6">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -278,8 +279,8 @@ export function InvoiceEditor({ id }: { id?: string }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="space-y-6 p-4 sm:p-6">
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        <div className="space-y-6 p-4 sm:p-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <Card>
             <CardHeader>
               <CardTitle>Invoice details</CardTitle>
@@ -631,13 +632,12 @@ export function InvoiceEditor({ id }: { id?: string }) {
           </Card>
         </div>
 
-        <div className="h-150 bg-muted lg:sticky lg:top-29 lg:h-[calc(100vh-7.25rem)]">
-          <PDFViewer
-            style={{ width: "100%", height: "100%", border: "none" }}
-            showToolbar={false}
-          >
-            <InvoiceDocument data={deferredData ?? data} company={company} />
-          </PDFViewer>
+        <div className="h-150 w-full bg-muted p-4 lg:h-full lg:w-1/2 lg:flex-none">
+          <div className="mx-auto h-full aspect-210/297 overflow-hidden">
+            <PDFViewer>
+              <InvoiceDocument data={deferredData ?? data} company={company} />
+            </PDFViewer>
+          </div>
         </div>
       </div>
 
