@@ -4,8 +4,10 @@ import type { Payment } from "./payments";
 
 export interface LineItem {
   id: string;
+  productId: string | null;
   description: string;
   rate: number;
+  listRate: number | null;
   qty: number;
 }
 
@@ -54,8 +56,10 @@ const CURRENCIES: CurrencyCode[] = ["BDT", "USD"];
 const lineItemSchema = new Schema(
   {
     id: { type: String, required: true },
+    productId: { type: String, default: null },
     description: { type: String, default: "" },
     rate: { type: Number, default: 0 },
+    listRate: { type: Number, default: null },
     qty: { type: Number, default: 1 },
   },
   { id: false, _id: false },

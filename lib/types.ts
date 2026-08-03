@@ -1,5 +1,6 @@
 export type { Client, ClientType } from "@/models/clients";
 export type { Payment, PaymentMethod } from "@/models/payments";
+export type { Product } from "@/models/products";
 export type {
   CurrencyCode,
   InvoiceData,

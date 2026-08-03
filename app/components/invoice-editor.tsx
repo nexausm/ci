@@ -34,12 +34,19 @@ import {
 import { InvoiceDocument } from "@/app/components/invoice-document";
 import { PaymentsSection } from "@/app/components/payments-section";
 import { ClientPicker } from "@/app/components/client-picker";
-import { useClients, useInvoices, fetchInvoiceById } from "@/lib/storage";
+import { ProductPicker } from "@/app/components/product-picker";
+import { useClients, useInvoices, useProducts, fetchInvoiceById } from "@/lib/storage";
 import { createDefaultInvoice, newItem } from "@/lib/defaults";
+import { genId } from "@/lib/id";
 import { computeTotals, formatMoney } from "@/lib/totals";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
-import type { Client, CurrencyCode, InvoiceData } from "@/lib/types";
+import type {
+  Client,
+  CurrencyCode,
+  InvoiceData,
+  Product,
+} from "@/lib/types";
 
 const PDFViewer = dynamic(
   () =>
@@ -68,6 +75,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
   const router = useRouter();
   const company = useCompany();
   const { clients } = useClients();
+  const { products } = useProducts();
   const { upsertInvoice, removeInvoice } = useInvoices();
 
   const mode: "new" | "edit" = id ? "edit" : "new";
@@ -122,6 +130,33 @@ export function InvoiceEditor({ id }: { id?: string }) {
   function removeItem(itemId: string) {
     setData((d) =>
       d ? { ...d, items: d.items.filter((it) => it.id !== itemId) } : d,
+    );
+  }
+
+  function addProductItem(product: Product) {
+    const basePrice = Number(product.basePrice) || 0;
+    const discounted = product.discountedPrice;
+    const rate =
+      discounted !== null && discounted !== undefined
+        ? Number(discounted) || 0
+        : basePrice;
+    setData((d) =>
+      d
+        ? {
+            ...d,
+            items: [
+              ...d.items,
+              {
+                id: genId(),
+                productId: product.id,
+                description: product.name,
+                rate,
+                listRate: basePrice,
+                qty: 1,
+              },
+            ],
+          }
+        : d,
     );
   }
 
@@ -312,73 +347,86 @@ export function InvoiceEditor({ id }: { id?: string }) {
           <Card>
             <CardHeader className="flex-row items-center justify-between space-y-0">
               <CardTitle>Line items</CardTitle>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addItem}
-              >
-                <Plus className="size-4" />
-                Add item
-              </Button>
+              <div className="flex items-center gap-2">
+                <ProductPicker products={products} onSelect={addProductItem} />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addItem}
+                >
+                  <Plus className="size-4" />
+                  Add item
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="hidden grid-cols-[1fr_96px_64px_96px_32px] gap-2 px-1 text-xs font-medium text-muted-foreground sm:grid">
+              <div className="hidden grid-cols-[1fr_120px_64px_96px_32px] gap-2 px-1 text-xs font-medium text-muted-foreground sm:grid">
                 <span>Description</span>
                 <span className="text-right">Rate</span>
                 <span className="text-right">Qty</span>
                 <span className="text-right">Amount</span>
                 <span />
               </div>
-              {data.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="grid grid-cols-2 gap-2 rounded-md border p-2 sm:grid-cols-[1fr_96px_64px_96px_32px] sm:items-center sm:border-none sm:p-0"
-                >
-                  <Input
-                    className="col-span-2 sm:col-span-1"
-                    placeholder="Description"
-                    value={item.description}
-                    onChange={(e) =>
-                      updateItem(item.id, { description: e.target.value })
-                    }
-                  />
-                  <Input
-                    type="number"
-                    className="text-right"
-                    placeholder="Rate"
-                    value={item.rate}
-                    onChange={(e) =>
-                      updateItem(item.id, { rate: Number(e.target.value) })
-                    }
-                  />
-                  <Input
-                    type="number"
-                    className="text-right"
-                    placeholder="Qty"
-                    value={item.qty}
-                    onChange={(e) =>
-                      updateItem(item.id, { qty: Number(e.target.value) })
-                    }
-                  />
-                  <div className="flex items-center justify-end text-sm font-medium">
-                    {formatMoney(
-                      (Number(item.rate) || 0) * (Number(item.qty) || 0),
-                      symbol,
-                    )}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 justify-self-end text-muted-foreground hover:text-destructive"
-                    onClick={() => removeItem(item.id)}
-                    disabled={data.items.length === 1}
+              {data.items.map((item) => {
+                const discounted = Number(item.listRate) > Number(item.rate);
+                return (
+                  <div
+                    key={item.id}
+                    className="grid grid-cols-2 gap-2 rounded-md border p-2 sm:grid-cols-[1fr_120px_64px_96px_32px] sm:items-center sm:border-none sm:p-0"
                   >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              ))}
+                    <Input
+                      className="col-span-2 sm:col-span-1"
+                      placeholder="Description"
+                      value={item.description}
+                      onChange={(e) =>
+                        updateItem(item.id, { description: e.target.value })
+                      }
+                    />
+                    <div className="flex flex-col gap-1">
+                      <Input
+                        type="number"
+                        className="text-right"
+                        placeholder="Rate"
+                        value={item.rate}
+                        onChange={(e) =>
+                          updateItem(item.id, { rate: Number(e.target.value) })
+                        }
+                      />
+                      {discounted && (
+                        <span className="truncate text-right text-[10px] leading-none text-muted-foreground">
+                          reg. {formatMoney(Number(item.listRate), symbol)}
+                        </span>
+                      )}
+                    </div>
+                    <Input
+                      type="number"
+                      className="text-right"
+                      placeholder="Qty"
+                      value={item.qty}
+                      onChange={(e) =>
+                        updateItem(item.id, { qty: Number(e.target.value) })
+                      }
+                    />
+                    <div className="flex items-center justify-end text-sm font-medium">
+                      {formatMoney(
+                        (Number(item.rate) || 0) * (Number(item.qty) || 0),
+                        symbol,
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="size-8 justify-self-end text-muted-foreground hover:text-destructive"
+                      onClick={() => removeItem(item.id)}
+                      disabled={data.items.length === 1}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
 
@@ -410,6 +458,10 @@ export function InvoiceEditor({ id }: { id?: string }) {
                   />
                 )}
               </div>
+              <p className="text-xs text-muted-foreground">
+                Product discounts are always applied and combined with any manual
+                discount above.
+              </p>
               <div className="flex flex-wrap items-center gap-3">
                 <Switch
                   id="taxEnabled"
@@ -472,7 +524,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 <span className="text-muted-foreground">Subtotal</span>
                 <span>{formatMoney(totals.subtotal, symbol)}</span>
               </div>
-              {data.discountEnabled && totals.discount !== 0 && (
+              {totals.discount !== 0 && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Discount</span>
                   <span>-{formatMoney(totals.discount, symbol)}</span>

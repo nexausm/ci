@@ -189,6 +189,11 @@ const styles = StyleSheet.create({
   totalsValue: {
     fontSize: 10.5,
   },
+  strike: {
+    textDecoration: "line-through",
+    textDecorationColor: COLORS.dividerGray,
+    color: COLORS.dividerGray,
+  },
   totalsDivider: {
     height: 0.75,
     backgroundColor: COLORS.dividerGray,
@@ -391,7 +396,19 @@ export function InvoiceDocument({
                   {item.description || " "}
                 </Text>
                 <Text style={[styles.cellText, styles.colRate]}>
-                  {formatMoney(Number(item.rate) || 0, symbol)}
+                  {Number(item.listRate) > Number(item.rate) ? (
+                    <>
+                      <Text style={styles.strike}>
+                        {Number(item.listRate).toLocaleString("en-US", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}{" "}
+                      </Text>
+                      {formatMoney(Number(item.rate) || 0, symbol)}
+                    </>
+                  ) : (
+                    formatMoney(Number(item.rate) || 0, symbol)
+                  )}
                 </Text>
                 <Text style={[styles.cellText, styles.colQty]}>
                   {Number(item.qty) || 0}
@@ -415,7 +432,7 @@ export function InvoiceDocument({
                 </Text>
               </View>
 
-              {data.discountEnabled && totals.discount !== 0 ? (
+              {totals.discount !== 0 ? (
                 <View style={styles.totalsRow}>
                   <Text style={styles.totalsLabel}>Discount</Text>
                   <Text style={styles.totalsValue}>

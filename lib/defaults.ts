@@ -1,4 +1,11 @@
-import type { Client, CurrencyCode, InvoiceData, Payment } from "./types";
+import type {
+  Client,
+  CurrencyCode,
+  InvoiceData,
+  LineItem,
+  Payment,
+  Product,
+} from "./types";
 import { CURRENCIES } from "./currency";
 import { genId } from "./id";
 import { PAYMENT_METHODS } from "./types";
@@ -14,8 +21,15 @@ function addDaysISO(iso: string, days: number): string {
   return date.toISOString().slice(0, 10);
 }
 
-export function newItem() {
-  return { id: genId(), description: "", rate: 0, qty: 1 };
+export function newItem(): LineItem {
+  return {
+    id: genId(),
+    productId: null,
+    description: "",
+    rate: 0,
+    listRate: null,
+    qty: 1,
+  };
 }
 
 export function createDefaultInvoice(): InvoiceData {
@@ -71,6 +85,19 @@ export function createDefaultClient(): Client {
   };
 }
 
+export function createDefaultProduct(): Product {
+  const now = new Date().toISOString();
+  return {
+    id: genId(),
+    name: "",
+    description: "",
+    basePrice: 0,
+    discountedPrice: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
 export function newPayment(): Payment {
   return {
     id: genId(),
@@ -96,6 +123,23 @@ export function sanitizePayment(raw: unknown): Payment {
   };
 }
 
+export function sanitizeLineItem(raw: unknown): LineItem {
+  const defaults = newItem();
+  if (!raw || typeof raw !== "object") return defaults;
+  const stored = raw as Partial<LineItem>;
+  return {
+    ...defaults,
+    ...stored,
+    productId: stored.productId ?? null,
+    rate: Number(stored.rate) || 0,
+    listRate:
+      stored.listRate === null || stored.listRate === undefined
+        ? null
+        : Number(stored.listRate) || 0,
+    qty: Number(stored.qty) || 0,
+  };
+}
+
 export function sanitizeInvoice(raw: unknown): InvoiceData {
   const defaults = createDefaultInvoice();
   if (!raw || typeof raw !== "object") return defaults;
@@ -109,7 +153,7 @@ export function sanitizeInvoice(raw: unknown): InvoiceData {
     currency,
     items:
       Array.isArray(stored.items) && stored.items.length > 0
-        ? stored.items
+        ? stored.items.map(sanitizeLineItem)
         : defaults.items,
     payments: Array.isArray(stored.payments) ? stored.payments : [],
   };
@@ -125,5 +169,20 @@ export function sanitizeClient(raw: unknown): Client {
     addressLines: Array.isArray(stored.addressLines)
       ? stored.addressLines
       : defaults.addressLines,
+  };
+}
+
+export function sanitizeProduct(raw: unknown): Product {
+  const defaults = createDefaultProduct();
+  if (!raw || typeof raw !== "object") return defaults;
+  const stored = raw as Partial<Product>;
+  return {
+    ...defaults,
+    ...stored,
+    basePrice: Number(stored.basePrice) || 0,
+    discountedPrice:
+      stored.discountedPrice === null || stored.discountedPrice === undefined
+        ? null
+        : Number(stored.discountedPrice) || 0,
   };
 }

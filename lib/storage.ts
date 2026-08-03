@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { Client, InvoiceData, Payment } from "./types";
+import type { Client, InvoiceData, Payment, Product } from "./types";
 
 async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -83,7 +83,71 @@ export async function deletePayment(id: string): Promise<{ ok: true }> {
   return apiFetch(`/api/payments/${id}`, { method: "DELETE" });
 }
 
+// --- products ---
+
+export async function createProduct(product: Product): Promise<Product> {
+  return apiFetch("/api/products", {
+    method: "POST",
+    body: JSON.stringify(product),
+  });
+}
+
+export async function updateProduct(
+  id: string,
+  patch: Partial<Product>,
+): Promise<Product> {
+  return apiFetch(`/api/products/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(patch),
+  });
+}
+
+export async function deleteProduct(id: string): Promise<{ ok: true }> {
+  return apiFetch(`/api/products/${id}`, { method: "DELETE" });
+}
+
 // --- hooks ---
+
+export function useProducts() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiFetch<Product[]>("/api/products").then((data) => {
+      if (cancelled) return;
+      setProducts(data);
+      setLoaded(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const upsertProduct = useCallback(
+    async (product: Product) => {
+      const exists = products.some((p) => p.id === product.id);
+      const saved = exists
+        ? await updateProduct(product.id, product)
+        : await createProduct(product);
+      setProducts((prev) => {
+        const found = prev.some((p) => p.id === saved.id);
+        return found
+          ? prev.map((p) => (p.id === saved.id ? saved : p))
+          : [...prev, saved];
+      });
+      return saved;
+    },
+    [products],
+  );
+
+  const removeProduct = useCallback(async (id: string) => {
+    await deleteProduct(id);
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+  }, []);
+
+  return { products, loaded, upsertProduct, removeProduct };
+}
 
 export function useClients() {
   const [clients, setClients] = useState<Client[]>([]);

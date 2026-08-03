@@ -2,10 +2,26 @@ import type { InvoiceData, InvoiceTotals } from "./types";
 
 export function computeTotals(data: InvoiceData): InvoiceTotals {
   const subtotal = data.items.reduce(
-    (sum, item) => sum + (Number(item.rate) || 0) * (Number(item.qty) || 0),
+    (sum, item) => {
+      const list = Number(item.listRate) || 0;
+      const rate = Number(item.rate) || 0;
+      return sum + Math.max(list, rate) * (Number(item.qty) || 0);
+    },
     0,
   );
-  const discount = data.discountEnabled ? Number(data.discountValue) || 0 : 0;
+  const itemDiscount = data.items.reduce(
+    (sum, item) => {
+      const list = Number(item.listRate) || 0;
+      const rate = Number(item.rate) || 0;
+      if (list <= 0 || rate >= list) return sum;
+      return sum + (list - rate) * (Number(item.qty) || 0);
+    },
+    0,
+  );
+  const manualDiscount = data.discountEnabled
+    ? Number(data.discountValue) || 0
+    : 0;
+  const discount = manualDiscount + itemDiscount;
   const tax = data.taxEnabled ? Number(data.taxValue) || 0 : 0;
   const total = subtotal - discount + tax;
   const amountPaid = data.payments.reduce(
