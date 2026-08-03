@@ -41,8 +41,8 @@ export function InvoicePreview({
         const loaded = await task.promise;
         if (cancelled) return;
         setProxy(loaded);
-      } catch {
-        /* keep last rendered frame */
+      } catch (err) {
+        console.error("invoice preview render failed", err);
       }
     };
 

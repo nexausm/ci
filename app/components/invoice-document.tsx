@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import {
   Document,
   Page,
@@ -6,7 +7,10 @@ import {
   Image,
   StyleSheet,
   Font,
+  Svg,
+  Rect,
 } from "@react-pdf/renderer";
+import qrcode from "qrcode-generator";
 import type { Styles } from "@react-pdf/renderer";
 import type { CompanyInfo, InvoiceData } from "@/lib/types";
 import { CURRENCIES } from "@/lib/currency";
@@ -46,6 +50,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bar,
   },
   body: {
+    flex: 1,
+    flexDirection: "column",
     paddingHorizontal: 30,
     paddingTop: 21,
     paddingBottom: 40,
@@ -101,6 +107,21 @@ const styles = StyleSheet.create({
   billToRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  billToBlock: {
+    flex: 1,
+  },
+  qrBox: {
+    padding: 6,
+    backgroundColor: "#FFFFFF",
+  },
+  footer: {
+    marginTop: "auto",
+    textAlign: "center",
+    fontSize: 9,
+    color: TEXT,
+    paddingTop: 26,
   },
   sectionLabel: {
     fontFamily: FONT_BOLD,
@@ -234,6 +255,41 @@ function Lines({ text, style }: { text: string; style: Styles[string] }) {
   );
 }
 
+const QrCode = memo(function QrCode({
+  value,
+  size,
+}: {
+  value: string;
+  size: number;
+}) {
+  const { count, dark } = useMemo(() => {
+    const qr = qrcode(0, "M");
+    qr.addData(value);
+    qr.make();
+    const modules = qr.getModuleCount();
+    const cells: { r: number; c: number }[] = [];
+    for (let r = 0; r < modules; r += 1) {
+      for (let c = 0; c < modules; c += 1) {
+        if (qr.isDark(r, c)) cells.push({ r, c });
+      }
+    }
+    return { count: modules, dark: cells };
+  }, [value]);
+
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${count} ${count}`}
+      style={{ backgroundColor: "#FFFFFF" }}
+    >
+      {dark.map(({ r, c }, i) => (
+        <Rect key={i} x={c} y={r} width={1} height={1} fill="#000000" />
+      ))}
+    </Svg>
+  );
+});
+
 export function InvoiceDocument({
   data,
   company,
@@ -291,7 +347,7 @@ export function InvoiceDocument({
           <View style={styles.headerDivider} />
 
           <View style={styles.billToRow}>
-            <View>
+            <View style={styles.billToBlock}>
               <Text style={styles.sectionLabel}>Bill To</Text>
               <Text style={styles.billToName}>
                 {data.billToName || "Client Name"}
@@ -308,6 +364,12 @@ export function InvoiceDocument({
               {data.billToEmail ? (
                 <Text style={styles.billToLine}>{data.billToEmail}</Text>
               ) : null}
+            </View>
+            <View style={styles.qrBox}>
+              <QrCode
+                value={`https://billing.nexaus.cloud/${data.id}`}
+                size={88}
+              />
             </View>
           </View>
 
@@ -408,6 +470,11 @@ export function InvoiceDocument({
               <Text style={styles.notesText}>{data.notes}</Text>
             </View>
           ) : null}
+
+          <Text style={styles.footer}>
+            Electronically generated. No signature required. Scan the QR code to
+            verify authenticity.
+          </Text>
         </View>
       </Page>
     </Document>
