@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { createDefaultProduct } from "@/lib/defaults";
+import { createDefaultProduct, sanitizeProduct } from "@/lib/defaults";
 import type { Product } from "@/lib/types";
 
 function PriceFields({
@@ -46,7 +46,7 @@ function PriceFields({
             step="0.01"
             min="0"
             placeholder={symbol}
-            value={base}
+            value={base ?? 0}
             onChange={(e) => onBaseChange(Number(e.target.value))}
             required
           />
@@ -90,14 +90,14 @@ export function ProductFormDialog({
   product: Product | null;
   onSaved: (product: Product) => void;
 }) {
-  const [form, setForm] = useState<Product>(
-    () => product ?? createDefaultProduct(),
+  const [form, setForm] = useState<Product>(() =>
+    sanitizeProduct(product ?? createDefaultProduct()),
   );
 
   useEffect(() => {
     if (open) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setForm(product ?? createDefaultProduct());
+      setForm(sanitizeProduct(product ?? createDefaultProduct()));
     }
   }, [open, product]);
 
