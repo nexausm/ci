@@ -1,20 +1,12 @@
 "use client";
 
-import { useDeferredValue, useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { pdf } from "@react-pdf/renderer";
 import { toast } from "sonner";
-import {
-  ArrowLeft,
-  Building2,
-  Download,
-  Loader2,
-  Plus,
-  Trash2,
-  User,
-} from "lucide-react";
+import { ArrowLeft, Download, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,7 +31,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
 import { InvoiceDocument } from "@/app/components/invoice-document";
 import { PaymentsSection } from "@/app/components/payments-section";
 import { ClientPicker } from "@/app/components/client-picker";
@@ -78,7 +69,7 @@ function Field({
 export function InvoiceEditor({ id }: { id?: string }) {
   const router = useRouter();
   const company = useCompany();
-  const { clients, upsertClient } = useClients();
+  const { clients } = useClients();
   const { upsertInvoice, removeInvoice } = useInvoices();
 
   const mode: "new" | "edit" = id ? "edit" : "new";
@@ -103,7 +94,6 @@ export function InvoiceEditor({ id }: { id?: string }) {
     };
   }, [id]);
 
-  const deferredData = useDeferredValue(data);
   const totals = data ? computeTotals(data) : null;
   const symbol = data ? (CURRENCIES[data.currency]?.symbol ?? "$") : "$";
   const status = data && totals ? computeStatus(data, totals) : "draft";
@@ -138,24 +128,39 @@ export function InvoiceEditor({ id }: { id?: string }) {
     );
   }
 
-  function selectClient(client: Client) {
-    update({
-      clientId: client.id,
+  function clientToBillTo(client: Client) {
+    return {
       billToType: client.type,
       billToName: client.name,
       billToContactName: client.contactName,
       billToAddress: client.addressLines.join("\n"),
       billToPhone: client.phone,
       billToEmail: client.email,
-    });
+    };
   }
 
+  function selectClient(client: Client) {
+    update({ clientId: client.id, ...clientToBillTo(client) });
+  }
+
+  const selectedClient = data?.clientId
+    ? (clients.find((c) => c.id === data.clientId) ?? null)
+    : null;
+
+  const effectiveData = useMemo(() => {
+    if (!data) return null;
+    if (!selectedClient) return data;
+    return { ...data, ...clientToBillTo(selectedClient) };
+  }, [data, selectedClient]);
+
+  const deferredData = useDeferredValue(effectiveData);
+
   async function handleSave() {
-    if (!data) return;
+    if (!effectiveData) return;
     setSaving(true);
     try {
       const toSave: InvoiceData = {
-        ...data,
+        ...effectiveData,
         updatedAt: new Date().toISOString(),
       };
       upsertInvoice(toSave);
@@ -170,16 +175,16 @@ export function InvoiceEditor({ id }: { id?: string }) {
   }
 
   async function handleDownload() {
-    if (!data) return;
+    if (!effectiveData) return;
     setDownloading(true);
     try {
       const blob = await pdf(
-        <InvoiceDocument data={data} company={company} />,
+        <InvoiceDocument data={effectiveData} company={company} />,
       ).toBlob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `Invoice-${data.invoiceNumber || "draft"}.pdf`;
+      a.download = `Invoice-${effectiveData.invoiceNumber || "draft"}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } finally {
@@ -188,8 +193,8 @@ export function InvoiceEditor({ id }: { id?: string }) {
   }
 
   function handleDelete() {
-    if (!data) return;
-    removeInvoice(data.id);
+    if (!effectiveData) return;
+    removeInvoice(effectiveData.id);
     toast.success("Invoice deleted");
     router.push("/");
   }
@@ -212,7 +217,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
     );
   }
 
-  if (!data || !totals) {
+  if (!data || !totals || !effectiveData) {
     return (
       <div className="mx-auto max-w-7xl px-6 py-24 text-center text-sm text-muted-foreground">
         Loading invoice…
@@ -240,9 +245,9 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 : data.invoiceNumber || "Untitled invoice"}
               <StatusBadge status={status} />
             </div>
-            {data.billToName && (
+            {effectiveData.billToName && (
               <div className="text-xs text-muted-foreground">
-                Billed to {data.billToName}
+                Billed to {effectiveData.billToName}
               </div>
             )}
           </div>
@@ -347,89 +352,12 @@ export function InvoiceEditor({ id }: { id?: string }) {
             <CardHeader>
               <CardTitle>Bill to</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
               <Field label="Client">
                 <ClientPicker
                   clients={clients}
                   value={data.clientId}
                   onSelect={selectClient}
-                  onCreateClient={upsertClient}
-                />
-              </Field>
-
-              <div className="grid grid-cols-2 gap-2">
-                {(
-                  [
-                    { value: "individual", label: "Individual", icon: User },
-                    {
-                      value: "organization",
-                      label: "Organization",
-                      icon: Building2,
-                    },
-                  ] as const
-                ).map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => update({ billToType: opt.value })}
-                    className={cn(
-                      "flex items-center justify-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
-                      data.billToType === opt.value
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-input hover:bg-accent",
-                    )}
-                  >
-                    <opt.icon className="size-4" />
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-
-              <Field label="Name">
-                <Input
-                  value={data.billToName}
-                  onChange={(e) => update({ billToName: e.target.value })}
-                  placeholder={
-                    data.billToType === "organization"
-                      ? "Acme Inc."
-                      : "Client name"
-                  }
-                />
-              </Field>
-
-              {data.billToType === "organization" && (
-                <Field label="Contact person (optional)">
-                  <Input
-                    value={data.billToContactName}
-                    onChange={(e) =>
-                      update({ billToContactName: e.target.value })
-                    }
-                    placeholder="Attn: John Smith"
-                  />
-                </Field>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Email">
-                  <Input
-                    type="email"
-                    value={data.billToEmail}
-                    onChange={(e) => update({ billToEmail: e.target.value })}
-                  />
-                </Field>
-                <Field label="Phone">
-                  <Input
-                    value={data.billToPhone}
-                    onChange={(e) => update({ billToPhone: e.target.value })}
-                  />
-                </Field>
-              </div>
-
-              <Field label="Address (one line per row)">
-                <Textarea
-                  rows={2}
-                  value={data.billToAddress}
-                  onChange={(e) => update({ billToAddress: e.target.value })}
                 />
               </Field>
             </CardContent>
@@ -635,7 +563,10 @@ export function InvoiceEditor({ id }: { id?: string }) {
         <div className="h-150 w-full bg-muted p-4 lg:h-full lg:w-auto lg:flex-none">
           <div className="mx-auto h-full aspect-210/297 overflow-hidden shadow-2xl shadow-black/10 ring-1 ring-black/5">
             <PDFViewer>
-              <InvoiceDocument data={deferredData ?? data} company={company} />
+              <InvoiceDocument
+                data={deferredData ?? effectiveData}
+                company={company}
+              />
             </PDFViewer>
           </div>
         </div>
