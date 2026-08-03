@@ -164,7 +164,7 @@ export function ClientsPage() {
                       </Link>
                       {client.type === "organization" && client.contactName && (
                         <div className="text-xs font-normal text-muted-foreground">
-                          Attn: {client.contactName}
+                          {client.contactName}
                         </div>
                       )}
                     </TableCell>

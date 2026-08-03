@@ -120,7 +120,7 @@ export function ClientFormDialog({
                   id="client-contact"
                   value={form.contactName}
                   onChange={(e) => update({ contactName: e.target.value })}
-                  placeholder="Attn: John Smith"
+                  placeholder="John Smith"
                 />
               </div>
             )}

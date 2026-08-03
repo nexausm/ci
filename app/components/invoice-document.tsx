@@ -353,9 +353,7 @@ export function InvoiceDocument({
                 {data.billToName || "Client Name"}
               </Text>
               {data.billToType === "organization" && data.billToContactName ? (
-                <Text style={styles.billToLine}>
-                  Attn: {data.billToContactName}
-                </Text>
+                <Text style={styles.billToLine}>{data.billToContactName}</Text>
               ) : null}
               <Lines text={data.billToAddress} style={styles.billToLine} />
               {data.billToPhone ? (
