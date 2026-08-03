@@ -385,7 +385,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 <span />
               </div>
               {data.items.map((item) => {
-                const discounted = Number(item.listRate) > Number(item.rate);
+                const base = item.listRate ?? item.rate;
                 return (
                   <div
                     key={item.id}
@@ -399,22 +399,20 @@ export function InvoiceEditor({ id }: { id?: string }) {
                         updateItem(item.id, { description: e.target.value })
                       }
                     />
-                    <div className="flex flex-col gap-1">
-                      <Input
-                        type="number"
-                        className="text-right"
-                        placeholder="Rate"
-                        value={item.rate}
-                        onChange={(e) =>
-                          updateItem(item.id, { rate: Number(e.target.value) })
+                    <Input
+                      type="number"
+                      className="text-right"
+                      placeholder="Rate"
+                      value={base}
+                      onChange={(e) => {
+                        const value = Number(e.target.value);
+                        if (item.listRate == null) {
+                          updateItem(item.id, { rate: value });
+                        } else {
+                          updateItem(item.id, { listRate: value });
                         }
-                      />
-                      {discounted && (
-                        <span className="truncate text-right text-[10px] leading-none text-muted-foreground">
-                          reg. {formatMoney(Number(item.listRate), symbol)}
-                        </span>
-                      )}
-                    </div>
+                      }}
+                    />
                     <Input
                       type="number"
                       className="text-right"
@@ -426,7 +424,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
                     />
                     <div className="flex items-center justify-end text-sm font-medium">
                       {formatMoney(
-                        (Number(item.rate) || 0) * (Number(item.qty) || 0),
+                        (Number(base) || 0) * (Number(item.qty) || 0),
                         symbol,
                       )}
                     </div>
