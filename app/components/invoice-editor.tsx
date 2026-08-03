@@ -437,7 +437,11 @@ export function InvoiceEditor({ id }: { id?: string }) {
                         size="icon"
                         className="size-8 justify-self-end text-muted-foreground hover:text-destructive"
                         onClick={() => removeItem(item.id)}
-                        disabled={data.items.filter((it) => !it.externalCost).length === 1}
+                        disabled={
+                          !data.items.some((it) => it.externalCost) &&
+                          data.items.filter((it) => !it.externalCost).length ===
+                            1
+                        }
                       >
                         <Trash2 className="size-4" />
                       </Button>
