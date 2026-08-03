@@ -13,7 +13,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Nexaus Invoice",
+  title: "Billing | Nexaus",
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({

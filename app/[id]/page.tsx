@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import type { Metadata } from "next";
 import { getDb } from "@/lib/mongodb";
 import { InvoiceModel } from "@/models/invoices";
 import { PaymentModel } from "@/models/payments";
@@ -8,15 +7,6 @@ import { computeTotals, formatDateLong, formatMoney } from "@/lib/totals";
 import { CURRENCIES } from "@/lib/currency";
 
 export const dynamic = "force-dynamic";
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}): Promise<Metadata> {
-  const { id } = await params;
-  return { title: `Invoice ${id.slice(0, 8)}` };
-}
 
 export default async function PublicInvoicePage({
   params,
