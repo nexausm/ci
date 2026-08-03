@@ -3,6 +3,7 @@ import path from "path";
 import type { CompanyInfo } from "./types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
+const PUBLIC_DIR = path.join(process.cwd(), "public");
 
 interface InfoJson {
   companyName: string;
@@ -29,7 +30,7 @@ export async function getCompanyInfo(): Promise<CompanyInfo> {
 
   let logoDataUri: string | null = null;
   if (info.logo) {
-    const bytes = await readFile(path.join(DATA_DIR, info.logo));
+    const bytes = await readFile(path.join(PUBLIC_DIR, info.logo));
     logoDataUri = `data:${mimeFor(info.logo)};base64,${bytes.toString("base64")}`;
   }
 
