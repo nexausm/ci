@@ -68,6 +68,9 @@ export function createDefaultInvoice(): InvoiceData {
     discountEnabled: false,
     discountValue: 0,
 
+    creditsEnabled: false,
+    creditsValue: 0,
+
     taxEnabled: false,
     taxLabel: "Tax",
     taxValue: 0,

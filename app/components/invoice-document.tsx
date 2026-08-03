@@ -391,10 +391,7 @@ export function InvoiceDocument({
                   {item.description || " "}
                 </Text>
                 <Text style={[styles.cellText, styles.colRate]}>
-                  {formatMoney(
-                    Number(item.listRate ?? item.rate) || 0,
-                    symbol,
-                  )}
+                  {formatMoney(Number(item.listRate ?? item.rate) || 0, symbol)}
                 </Text>
                 <Text style={[styles.cellText, styles.colQty]}>
                   {Number(item.qty) || 0}
@@ -424,6 +421,15 @@ export function InvoiceDocument({
                   <Text style={styles.totalsLabel}>Discount</Text>
                   <Text style={styles.totalsValue}>
                     {formatMoney(-totals.discount, symbol)}
+                  </Text>
+                </View>
+              ) : null}
+
+              {totals.credits !== 0 ? (
+                <View style={styles.totalsRow}>
+                  <Text style={styles.totalsLabel}>Credit(s) Applied</Text>
+                  <Text style={styles.totalsValue}>
+                    {formatMoney(-totals.credits, symbol)}
                   </Text>
                 </View>
               ) : null}

@@ -30,6 +30,7 @@ export interface CompanyInfo {
 export interface InvoiceTotals {
   subtotal: number;
   discount: number;
+  credits: number;
   tax: number;
   adjustment: number;
   total: number;

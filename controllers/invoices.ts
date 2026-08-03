@@ -20,6 +20,8 @@ const PATCH_FIELDS = [
   "items",
   "discountEnabled",
   "discountValue",
+  "creditsEnabled",
+  "creditsValue",
   "taxEnabled",
   "taxLabel",
   "taxValue",
@@ -63,7 +65,7 @@ export async function getInvoices() {
     const payments = (paymentsByInvoice.get(_id) ?? []).map(
       ({ _id: paymentId, ...payment }) => ({ ...payment, id: paymentId }),
     );
-    return { ...invoice, id: _id, payments };
+    return sanitizeInvoice({ ...invoice, id: _id, payments });
   });
   return NextResponse.json(invoices);
 }
@@ -87,7 +89,9 @@ export async function createInvoice(req: Request) {
     id: paymentId,
   }));
   const { _id, ...rest } = doc;
-  return NextResponse.json({ ...rest, id: _id, payments: storedPayments });
+  return NextResponse.json(
+    sanitizeInvoice({ ...rest, id: _id, payments: storedPayments }),
+  );
 }
 
 export async function updateInvoice(
@@ -119,7 +123,9 @@ export async function updateInvoice(
     id: _id,
   }));
   const { _id, ...rest } = doc;
-  return NextResponse.json({ ...rest, id: _id, payments });
+  return NextResponse.json(
+    sanitizeInvoice({ ...rest, id: _id, payments }),
+  );
 }
 
 export async function getInvoice(
@@ -136,7 +142,9 @@ export async function getInvoice(
     id: _id,
   }));
   const { _id, ...invoice } = doc;
-  return NextResponse.json({ ...invoice, id: _id, payments });
+  return NextResponse.json(
+    sanitizeInvoice({ ...invoice, id: _id, payments }),
+  );
 }
 
 export async function deleteInvoice(

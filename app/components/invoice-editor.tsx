@@ -484,6 +484,29 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 Product discounts are always applied and combined with any manual
                 discount above.
               </p>
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="creditsEnabled"
+                  checked={data.creditsEnabled}
+                  onCheckedChange={(checked) =>
+                    update({ creditsEnabled: checked })
+                  }
+                />
+                <Label htmlFor="creditsEnabled" className="font-normal">
+                  Credit applied
+                </Label>
+                {data.creditsEnabled && (
+                  <Input
+                    type="number"
+                    aria-label="Credit applied amount"
+                    className="w-32"
+                    value={data.creditsValue}
+                    onChange={(e) =>
+                      update({ creditsValue: Number(e.target.value) })
+                    }
+                  />
+                )}
+              </div>
               <div className="flex flex-wrap items-center gap-3">
                 <Switch
                   id="taxEnabled"
@@ -575,6 +598,12 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Discount</span>
                   <span>-{formatMoney(totals.discount, symbol)}</span>
+                </div>
+              )}
+              {totals.credits !== 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Credit applied</span>
+                  <span>-{formatMoney(totals.credits, symbol)}</span>
                 </div>
               )}
               {data.taxEnabled && totals.tax !== 0 && (

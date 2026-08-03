@@ -42,6 +42,9 @@ export interface InvoiceData {
   discountEnabled: boolean;
   discountValue: number;
 
+  creditsEnabled: boolean;
+  creditsValue: number;
+
   taxEnabled: boolean;
   taxLabel: string;
   taxValue: number;
@@ -105,6 +108,8 @@ const invoiceSchema = new Schema<InvoiceDoc>(
     items: { type: [lineItemSchema], default: [] },
     discountEnabled: { type: Boolean, default: false },
     discountValue: { type: Number, default: 0 },
+    creditsEnabled: { type: Boolean, default: false },
+    creditsValue: { type: Number, default: 0 },
     taxEnabled: { type: Boolean, default: false },
     taxLabel: { type: String, default: "Tax" },
     taxValue: { type: Number, default: 0 },

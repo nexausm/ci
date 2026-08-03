@@ -22,16 +22,26 @@ export function computeTotals(data: InvoiceData): InvoiceTotals {
     ? Number(data.discountValue) || 0
     : 0;
   const discount = manualDiscount + itemDiscount;
+  const credits = data.creditsEnabled ? Number(data.creditsValue) || 0 : 0;
   const tax = data.taxEnabled ? Number(data.taxValue) || 0 : 0;
   const adjustment = Number(data.adjustmentValue) || 0;
-  const total = subtotal - discount + tax + adjustment;
+  const total = subtotal - discount - credits + tax + adjustment;
   const amountPaid = data.payments.reduce(
     (sum, p) => sum + (Number(p.amount) || 0),
     0,
   );
   const balanceDue = total - amountPaid;
 
-  return { subtotal, discount, tax, adjustment, total, amountPaid, balanceDue };
+  return {
+    subtotal,
+    discount,
+    credits,
+    tax,
+    adjustment,
+    total,
+    amountPaid,
+    balanceDue,
+  };
 }
 
 export function formatMoney(amount: number, currency: string): string {
