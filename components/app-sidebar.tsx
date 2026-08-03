@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, LayoutDashboard, Plus, Users } from "lucide-react";
+import { LayoutDashboard, Plus, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,7 +16,6 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { useCompany } from "@/app/providers/company-provider";
 
 const links = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -25,7 +24,6 @@ const links = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const company = useCompany();
 
   return (
     <Sidebar collapsible="icon">
@@ -33,8 +31,15 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/" />}>
-              <FileText />
-              <span>{company.companyName}</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo/main.png"
+                alt="Billing"
+                className="h-6 w-auto shrink-0 group-data-[collapsible=icon]:hidden"
+              />
+              <span className="group-data-[collapsible=icon]:hidden">
+                Billing
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -175,7 +175,7 @@ export function Dashboard() {
     CURRENCIES[currency]?.symbol ?? "$";
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div className="w-full px-4 py-8 sm:px-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
@@ -275,16 +275,16 @@ export function Dashboard() {
 
       <Card className="mt-4 py-0">
         <CardContent className="p-0">
-          <Table>
+          <Table className="table-fixed">
             <TableHeader>
               <TableRow>
-                <TableHead>Invoice</TableHead>
+                <TableHead className="w-32.5">Invoice</TableHead>
                 <TableHead>Client</TableHead>
-                <TableHead>Issued</TableHead>
-                <TableHead>Due</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead className="text-right">Balance due</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="w-25">Issued</TableHead>
+                <TableHead className="w-25">Due</TableHead>
+                <TableHead className="w-27.5 text-right">Total</TableHead>
+                <TableHead className="w-30 text-right">Balance due</TableHead>
+                <TableHead className="w-30">Status</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
@@ -329,10 +329,10 @@ export function Dashboard() {
                     className="cursor-pointer"
                     onClick={() => router.push(`/invoices/${inv.id}`)}
                   >
-                    <TableCell className="font-medium">
+                    <TableCell className="truncate font-medium">
                       {inv.invoiceNumber || "(no number)"}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="truncate text-muted-foreground">
                       {inv.billToName || clientName(inv.clientId)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
