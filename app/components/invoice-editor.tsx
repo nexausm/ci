@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { pdf } from "@react-pdf/renderer";
 import { toast } from "sonner";
-import { ArrowLeft, Download, Loader2, Plus, Trash2 } from "lucide-react";
+import { Download, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,11 +34,9 @@ import {
 import { InvoiceDocument } from "@/app/components/invoice-document";
 import { PaymentsSection } from "@/app/components/payments-section";
 import { ClientPicker } from "@/app/components/client-picker";
-import { StatusBadge } from "@/app/components/status-badge";
 import { useClients, useInvoices, fetchInvoiceById } from "@/lib/storage";
 import { createDefaultInvoice, newItem } from "@/lib/defaults";
 import { computeTotals, formatMoney } from "@/lib/totals";
-import { computeStatus } from "@/lib/invoice-status";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
 import type { Client, CurrencyCode, InvoiceData } from "@/lib/types";
@@ -96,7 +94,6 @@ export function InvoiceEditor({ id }: { id?: string }) {
 
   const totals = data ? computeTotals(data) : null;
   const symbol = data ? (CURRENCIES[data.currency]?.symbol ?? "$") : "$";
-  const status = data && totals ? computeStatus(data, totals) : "draft";
 
   function update(patch: Partial<InvoiceData>) {
     setData((d) => (d ? { ...d, ...patch } : d));
@@ -227,63 +224,6 @@ export function InvoiceEditor({ id }: { id?: string }) {
 
   return (
     <div className="flex flex-col lg:h-full">
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-b px-4 py-4 sm:px-6">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8"
-            nativeButton={false}
-            render={<Link href="/" />}
-          >
-            <ArrowLeft className="size-4" />
-          </Button>
-          <div>
-            <div className="flex items-center gap-2 text-sm font-medium">
-              {mode === "new"
-                ? "New invoice"
-                : data.invoiceNumber || "Untitled invoice"}
-              <StatusBadge status={status} />
-            </div>
-            {effectiveData.billToName && (
-              <div className="text-xs text-muted-foreground">
-                Billed to {effectiveData.billToName}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {mode === "edit" && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-destructive hover:text-destructive"
-              onClick={() => setDeleteOpen(true)}
-            >
-              <Trash2 className="size-4" />
-              <span className="hidden sm:inline">Delete</span>
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDownload}
-            disabled={downloading}
-          >
-            {downloading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Download className="size-4" />
-            )}
-            <span className="hidden sm:inline">Download PDF</span>
-          </Button>
-          <Button size="sm" onClick={handleSave} disabled={saving}>
-            {saving && <Loader2 className="size-4 animate-spin" />}
-            Save invoice
-          </Button>
-        </div>
-      </div>
-
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <div className="space-y-6 p-4 sm:p-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           <Card>
@@ -558,6 +498,37 @@ export function InvoiceEditor({ id }: { id?: string }) {
               </div>
             </CardContent>
           </Card>
+
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {mode === "edit" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={() => setDeleteOpen(true)}
+              >
+                <Trash2 className="size-4" />
+                <span className="hidden sm:inline">Delete</span>
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownload}
+              disabled={downloading}
+            >
+              {downloading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Download className="size-4" />
+              )}
+              <span className="hidden sm:inline">Download PDF</span>
+            </Button>
+            <Button size="sm" onClick={handleSave} disabled={saving}>
+              {saving && <Loader2 className="size-4 animate-spin" />}
+              Save invoice
+            </Button>
+          </div>
         </div>
 
         <div className="h-150 w-full bg-muted p-4 lg:h-full lg:w-auto lg:flex-none">
