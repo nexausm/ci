@@ -203,23 +203,6 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     textAlign: "right",
   },
-  payments: {
-    marginTop: 26,
-  },
-  paymentsLabel: {
-    fontFamily: FONT_BOLD,
-    fontSize: 9,
-    textTransform: "uppercase",
-    marginBottom: 8,
-  },
-  paymentRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  paymentText: {
-    fontSize: 9.5,
-  },
   notes: {
     marginTop: 26,
   },
@@ -299,13 +282,8 @@ export function InvoiceDocument({
               </Text>
 
               <Text style={styles.metaLabel}>Due Date</Text>
-              <Text style={styles.metaValue}>
-                {formatDateLong(data.dueDate) || "—"}
-              </Text>
-
-              <Text style={styles.metaLabel}>Balance Due</Text>
               <Text style={[styles.metaValue, { marginBottom: 0 }]}>
-                {formatMoney(totals.balanceDue, symbol)}
+                {formatDateLong(data.dueDate) || "—"}
               </Text>
             </View>
           </View>
@@ -423,25 +401,6 @@ export function InvoiceDocument({
               <View style={styles.totalsDividerFinal} />
             </View>
           </View>
-
-          {data.payments.length > 0 ? (
-            <View style={styles.payments}>
-              <Text style={styles.paymentsLabel}>Payments Received</Text>
-              {[...data.payments]
-                .sort((a, b) => a.date.localeCompare(b.date))
-                .map((payment) => (
-                  <View key={payment.id} style={styles.paymentRow}>
-                    <Text style={styles.paymentText}>
-                      {formatDateLong(payment.date)} · {payment.method}
-                      {payment.note ? ` · ${payment.note}` : ""}
-                    </Text>
-                    <Text style={styles.paymentText}>
-                      {formatMoney(Number(payment.amount) || 0, symbol)}
-                    </Text>
-                  </View>
-                ))}
-            </View>
-          ) : null}
 
           {data.notes ? (
             <View style={styles.notes}>
