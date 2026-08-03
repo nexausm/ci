@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Plus, Users } from "lucide-react";
+import { FaUserFriends } from "react-icons/fa";
+import { BiSolidLayout } from "react-icons/bi";
+
 import {
   Sidebar,
   SidebarContent,
@@ -18,8 +21,8 @@ import {
 } from "@/components/ui/sidebar";
 
 const links = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/clients", label: "Clients", icon: Users, exact: false },
+  { href: "/", label: "Dashboard", icon: BiSolidLayout, exact: true },
+  { href: "/clients", label: "Clients", icon: FaUserFriends, exact: false },
 ];
 
 export function AppSidebar() {
