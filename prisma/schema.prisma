@@ -61,32 +61,33 @@ model Product {
 }
 
 model Invoice {
-  id                String       @id
-  invoiceNumber     String       @default("")
-  invoiceDate       String       @default("")
-  dueDate           String       @default("")
-  currency          CurrencyCode @default(BDT)
+  id                String         @id
+  invoiceNumber     String         @default("")
+  invoiceDate       String         @default("")
+  dueDate           String         @default("")
+  currency          CurrencyCode   @default(BDT)
   clientId          String?
-  billToType        ClientType   @default(individual)
-  billToName        String       @default("")
-  billToContactName String       @default("")
-  billToAddress     String       @default("")
-  billToPhone       String       @default("")
-  billToEmail       String       @default("")
-  items             Json         @default("[]")
-  discountEnabled   Boolean      @default(false)
-  discountValue     Float        @default(0)
-  creditsEnabled    Boolean      @default(false)
-  creditsValue      Float        @default(0)
-  taxEnabled        Boolean      @default(false)
-  taxLabel          String       @default("Tax")
-  taxValue          Float        @default(0)
-  adjustmentValue   Float        @default(0)
-  notes             String       @default("")
-  state             InvoiceState @default(draft)
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
+  billToType        ClientType     @default(individual)
+  billToName        String         @default("")
+  billToContactName String         @default("")
+  billToAddress     String         @default("")
+  billToPhone       String         @default("")
+  billToEmail       String         @default("")
+  items             Json           @default("[]")
+  discountEnabled   Boolean        @default(false)
+  discountValue     Float          @default(0)
+  creditsEnabled    Boolean        @default(false)
+  creditsValue      Float          @default(0)
+  taxEnabled        Boolean        @default(false)
+  taxLabel          String         @default("Tax")
+  taxValue          Float          @default(0)
+  adjustmentValue   Float          @default(0)
+  notes             String         @default("")
+  state             InvoiceState   @default(draft)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
   payments          Payment[]
+  externalCosts     ExternalCost[]
 }
 
 model Payment {
@@ -99,4 +100,17 @@ model Payment {
   note      String   @default("")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model ExternalCost {
+  id            String  @id
+  invoiceId     String
+  invoice       Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  itemId        String
+  vendor        String  @default("")
+  invoiceNumber String  @default("")
+  billedDate    String  @default("")
+
+  @@unique([invoiceId, itemId])
+  @@index([invoiceId])
 }

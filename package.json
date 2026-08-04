@@ -9,8 +9,8 @@
     "lint": "eslint",
     "seed": "tsx --env-file=.env scripts/seed-user.ts",
     "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev"
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
