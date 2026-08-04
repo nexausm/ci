@@ -1,8 +1,6 @@
-import mongoose from "mongoose";
-import { connectDb } from "../lib/mongodb";
+import { prisma } from "../lib/prisma";
 import { genId } from "../lib/id";
 import { hashPassword } from "../lib/password";
-import { UserModel } from "../models/users";
 
 async function main() {
   const email = (process.env.SEED_USER_EMAIL ?? "admin@nexaus.cloud")
@@ -18,28 +16,17 @@ async function main() {
     process.exit(1);
   }
 
-  await connectDb();
-  const existing = await UserModel.findOne({ email }).lean();
-  const now = new Date().toISOString();
-  const id = existing?._id ?? genId();
+  const existing = await prisma.user.findUnique({ where: { email } });
+  const id = existing?.id ?? genId();
   const passwordHash = await hashPassword(password);
 
-  await UserModel.updateOne(
-    { _id: id },
-    {
-      $set: {
-        email,
-        name,
-        passwordHash,
-        createdAt: existing?.createdAt ?? now,
-        updatedAt: now,
-      },
-    },
-    { upsert: true },
-  );
+  await prisma.user.upsert({
+    where: { email },
+    create: { id, email, name, passwordHash },
+    update: { name, passwordHash },
+  });
 
   console.log(`Seeded user: ${email}`);
-  await mongoose.disconnect();
 }
 
 main().catch((err) => {

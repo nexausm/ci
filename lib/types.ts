@@ -1,13 +1,75 @@
-export type { Client, ClientType } from "@/models/clients";
-export type { Payment, PaymentMethod } from "@/models/payments";
-export type { Product } from "@/models/products";
-export type {
-  CurrencyCode,
-  ExternalCostInfo,
-  InvoiceData,
-  InvoiceState,
-  LineItem,
-} from "@/models/invoices";
+export type ClientType = "individual" | "organization";
+
+export interface Client {
+  id: string;
+  type: ClientType;
+  name: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  addressLines: string[];
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExternalCostInfo {
+  vendor: string;
+  invoiceNumber: string;
+  billedDate: string;
+}
+
+export interface LineItem {
+  id: string;
+  productId: string | null;
+  description: string;
+  rate: number;
+  listRate: number | null;
+  qty: number;
+  externalCost?: ExternalCostInfo | null;
+}
+
+export type CurrencyCode = "BDT" | "USD";
+
+export type InvoiceState = "draft" | "sent";
+
+export interface InvoiceData {
+  id: string;
+  invoiceNumber: string;
+  invoiceDate: string;
+  dueDate: string;
+  currency: CurrencyCode;
+
+  clientId: string | null;
+  billToType: ClientType;
+  billToName: string;
+  billToContactName: string;
+  billToAddress: string;
+  billToPhone: string;
+  billToEmail: string;
+
+  items: LineItem[];
+
+  discountEnabled: boolean;
+  discountValue: number;
+
+  creditsEnabled: boolean;
+  creditsValue: number;
+
+  taxEnabled: boolean;
+  taxLabel: string;
+  taxValue: number;
+
+  adjustmentValue: number;
+
+  payments: Payment[];
+
+  notes: string;
+  state: InvoiceState;
+
+  createdAt: string;
+  updatedAt: string;
+}
 
 export const PAYMENT_METHODS = [
   "Cash",
@@ -16,6 +78,29 @@ export const PAYMENT_METHODS = [
   "Mobile Banking",
   "Other",
 ] as const;
+
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+export interface Payment {
+  id: string;
+  invoiceId?: string;
+  date: string;
+  amount: number;
+  method: PaymentMethod;
+  note: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  basePriceUsd: number;
+  basePriceBdt: number;
+  discountedPriceUsd: number | null;
+  discountedPriceBdt: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface CompanyInfo {
   companyName: string;
