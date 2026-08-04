@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { sanitizeInvoice } from "@/lib/defaults";
-import type { Payment, PaymentMethod } from "@/lib/types";
+import { sanitizeInvoice, sanitizeLineItem } from "@/lib/defaults";
+import type {
+  ExternalCostInfo,
+  LineItem,
+  Payment,
+  PaymentMethod,
+} from "@/lib/types";
 
 const PATCH_FIELDS = [
   "invoiceNumber",
@@ -30,6 +35,13 @@ const PATCH_FIELDS = [
   "updatedAt",
 ] as const;
 
+type ExternalCostRow = {
+  itemId: string;
+  vendor: string;
+  invoiceNumber: string;
+  billedDate: string;
+};
+
 function toPayment(p: {
   id: string;
   invoiceId: string;
@@ -46,6 +58,75 @@ function toPayment(p: {
     method: p.method as PaymentMethod,
     note: p.note,
   };
+}
+
+function externalCostId(invoiceId: string, itemId: string): string {
+  return `ec_${invoiceId}_${itemId}`;
+}
+
+function itemsFromJson(value: unknown): LineItem[] {
+  return value as LineItem[];
+}
+
+function stripExternalCosts(items: LineItem[]): LineItem[] {
+  return items.map((item) => {
+    const { externalCost: _ec, ...rest } = item;
+    void _ec;
+    return rest;
+  });
+}
+
+function inflateExternalCosts(
+  items: LineItem[],
+  costs: ExternalCostRow[],
+): LineItem[] {
+  const byItem = new Map(costs.map((cost) => [cost.itemId, cost]));
+  return items.map((item) => {
+    const cost = byItem.get(item.id);
+    return {
+      ...item,
+      externalCost: cost
+        ? {
+            vendor: cost.vendor,
+            invoiceNumber: cost.invoiceNumber,
+            billedDate: cost.billedDate,
+          }
+        : null,
+    };
+  });
+}
+
+async function syncExternalCosts(invoiceId: string, items: LineItem[]) {
+  const incoming = items.filter(
+    (item) => item.externalCost && typeof item.externalCost === "object",
+  );
+  const incomingIds = new Set(incoming.map((item) => item.id));
+  for (const item of incoming) {
+    const cost = item.externalCost as ExternalCostInfo;
+    const id = externalCostId(invoiceId, item.id);
+    await prisma.externalCost.upsert({
+      where: { id },
+      create: {
+        id,
+        invoiceId,
+        itemId: item.id,
+        vendor: cost.vendor,
+        invoiceNumber: cost.invoiceNumber,
+        billedDate: cost.billedDate,
+      },
+      update: {
+        vendor: cost.vendor,
+        invoiceNumber: cost.invoiceNumber,
+        billedDate: cost.billedDate,
+      },
+    });
+  }
+  await prisma.externalCost.deleteMany({
+    where:
+      incomingIds.size === 0
+        ? { invoiceId }
+        : { invoiceId, itemId: { notIn: Array.from(incomingIds) } },
+  });
 }
 
 async function syncPayments(invoiceId: string, payments: Payment[]) {
@@ -70,16 +151,21 @@ async function syncPayments(invoiceId: string, payments: Payment[]) {
 
 export async function getInvoices() {
   const docs = await prisma.invoice.findMany({
-    include: { payments: true },
+    include: { payments: true, externalCosts: true },
     orderBy: { createdAt: "asc" },
   });
-  const invoices = docs.map(({ payments, ...invoice }) =>
-    sanitizeInvoice({
+  const invoices = docs.map(({ payments, externalCosts, ...invoice }) => {
+    const items = inflateExternalCosts(
+      itemsFromJson(invoice.items),
+      externalCosts,
+    );
+    return sanitizeInvoice({
       ...invoice,
       id: invoice.id,
+      items,
       payments: payments.map(toPayment),
-    }),
-  );
+    });
+  });
   return NextResponse.json(invoices);
 }
 
@@ -89,7 +175,7 @@ export async function createInvoice(req: Request) {
   const { id, payments = [], items, ...rest } = invoice;
   const data = {
     ...rest,
-    items: items as unknown as Prisma.InputJsonValue,
+    items: stripExternalCosts(items) as unknown as Prisma.InputJsonValue,
   };
   await prisma.invoice.upsert({
     where: { id },
@@ -97,16 +183,18 @@ export async function createInvoice(req: Request) {
     update: data,
   });
   await syncPayments(id, payments);
+  await syncExternalCosts(id, items);
   const doc = await prisma.invoice.findUnique({
     where: { id },
-    include: { payments: true },
+    include: { payments: true, externalCosts: true },
   });
   if (!doc) return NextResponse.json(invoice);
-  const { payments: storedPayments, ...stored } = doc;
+  const { payments: storedPayments, externalCosts, ...stored } = doc;
   return NextResponse.json(
     sanitizeInvoice({
       ...stored,
       id: stored.id,
+      items: inflateExternalCosts(itemsFromJson(stored.items), externalCosts),
       payments: storedPayments.map(toPayment),
     }),
   );
@@ -120,7 +208,16 @@ export async function updateInvoice(
   const body = await req.json();
   const set: Record<string, unknown> = {};
   for (const key of PATCH_FIELDS) {
+    if (key === "items") continue;
     if (body[key] !== undefined) set[key] = body[key];
+  }
+  const patchItems = Array.isArray(body.items)
+    ? body.items.map(sanitizeLineItem)
+    : undefined;
+  if (patchItems) {
+    set.items = stripExternalCosts(
+      patchItems,
+    ) as unknown as Prisma.InputJsonValue;
   }
   if (Object.keys(set).length === 0) {
     return NextResponse.json(
@@ -142,16 +239,18 @@ export async function updateInvoice(
     }
     throw err;
   }
+  if (patchItems) await syncExternalCosts(id, patchItems);
   const doc = await prisma.invoice.findUnique({
     where: { id },
-    include: { payments: true },
+    include: { payments: true, externalCosts: true },
   });
   if (!doc) return NextResponse.json(null, { status: 404 });
-  const { payments, ...stored } = doc;
+  const { payments, externalCosts, ...stored } = doc;
   return NextResponse.json(
     sanitizeInvoice({
       ...stored,
       id: stored.id,
+      items: inflateExternalCosts(itemsFromJson(stored.items), externalCosts),
       payments: payments.map(toPayment),
     }),
   );
@@ -164,14 +263,15 @@ export async function getInvoice(
   const { id } = await params;
   const doc = await prisma.invoice.findUnique({
     where: { id },
-    include: { payments: true },
+    include: { payments: true, externalCosts: true },
   });
   if (!doc) return NextResponse.json(null, { status: 404 });
-  const { payments, ...stored } = doc;
+  const { payments, externalCosts, ...stored } = doc;
   return NextResponse.json(
     sanitizeInvoice({
       ...stored,
       id: stored.id,
+      items: inflateExternalCosts(itemsFromJson(stored.items), externalCosts),
       payments: payments.map(toPayment),
     }),
   );
