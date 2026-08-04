@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/lib/mongodb";
+import { Prisma } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { sanitizeInvoice } from "@/lib/defaults";
-import { InvoiceModel } from "@/models/invoices";
-import { PaymentModel } from "@/models/payments";
-import type { Payment } from "@/models/payments";
+import type { Payment, PaymentMethod } from "@/lib/types";
 
 const PATCH_FIELDS = [
   "invoiceNumber",
@@ -31,66 +30,85 @@ const PATCH_FIELDS = [
   "updatedAt",
 ] as const;
 
+function toPayment(p: {
+  id: string;
+  invoiceId: string;
+  date: string;
+  amount: number;
+  method: string;
+  note: string;
+}): Payment {
+  return {
+    id: p.id,
+    invoiceId: p.invoiceId,
+    date: p.date,
+    amount: p.amount,
+    method: p.method as PaymentMethod,
+    note: p.note,
+  };
+}
+
 async function syncPayments(invoiceId: string, payments: Payment[]) {
   const incoming = payments.filter((p) => p.id);
   const incomingIds = new Set(incoming.map((p) => p.id));
-  const existing = await PaymentModel.find({ invoiceId }).lean();
   for (const payment of incoming) {
-    const { id: paymentId, ...rest } = payment;
-    await PaymentModel.updateOne(
-      { _id: paymentId },
-      { $set: { ...rest, invoiceId } },
-      { upsert: true },
-    );
+    const { id, invoiceId: _invoiceId, ...rest } = payment;
+    void _invoiceId;
+    await prisma.payment.upsert({
+      where: { id },
+      create: { id, invoiceId, ...rest },
+      update: { invoiceId, ...rest },
+    });
   }
-  for (const old of existing) {
-    if (!incomingIds.has(old._id)) {
-      await PaymentModel.deleteOne({ _id: old._id });
-    }
-  }
+  await prisma.payment.deleteMany({
+    where:
+      incomingIds.size === 0
+        ? { invoiceId }
+        : { invoiceId, id: { notIn: Array.from(incomingIds) } },
+  });
 }
 
 export async function getInvoices() {
-  await getDb();
-  const docs = await InvoiceModel.find().lean();
-  const paymentDocs = await PaymentModel.find().lean();
-  const paymentsByInvoice = new Map<string, typeof paymentDocs>();
-  for (const doc of paymentDocs) {
-    if (!doc.invoiceId) continue;
-    const list = paymentsByInvoice.get(doc.invoiceId) ?? [];
-    list.push(doc);
-    paymentsByInvoice.set(doc.invoiceId, list);
-  }
-  const invoices = docs.map(({ _id, ...invoice }) => {
-    const payments = (paymentsByInvoice.get(_id) ?? []).map(
-      ({ _id: paymentId, ...payment }) => ({ ...payment, id: paymentId }),
-    );
-    return sanitizeInvoice({ ...invoice, id: _id, payments });
+  const docs = await prisma.invoice.findMany({
+    include: { payments: true },
+    orderBy: { createdAt: "asc" },
   });
+  const invoices = docs.map(({ payments, ...invoice }) =>
+    sanitizeInvoice({
+      ...invoice,
+      id: invoice.id,
+      payments: payments.map(toPayment),
+    }),
+  );
   return NextResponse.json(invoices);
 }
 
 export async function createInvoice(req: Request) {
   const body = await req.json();
   const invoice = sanitizeInvoice(body);
-  await getDb();
-  const { id, payments = [], ...data } = invoice;
-  await InvoiceModel.updateOne(
-    { _id: id },
-    { $set: data },
-    { upsert: true },
-  );
+  const { id, payments = [], items, ...rest } = invoice;
+  const data = {
+    ...rest,
+    items: items as unknown as Prisma.InputJsonValue,
+  };
+  await prisma.invoice.upsert({
+    where: { id },
+    create: { id, ...data },
+    update: data,
+  });
   await syncPayments(id, payments);
-  const doc = await InvoiceModel.findById(id).lean();
+  const doc = await prisma.invoice.findUnique({
+    where: { id },
+    include: { payments: true },
+  });
   if (!doc) return NextResponse.json(invoice);
-  const paymentDocs = await PaymentModel.find({ invoiceId: id }).lean();
-  const storedPayments = paymentDocs.map(({ _id: paymentId, ...payment }) => ({
-    ...payment,
-    id: paymentId,
-  }));
-  const { _id, ...rest } = doc;
+  const { payments: storedPayments, ...stored } = doc;
   return NextResponse.json(
-    sanitizeInvoice({ ...rest, id: _id, payments: storedPayments }),
+    sanitizeInvoice({
+      ...stored,
+      id: stored.id,
+      payments: storedPayments.map(toPayment),
+    }),
   );
 }
 
@@ -110,21 +128,32 @@ export async function updateInvoice(
       { status: 400 },
     );
   }
-  await getDb();
-  const doc = await InvoiceModel.findOneAndUpdate(
-    { _id: id },
-    { $set: set },
-    { new: true, runValidators: true },
-  ).lean();
+  try {
+    await prisma.invoice.update({
+      where: { id },
+      data: set as Prisma.InvoiceUpdateInput,
+    });
+  } catch (err) {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2025"
+    ) {
+      return NextResponse.json(null, { status: 404 });
+    }
+    throw err;
+  }
+  const doc = await prisma.invoice.findUnique({
+    where: { id },
+    include: { payments: true },
+  });
   if (!doc) return NextResponse.json(null, { status: 404 });
-  const paymentDocs = await PaymentModel.find({ invoiceId: id }).lean();
-  const payments = paymentDocs.map(({ _id, ...payment }) => ({
-    ...payment,
-    id: _id,
-  }));
-  const { _id, ...rest } = doc;
+  const { payments, ...stored } = doc;
   return NextResponse.json(
-    sanitizeInvoice({ ...rest, id: _id, payments }),
+    sanitizeInvoice({
+      ...stored,
+      id: stored.id,
+      payments: payments.map(toPayment),
+    }),
   );
 }
 
@@ -133,17 +162,18 @@ export async function getInvoice(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  await getDb();
-  const doc = await InvoiceModel.findById(id).lean();
+  const doc = await prisma.invoice.findUnique({
+    where: { id },
+    include: { payments: true },
+  });
   if (!doc) return NextResponse.json(null, { status: 404 });
-  const paymentDocs = await PaymentModel.find({ invoiceId: id }).lean();
-  const payments = paymentDocs.map(({ _id, ...payment }) => ({
-    ...payment,
-    id: _id,
-  }));
-  const { _id, ...invoice } = doc;
+  const { payments, ...stored } = doc;
   return NextResponse.json(
-    sanitizeInvoice({ ...invoice, id: _id, payments }),
+    sanitizeInvoice({
+      ...stored,
+      id: stored.id,
+      payments: payments.map(toPayment),
+    }),
   );
 }
 
@@ -152,8 +182,6 @@ export async function deleteInvoice(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  await getDb();
-  await InvoiceModel.deleteOne({ _id: id });
-  await PaymentModel.deleteMany({ invoiceId: id });
+  await prisma.invoice.deleteMany({ where: { id } });
   return NextResponse.json({ ok: true });
 }

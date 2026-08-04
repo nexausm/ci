@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/lib/mongodb";
+import { Prisma } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { sanitizeProduct } from "@/lib/defaults";
-import { ProductModel } from "@/models/products";
 
 const PATCH_FIELDS = [
   "name",
@@ -14,21 +14,23 @@ const PATCH_FIELDS = [
 ] as const;
 
 export async function getProducts() {
-  await getDb();
-  const docs = await ProductModel.find().lean();
-  const products = docs.map(({ _id, ...product }) => ({
-    ...product,
-    id: _id,
-  }));
+  const products = await prisma.product.findMany({
+    orderBy: { createdAt: "asc" },
+  });
   return NextResponse.json(products);
 }
 
 export async function createProduct(req: Request) {
   const body = await req.json();
   const product = sanitizeProduct(body);
-  await getDb();
-  const { id, ...data } = product;
-  await ProductModel.updateOne({ _id: id }, { $set: data }, { upsert: true });
+  const { id, createdAt, updatedAt, ...data } = product;
+  void createdAt;
+  void updatedAt;
+  await prisma.product.upsert({
+    where: { id },
+    create: { id, ...data },
+    update: data,
+  });
   return NextResponse.json(product);
 }
 
@@ -48,15 +50,21 @@ export async function updateProduct(
       { status: 400 },
     );
   }
-  await getDb();
-  const doc = await ProductModel.findOneAndUpdate(
-    { _id: id },
-    { $set: set },
-    { new: true, runValidators: true },
-  ).lean();
-  if (!doc) return NextResponse.json(null, { status: 404 });
-  const { _id, ...rest } = doc;
-  return NextResponse.json({ ...rest, id: _id });
+  try {
+    const doc = await prisma.product.update({
+      where: { id },
+      data: set as Prisma.ProductUpdateInput,
+    });
+    return NextResponse.json(doc);
+  } catch (err) {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2025"
+    ) {
+      return NextResponse.json(null, { status: 404 });
+    }
+    throw err;
+  }
 }
 
 export async function deleteProduct(
@@ -64,7 +72,6 @@ export async function deleteProduct(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  await getDb();
-  await ProductModel.deleteOne({ _id: id });
+  await prisma.product.deleteMany({ where: { id } });
   return NextResponse.json({ ok: true });
 }
