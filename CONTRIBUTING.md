@@ -42,7 +42,13 @@ Required environment variables:
 | ---------------------- | --------------------------------------------------- |
 | `AUTH_SESSION_MAX_AGE` | Session lifetime in seconds for authenticated users |
 | `AUTH_SECRET`          | Secret used by NextAuth to sign sessions            |
-| `MONGO_URI`            | MongoDB connection string                           |
+| `DATABASE_URL`         | PostgreSQL connection string (Prisma)               |
+
+Before running the app, set up the database schema:
+
+```bash
+npm run db:push  # sync the Prisma schema to PostgreSQL
+```
 
 Used by the seed script (`npm run seed`):
 
@@ -67,7 +73,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the app.
 - TypeScript is required for all source files. Strict typing is enforced.
 - Run `npm run lint` and make sure it passes before submitting.
 - Follow the existing project structure: app routes in `app/`, server logic in
-  `controllers/`, domain types in `models/` and `types/`, shared UI in
+  `controllers/`, domain types in `lib/types.ts`, shared UI in
   `components/`.
 
 ### Commit messages
