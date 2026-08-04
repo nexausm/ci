@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+build
+coverage
+generated
+prisma/migrations
+package-lock.json
+next-env.d.ts
+*.tsbuildinfo
+public
+.agents
+.claude
+.env
+.env.example
