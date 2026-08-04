@@ -16,8 +16,21 @@ import type { CompanyInfo, InvoiceData } from "@/lib/types";
 import { CURRENCIES } from "@/lib/currency";
 import { computeTotals, formatMoney, formatDateLong } from "@/lib/totals";
 
-Font.register({ family: "Inter-Medium", src: "/fonts/Inter-Medium.woff" });
-Font.register({ family: "Inter-SemiBold", src: "/fonts/Inter-SemiBold.woff" });
+Font.register({
+  family: "Inter",
+  src: "/fonts/Inter-Regular.woff",
+  fontWeight: 400,
+});
+Font.register({
+  family: "Inter",
+  src: "/fonts/Inter-Medium.woff",
+  fontWeight: 500,
+});
+Font.register({
+  family: "Inter",
+  src: "/fonts/Inter-SemiBold.woff",
+  fontWeight: 600,
+});
 Font.register({
   family: "NotoSansDevanagari",
   src: "/fonts/NotoSansDevanagari-Regular.woff",
@@ -27,8 +40,10 @@ Font.register({
   src: "/fonts/NotoSansBengali-Regular.woff",
 });
 
-const FONT_REGULAR = ["Inter-Medium", "NotoSansDevanagari", "NotoSansBengali"];
-const FONT_BOLD = ["Inter-SemiBold", "NotoSansDevanagari", "NotoSansBengali"];
+const FONT_REGULAR = ["Inter", "NotoSansDevanagari", "NotoSansBengali"];
+const FONT_BOLD = ["Inter", "NotoSansDevanagari", "NotoSansBengali"];
+const FONT_WEIGHT_REGULAR = 500;
+const FONT_WEIGHT_BOLD = 600;
 
 const TEXT = "#444444";
 const COLORS = {
@@ -42,6 +57,7 @@ const COLORS = {
 const styles = StyleSheet.create({
   page: {
     fontFamily: FONT_REGULAR,
+    fontWeight: FONT_WEIGHT_REGULAR,
     fontSize: 10.5,
     color: TEXT,
   },
@@ -76,6 +92,7 @@ const styles = StyleSheet.create({
   },
   companyName: {
     fontFamily: FONT_BOLD,
+    fontWeight: FONT_WEIGHT_BOLD,
     fontSize: 15,
     marginBottom: 10,
   },
@@ -89,6 +106,7 @@ const styles = StyleSheet.create({
   },
   metaLabel: {
     fontFamily: FONT_BOLD,
+    fontWeight: FONT_WEIGHT_BOLD,
     fontSize: 9,
     textTransform: "uppercase",
     marginBottom: 6,
@@ -125,12 +143,14 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontFamily: FONT_BOLD,
+    fontWeight: FONT_WEIGHT_BOLD,
     fontSize: 9,
     textTransform: "uppercase",
     marginBottom: 14,
   },
   billToName: {
     fontFamily: FONT_BOLD,
+    fontWeight: FONT_WEIGHT_BOLD,
     fontSize: 13.5,
     marginBottom: 9.5,
   },
@@ -152,6 +172,7 @@ const styles = StyleSheet.create({
   },
   tableHeaderCell: {
     fontFamily: FONT_BOLD,
+    fontWeight: FONT_WEIGHT_BOLD,
     fontSize: 9,
     textTransform: "uppercase",
   },
@@ -187,6 +208,7 @@ const styles = StyleSheet.create({
   },
   totalsLabel: {
     fontFamily: FONT_BOLD,
+    fontWeight: FONT_WEIGHT_BOLD,
     fontSize: 9,
     textTransform: "uppercase",
   },
@@ -210,6 +232,7 @@ const styles = StyleSheet.create({
   },
   totalsFinalLabel: {
     fontFamily: FONT_BOLD,
+    fontWeight: FONT_WEIGHT_BOLD,
     fontSize: 9,
     textTransform: "uppercase",
   },
@@ -218,6 +241,7 @@ const styles = StyleSheet.create({
   },
   balanceDueLabel: {
     fontFamily: FONT_BOLD,
+    fontWeight: FONT_WEIGHT_BOLD,
     fontSize: 9,
     textTransform: "uppercase",
     textAlign: "right",
@@ -225,6 +249,7 @@ const styles = StyleSheet.create({
   },
   balanceDueValue: {
     fontFamily: FONT_BOLD,
+    fontWeight: FONT_WEIGHT_BOLD,
     fontSize: 13.5,
     textAlign: "right",
   },
@@ -233,6 +258,7 @@ const styles = StyleSheet.create({
   },
   notesLabel: {
     fontFamily: FONT_BOLD,
+    fontWeight: FONT_WEIGHT_BOLD,
     fontSize: 9,
     textTransform: "uppercase",
     marginBottom: 8,
