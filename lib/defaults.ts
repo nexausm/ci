@@ -166,9 +166,7 @@ export function sanitizeLineItem(raw: unknown): LineItem {
   if (!raw || typeof raw !== "object") return defaults;
   const stored = raw as Partial<LineItem>;
   const externalCost = stored.externalCost as
-    | Partial<LineItem["externalCost"]>
-    | null
-    | undefined;
+    Partial<LineItem["externalCost"]> | null | undefined;
   return {
     ...defaults,
     ...stored,
