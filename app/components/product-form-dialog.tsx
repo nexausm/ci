@@ -106,7 +106,8 @@ export function ProductFormDialog({
   }
 
   const invalidUsd =
-    form.discountedPriceUsd !== null && form.discountedPriceUsd > form.basePriceUsd;
+    form.discountedPriceUsd !== null &&
+    form.discountedPriceUsd > form.basePriceUsd;
   const invalidBdt =
     form.discountedPriceBdt !== null &&
     form.discountedPriceBdt > form.basePriceBdt;
@@ -127,9 +128,9 @@ export function ProductFormDialog({
               {product ? "Edit product" : "New product"}
             </DialogTitle>
             <DialogDescription>
-              Save a product once, then add it to any invoice. Provide prices for
-              both USD and BDT — the invoice&apos;s currency picks the matching
-              price.
+              Save a product once, then add it to any invoice. Provide prices
+              for both USD and BDT — the invoice&apos;s currency picks the
+              matching price.
             </DialogDescription>
           </DialogHeader>
 

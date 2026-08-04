@@ -44,10 +44,12 @@ Required environment variables:
 | `AUTH_SECRET`          | Secret used by NextAuth to sign sessions            |
 | `DATABASE_URL`         | PostgreSQL connection string (Prisma)               |
 
-Before running the app, set up the database schema:
+Before running the app, set up the database schema (all schema changes go through
+`prisma/migrations/`):
 
 ```bash
-npm run db:push  # sync the Prisma schema to PostgreSQL
+npm run db:migrate  # create & apply migration files in dev
+npm run db:deploy   # apply pending migrations (CI/production)
 ```
 
 Used by the seed script (`npm run seed`):

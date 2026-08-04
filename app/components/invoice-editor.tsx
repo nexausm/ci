@@ -37,18 +37,18 @@ import { ReferencesSection } from "@/app/components/references-section";
 import { ClientPicker } from "@/app/components/client-picker";
 import { ProductPicker } from "@/app/components/product-picker";
 import { SignedNumberInput } from "@/app/components/signed-number-input";
-import { useClients, useInvoices, useProducts, fetchInvoiceById } from "@/lib/storage";
+import {
+  useClients,
+  useInvoices,
+  useProducts,
+  fetchInvoiceById,
+} from "@/lib/storage";
 import { createDefaultInvoice, newItem, productPriceFor } from "@/lib/defaults";
 import { genId } from "@/lib/id";
 import { computeTotals, formatMoney } from "@/lib/totals";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
-import type {
-  Client,
-  CurrencyCode,
-  InvoiceData,
-  Product,
-} from "@/lib/types";
+import type { Client, CurrencyCode, InvoiceData, Product } from "@/lib/types";
 
 const PDFViewer = dynamic(
   () =>
@@ -136,10 +136,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
   }
 
   function addProductItem(product: Product) {
-    const { base, rate } = productPriceFor(
-      product,
-      data?.currency ?? "BDT",
-    );
+    const { base, rate } = productPriceFor(product, data?.currency ?? "BDT");
     setData((d) =>
       d
         ? {
@@ -481,8 +478,8 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 )}
               </div>
               <p className="text-xs text-muted-foreground">
-                Product discounts are always applied and combined with any manual
-                discount above.
+                Product discounts are always applied and combined with any
+                manual discount above.
               </p>
               <div className="flex items-center gap-3">
                 <Switch
