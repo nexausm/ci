@@ -1,20 +1,49 @@
 import { NextResponse } from "next/server";
-import { getDb } from "@/lib/mongodb";
+import { Prisma } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { sanitizePayment } from "@/lib/defaults";
-import { PaymentModel } from "@/models/payments";
+import type { Payment, PaymentMethod } from "@/lib/types";
 
 const PATCH_FIELDS = ["invoiceId", "date", "amount", "method", "note"] as const;
 
+function toPayment(p: {
+  id: string;
+  invoiceId: string;
+  date: string;
+  amount: number;
+  method: string;
+  note: string;
+}): Payment {
+  return {
+    id: p.id,
+    invoiceId: p.invoiceId,
+    date: p.date,
+    amount: p.amount,
+    method: p.method as PaymentMethod,
+    note: p.note,
+  };
+}
+
+function isNotFound(err: unknown): boolean {
+  return (
+    err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025"
+  );
+}
+
+function isForeignKey(err: unknown): boolean {
+  return (
+    err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003"
+  );
+}
+
 export async function getPayments(req: Request) {
-  await getDb();
   const invoiceId = new URL(req.url).searchParams.get("invoiceId");
-  const filter = invoiceId ? { invoiceId } : {};
-  const docs = await PaymentModel.find(filter).lean();
-  const payments = docs.map(({ _id, ...payment }) => ({
-    ...payment,
-    id: _id,
-  }));
-  return NextResponse.json(payments);
+  const where = invoiceId ? { invoiceId } : {};
+  const docs = await prisma.payment.findMany({
+    where,
+    orderBy: { createdAt: "asc" },
+  });
+  return NextResponse.json(docs.map(toPayment));
 }
 
 export async function createPayment(req: Request) {
@@ -26,13 +55,19 @@ export async function createPayment(req: Request) {
       { status: 400 },
     );
   }
-  await getDb();
-  const { id, ...data } = payment;
-  await PaymentModel.updateOne(
-    { _id: id },
-    { $set: data },
-    { upsert: true },
-  );
+  const { id, invoiceId, ...data } = payment;
+  try {
+    await prisma.payment.upsert({
+      where: { id },
+      create: { id, invoiceId, ...data },
+      update: { invoiceId, ...data },
+    });
+  } catch (err) {
+    if (isForeignKey(err)) {
+      return NextResponse.json({ error: "invoice not found" }, { status: 400 });
+    }
+    throw err;
+  }
   return NextResponse.json(payment);
 }
 
@@ -52,15 +87,19 @@ export async function updatePayment(
       { status: 400 },
     );
   }
-  await getDb();
-  const doc = await PaymentModel.findOneAndUpdate(
-    { _id: id },
-    { $set: set },
-    { new: true, runValidators: true },
-  ).lean();
-  if (!doc) return NextResponse.json(null, { status: 404 });
-  const { _id, ...rest } = doc;
-  return NextResponse.json({ ...rest, id: _id });
+  try {
+    const doc = await prisma.payment.update({
+      where: { id },
+      data: set as Prisma.PaymentUpdateInput,
+    });
+    return NextResponse.json(toPayment(doc));
+  } catch (err) {
+    if (isNotFound(err)) return NextResponse.json(null, { status: 404 });
+    if (isForeignKey(err)) {
+      return NextResponse.json({ error: "invoice not found" }, { status: 400 });
+    }
+    throw err;
+  }
 }
 
 export async function getPayment(
@@ -68,11 +107,9 @@ export async function getPayment(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  await getDb();
-  const doc = await PaymentModel.findById(id).lean();
+  const doc = await prisma.payment.findUnique({ where: { id } });
   if (!doc) return NextResponse.json(null, { status: 404 });
-  const { _id, ...payment } = doc;
-  return NextResponse.json({ ...payment, id: _id });
+  return NextResponse.json(toPayment(doc));
 }
 
 export async function deletePayment(
@@ -80,7 +117,6 @@ export async function deletePayment(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  await getDb();
-  await PaymentModel.deleteOne({ _id: id });
+  await prisma.payment.deleteMany({ where: { id } });
   return NextResponse.json({ ok: true });
 }

@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation";
-import { getDb } from "@/lib/mongodb";
-import { InvoiceModel } from "@/models/invoices";
-import { PaymentModel } from "@/models/payments";
+import { prisma } from "@/lib/prisma";
 import { sanitizeInvoice } from "@/lib/defaults";
 import { computeTotals, formatDateLong, formatMoney } from "@/lib/totals";
 import { CURRENCIES } from "@/lib/currency";
+import type { PaymentMethod } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -14,17 +13,24 @@ export default async function PublicInvoicePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  await getDb();
-  const doc = await InvoiceModel.findById(id).lean();
+  const doc = await prisma.invoice.findUnique({
+    where: { id },
+    include: { payments: true },
+  });
   if (!doc) notFound();
-  const { _id, ...invoice } = doc;
+  const { payments: paymentDocs, ...invoice } = doc;
 
-  const paymentDocs = await PaymentModel.find({ invoiceId: id }).lean();
   const payments = paymentDocs
-    .map(({ _id: paymentId, ...payment }) => ({ ...payment, id: paymentId }))
+    .map((p) => ({
+      id: p.id,
+      date: p.date,
+      amount: p.amount,
+      method: p.method as PaymentMethod,
+      note: p.note,
+    }))
     .sort((a, b) => a.date.localeCompare(b.date));
 
-  const data = sanitizeInvoice({ ...invoice, id: _id, payments });
+  const data = sanitizeInvoice({ ...invoice, id: invoice.id, payments });
   const totals = computeTotals(data);
   const symbol = CURRENCIES[data.currency]?.symbol ?? "$";
   const money = (amount: number) =>
@@ -48,9 +54,7 @@ export default async function PublicInvoicePage({
     sentences.push("No payment has been received against this invoice.");
   } else {
     const installmentsText =
-      installments === 1
-        ? "payment"
-        : `${installments} payments`;
+      installments === 1 ? "payment" : `${installments} payments`;
     const lastText = lastPayment
       ? ` The last was ${money(lastPayment.amount)} via ${
           lastPayment.method
