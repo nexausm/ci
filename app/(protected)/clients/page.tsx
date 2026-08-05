@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { useClients, useInvoices } from "@/lib/storage";
-import { ClientFormDialog } from "@/app/components/client-form-dialog";
+import { ClientFormDialog } from "@/components/custom/client/form-dialog";
 import type { Client } from "@/lib/types";
 
 export default function Page() {

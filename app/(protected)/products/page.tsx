@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { useProducts } from "@/lib/storage";
-import { ProductFormDialog } from "@/app/components/product-form-dialog";
+import { ProductFormDialog } from "@/components/custom/product/form-dialog";
 import type { Product } from "@/lib/types";
 
 function formatPrice(value: number): string {

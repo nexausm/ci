@@ -50,7 +50,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { StatusBadge } from "@/app/components/status-badge";
+import { StatusBadge } from "@/components/custom/shared/status-badge";
 import { useClients, useInvoices } from "@/lib/storage";
 import { computeTotals, formatDateLong, formatMoney } from "@/lib/totals";
 import { computeStatus } from "@/lib/invoice-status";
