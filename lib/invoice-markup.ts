@@ -12,64 +12,56 @@ const C = {
   dividerGray: "#BFBFBF",
 };
 
+const pt = (n: number) => Math.round(n * (96 / 72) * 100) / 100;
+
 const S = {
-  page: `width:794px;min-height:1123px;background:#FFFFFF;font-family:${FONT};font-size:10.5px;font-weight:500;color:${C.text};display:flex;flex-direction:column;`,
-  topBar: `height:3px;background:${C.bar};`,
-  body: "flex:1;display:flex;flex-direction:column;padding:21px 30px 40px;",
+  page: `width:794px;min-height:1123px;background:#FFFFFF;font-family:${FONT};font-size:${pt(10.5)}px;font-weight:500;color:${C.text};display:flex;flex-direction:column;`,
+  topBar: `height:${pt(3)}px;background:${C.bar};`,
+  body: `flex:1;display:flex;flex-direction:column;padding:${pt(21)}px ${pt(30)}px ${pt(40)}px;`,
   header: "display:flex;flex-direction:row;align-items:flex-start;",
-  logoBox: "width:144px;height:112.5px;margin-right:19px;",
+  logoBox: `width:${pt(144)}px;height:${pt(112.5)}px;margin-right:${pt(19)}px;`,
   logo: "width:100%;height:100%;object-fit:contain;object-position:left top;",
   companyBox: "flex:1;",
-  companyName: "font-weight:600;font-size:15px;margin-bottom:10px;",
-  companyLine: "font-size:10.5px;margin-bottom:3.7px;",
-  metaBox: "width:170px;text-align:right;",
-  metaLabel:
-    "font-weight:600;font-size:9px;text-transform:uppercase;margin-bottom:6px;",
-  metaValue: "font-size:10.5px;margin-bottom:15.5px;text-align:right;",
+  companyName: `font-weight:600;font-size:${pt(15)}px;margin-bottom:${pt(10)}px;`,
+  companyLine: `font-size:${pt(10.5)}px;margin-bottom:${pt(3.7)}px;`,
+  metaBox: `width:${pt(170)}px;text-align:right;`,
+  metaLabel: `font-weight:600;font-size:${pt(9)}px;text-transform:uppercase;margin-bottom:${pt(6)}px;`,
+  metaValue: `font-size:${pt(10.5)}px;margin-bottom:${pt(15.5)}px;text-align:right;`,
   metaValueLast: "margin-bottom:0px;",
-  headerDivider: `height:0.75px;background:${C.dividerLight};margin-top:11px;margin-bottom:14px;`,
+  headerDivider: `height:${pt(0.75)}px;background:${C.dividerLight};margin-top:${pt(11)}px;margin-bottom:${pt(14)}px;`,
   billToRow:
     "display:flex;flex-direction:row;justify-content:space-between;align-items:flex-start;",
   billToBlock: "flex:1;",
-  qrBox: "padding:6px;background:#FFFFFF;",
-  sectionLabel:
-    "font-weight:600;font-size:9px;text-transform:uppercase;margin-bottom:14px;",
-  billToName: "font-weight:600;font-size:13.5px;margin-bottom:9.5px;",
-  billToLine: "font-size:10.5px;margin-bottom:3.7px;",
-  table: "margin-top:6px;",
-  tableHeader:
-    "display:flex;flex-direction:row;border-top:0.75px solid #000000;border-bottom:0.75px solid #000000;padding-top:12px;padding-bottom:10px;",
-  tableHeaderCell: "font-weight:600;font-size:9px;text-transform:uppercase;",
+  qrBox: `padding:${pt(6)}px;background:#FFFFFF;`,
+  sectionLabel: `font-weight:600;font-size:${pt(9)}px;text-transform:uppercase;margin-bottom:${pt(14)}px;`,
+  billToName: `font-weight:600;font-size:${pt(13.5)}px;margin-bottom:${pt(9.5)}px;`,
+  billToLine: `font-size:${pt(10.5)}px;margin-bottom:${pt(3.7)}px;`,
+  table: `margin-top:${pt(6)}px;`,
+  tableHeader: `display:flex;flex-direction:row;border-top:${pt(0.75)}px solid #000000;border-bottom:${pt(0.75)}px solid #000000;padding-top:${pt(12)}px;padding-bottom:${pt(10)}px;`,
+  tableHeaderCell: `font-weight:600;font-size:${pt(9)}px;text-transform:uppercase;`,
   colDescription: "flex:1;",
-  colRate: "width:80px;text-align:right;",
-  colQty: "width:45px;text-align:right;",
-  colAmount: "width:67px;text-align:right;",
-  tableRow:
-    "display:flex;flex-direction:row;border-bottom:0.75px solid #BFBFBF;padding-top:6px;padding-bottom:6px;",
-  cellText: "font-size:10.5px;",
-  superscript: "font-size:7px;vertical-align:super;",
-  totalsWrap:
-    "display:flex;flex-direction:row;justify-content:flex-end;margin-top:16px;",
-  totalsBox: "width:268px;",
-  totalsRow:
-    "display:flex;flex-direction:row;justify-content:space-between;margin-bottom:7px;",
-  totalsLabel: "font-weight:600;font-size:9px;text-transform:uppercase;",
-  totalsValue: "font-size:10.5px;",
-  totalsDivider: `height:0.75px;background:${C.dividerGray};margin-bottom:9px;`,
-  totalsDividerFinal: `height:0.75px;background:${C.dividerGray};margin-top:7px;`,
-  totalsFinalRow:
-    "display:flex;flex-direction:row;justify-content:space-between;margin-bottom:7px;",
-  totalsFinalLabel: "font-weight:600;font-size:9px;text-transform:uppercase;",
-  totalsFinalValue: "font-size:10.5px;",
-  balanceDueLabel:
-    "font-weight:600;font-size:9px;text-transform:uppercase;text-align:right;margin-bottom:9px;",
-  balanceDueValue: "font-weight:600;font-size:13.5px;text-align:right;",
-  notes: "margin-top:26px;",
-  notesLabel:
-    "font-weight:600;font-size:9px;text-transform:uppercase;margin-bottom:8px;",
-  notesText: "font-size:10.5px;line-height:1.5;",
-  footer:
-    "margin-top:10px;text-align:center;font-size:9px;color:#444444;padding-top:6px;",
+  colRate: `width:${pt(80)}px;text-align:right;`,
+  colQty: `width:${pt(45)}px;text-align:right;`,
+  colAmount: `width:${pt(67)}px;text-align:right;`,
+  tableRow: `display:flex;flex-direction:row;border-bottom:${pt(0.75)}px solid #BFBFBF;padding-top:${pt(6)}px;padding-bottom:${pt(6)}px;`,
+  cellText: `font-size:${pt(10.5)}px;`,
+  superscript: `font-size:${pt(7)}px;vertical-align:super;`,
+  totalsWrap: `display:flex;flex-direction:row;justify-content:flex-end;margin-top:${pt(16)}px;`,
+  totalsBox: `width:${pt(268)}px;`,
+  totalsRow: `display:flex;flex-direction:row;justify-content:space-between;margin-bottom:${pt(7)}px;`,
+  totalsLabel: `font-weight:600;font-size:${pt(9)}px;text-transform:uppercase;`,
+  totalsValue: `font-size:${pt(10.5)}px;`,
+  totalsDivider: `height:${pt(0.75)}px;background:${C.dividerGray};margin-bottom:${pt(9)}px;`,
+  totalsDividerFinal: `height:${pt(0.75)}px;background:${C.dividerGray};margin-top:${pt(7)}px;`,
+  totalsFinalRow: `display:flex;flex-direction:row;justify-content:space-between;margin-bottom:${pt(7)}px;`,
+  totalsFinalLabel: `font-weight:600;font-size:${pt(9)}px;text-transform:uppercase;`,
+  totalsFinalValue: `font-size:${pt(10.5)}px;`,
+  balanceDueLabel: `font-weight:600;font-size:${pt(9)}px;text-transform:uppercase;text-align:right;margin-bottom:${pt(9)}px;`,
+  balanceDueValue: `font-weight:600;font-size:${pt(13.5)}px;text-align:right;`,
+  notes: `margin-top:${pt(26)}px;`,
+  notesLabel: `font-weight:600;font-size:${pt(9)}px;text-transform:uppercase;margin-bottom:${pt(8)}px;`,
+  notesText: `font-size:${pt(10.5)}px;line-height:1.5;`,
+  footer: `margin-top:${pt(10)}px;text-align:center;font-size:${pt(9)}px;color:#444444;padding-top:${pt(6)}px;`,
 };
 
 function esc(value: unknown): string {
@@ -221,7 +213,7 @@ export function invoiceMarkup(data: InvoiceData, company: CompanyInfo): string {
         ${data.billToPhone ? `<div style="${S.billToLine}">${esc(data.billToPhone)}</div>` : ""}
         ${data.billToEmail ? `<div style="${S.billToLine}">${esc(data.billToEmail)}</div>` : ""}
       </div>
-      <div style="${S.qrBox}">${qrSvg(`https://billing.nexaus.cloud/${data.id}`, 88)}</div>
+      <div style="${S.qrBox}">${qrSvg(`https://billing.nexaus.cloud/${data.id}`, pt(88))}</div>
     </div>
     <div style="${S.table}">
       <div style="${S.tableHeader}">
