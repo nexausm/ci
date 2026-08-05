@@ -54,7 +54,7 @@ import { StatusBadge } from "@/components/custom/shared/status-badge";
 import { useClients, useInvoices } from "@/lib/storage";
 import { computeTotals, formatDateLong, formatMoney } from "@/lib/totals";
 import { invoiceMarkup } from "@/lib/invoice-markup";
-import { printInvoice } from "@/lib/print-pdf";
+import { downloadInvoicePdf } from "@/lib/print-pdf";
 import { computeStatus } from "@/lib/invoice-status";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
@@ -162,7 +162,10 @@ function Dashboard() {
 
   async function handleDownload(inv: InvoiceData) {
     try {
-      await printInvoice(invoiceMarkup(inv, company));
+      await downloadInvoicePdf(
+        invoiceMarkup(inv, company),
+        `${inv.invoiceNumber || "invoice"}.pdf`,
+      );
     } catch {
       toast.error("Failed to generate PDF");
     }

@@ -44,7 +44,7 @@ import {
 import { createDefaultInvoice, newItem, productPriceFor } from "@/lib/defaults";
 import { genId } from "@/lib/id";
 import { invoiceMarkup } from "@/lib/invoice-markup";
-import { printInvoice } from "@/lib/print-pdf";
+import { downloadInvoicePdf } from "@/lib/print-pdf";
 import { computeTotals, formatMoney } from "@/lib/totals";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
@@ -223,7 +223,10 @@ export function InvoiceEditor({ id }: { id?: string }) {
     if (!effectiveData) return;
     setDownloading(true);
     try {
-      await printInvoice(invoiceMarkup(effectiveData, company));
+      await downloadInvoicePdf(
+        invoiceMarkup(effectiveData, company),
+        `${effectiveData.invoiceNumber || "invoice"}.pdf`,
+      );
     } catch {
       toast.error("Failed to generate PDF");
     } finally {
