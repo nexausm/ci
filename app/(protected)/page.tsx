@@ -54,10 +54,11 @@ import { StatusBadge } from "@/components/custom/shared/status-badge";
 import { useClients, useInvoices } from "@/lib/storage";
 import { computeTotals, formatDateLong, formatMoney } from "@/lib/totals";
 import { invoiceMarkup } from "@/lib/invoice-markup";
-import { downloadInvoicePdf } from "@/lib/print-pdf";
+import { downloadInvoicePdf, buildPrintExtras } from "@/lib/print-pdf";
 import { computeStatus } from "@/lib/invoice-status";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
+import { usePrintSettings } from "@/hooks/use-print-settings";
 import type { InvoiceData, InvoiceStatus } from "@/lib/types";
 
 const STATUS_FILTERS: { value: InvoiceStatus | "all"; label: string }[] = [
@@ -81,6 +82,7 @@ function Dashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const company = useCompany();
+  const { settings: printSettings } = usePrintSettings();
   const { clients } = useClients();
   const { invoices, loaded, removeInvoice } = useInvoices();
 
@@ -163,8 +165,13 @@ function Dashboard() {
   async function handleDownload(inv: InvoiceData) {
     try {
       await downloadInvoicePdf(
-        invoiceMarkup(inv, company),
+        invoiceMarkup(inv, {
+          realTable: true,
+          headerMode: printSettings.headerMode,
+          company,
+        }),
         `${inv.invoiceNumber || "invoice"}.pdf`,
+        buildPrintExtras(printSettings, inv, company),
       );
     } catch {
       toast.error("Failed to generate PDF");

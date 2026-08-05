@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { Download, Loader2, Plus, Trash2 } from "lucide-react";
+import { Download, Loader2, Plus, Settings2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,10 +52,11 @@ import {
 import { createDefaultInvoice, newItem, productPriceFor } from "@/lib/defaults";
 import { genId } from "@/lib/id";
 import { invoiceMarkup } from "@/lib/invoice-markup";
-import { downloadInvoicePdf } from "@/lib/print-pdf";
+import { downloadInvoicePdf, buildPrintExtras } from "@/lib/print-pdf";
 import { computeTotals, formatMoney } from "@/lib/totals";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
+import { usePrintSettings } from "@/hooks/use-print-settings";
 import type { Client, CurrencyCode, InvoiceData, Product } from "@/lib/types";
 
 const PDFViewer = dynamic(
@@ -76,6 +85,8 @@ function Field({
 export function InvoiceEditor({ id }: { id?: string }) {
   const router = useRouter();
   const company = useCompany();
+  const { settings: printSettings, update: updatePrintSettings } =
+    usePrintSettings();
   const { clients } = useClients();
   const { products } = useProducts();
   const { upsertInvoice, removeInvoice } = useInvoices();
@@ -223,9 +234,16 @@ export function InvoiceEditor({ id }: { id?: string }) {
     if (!effectiveData) return;
     setDownloading(true);
     try {
+      const markup = invoiceMarkup(effectiveData, {
+        realTable: true,
+        headerMode: printSettings.headerMode,
+        company,
+      });
+      const extras = buildPrintExtras(printSettings, effectiveData, company);
       await downloadInvoicePdf(
-        invoiceMarkup(effectiveData, company),
+        markup,
         `${effectiveData.invoiceNumber || "invoice"}.pdf`,
+        extras,
       );
     } catch {
       toast.error("Failed to generate PDF");
@@ -645,6 +663,58 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 <span className="hidden sm:inline">Delete</span>
               </Button>
             )}
+            <Popover>
+              <PopoverTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    aria-label="Print settings"
+                  />
+                }
+              >
+                <Settings2 className="size-4" />
+              </PopoverTrigger>
+              <PopoverContent align="end">
+                <PopoverHeader>
+                  <PopoverTitle>Print settings</PopoverTitle>
+                  <PopoverDescription>
+                    Controls the preview and exported PDF when an invoice spans
+                    multiple pages. Bill to always appears once, on the first
+                    page.
+                  </PopoverDescription>
+                </PopoverHeader>
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="headerMode" className="font-normal">
+                    Repeat header on every page
+                  </Label>
+                  <Switch
+                    id="headerMode"
+                    checked={printSettings.headerMode === "every"}
+                    onCheckedChange={(checked) =>
+                      updatePrintSettings({
+                        headerMode: checked ? "every" : "first",
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="footerMode" className="font-normal">
+                    Repeat footer on every page
+                  </Label>
+                  <Switch
+                    id="footerMode"
+                    checked={printSettings.footerMode === "every"}
+                    onCheckedChange={(checked) =>
+                      updatePrintSettings({
+                        footerMode: checked ? "every" : "last",
+                      })
+                    }
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button
               variant="outline"
               size="sm"
