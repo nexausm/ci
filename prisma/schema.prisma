@@ -1,7 +1,7 @@
 generator client {
   provider               = "prisma-client"
   output                 = "../generated/prisma"
-  runtime                = "nodejs"
+  runtime                = "cloudflare"
   moduleFormat           = "esm"
   generatedFileExtension = "ts"
   importFileExtension    = "ts"

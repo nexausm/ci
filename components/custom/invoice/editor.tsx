@@ -4,7 +4,6 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { pdf } from "@react-pdf/renderer";
 import { toast } from "sonner";
 import { Download, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,12 +30,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { InvoiceDocument } from "@/app/components/invoice-document";
-import { PaymentsSection } from "@/app/components/payments-section";
-import { ReferencesSection } from "@/app/components/references-section";
-import { ClientPicker } from "@/app/components/client-picker";
-import { ProductPicker } from "@/app/components/product-picker";
-import { SignedNumberInput } from "@/app/components/signed-number-input";
+import { PaymentsSection } from "@/components/custom/invoice/payments-section";
+import { ReferencesSection } from "@/components/custom/invoice/references-section";
+import { ClientPicker } from "@/components/custom/client/picker";
+import { ProductPicker } from "@/components/custom/product/picker";
+import { SignedNumberInput } from "@/components/custom/shared/signed-number-input";
 import {
   useClients,
   useInvoices,
@@ -52,7 +50,7 @@ import type { Client, CurrencyCode, InvoiceData, Product } from "@/lib/types";
 
 const PDFViewer = dynamic(
   () =>
-    import("@/app/components/invoice-preview").then((m) => m.InvoicePreview),
+    import("@/components/custom/invoice/preview").then((m) => m.InvoicePreview),
   { ssr: false },
 );
 
@@ -223,15 +221,21 @@ export function InvoiceEditor({ id }: { id?: string }) {
     if (!effectiveData) return;
     setDownloading(true);
     try {
-      const blob = await pdf(
-        <InvoiceDocument data={effectiveData} company={company} />,
-      ).toBlob();
+      const res = await fetch("/api/invoices/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: effectiveData }),
+      });
+      if (!res.ok) throw new Error("PDF generation failed");
+      const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `Invoice-${effectiveData.invoiceNumber || "draft"}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
+    } catch {
+      toast.error("Failed to generate PDF");
     } finally {
       setDownloading(false);
     }
@@ -670,12 +674,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
 
         <div className="h-150 w-full bg-muted p-4 lg:h-full lg:w-auto lg:flex-none">
           <div className="mx-auto h-full aspect-210/297 overflow-hidden shadow-2xl shadow-black/10 ring-1 ring-black/5">
-            <PDFViewer>
-              <InvoiceDocument
-                data={deferredData ?? effectiveData}
-                company={company}
-              />
-            </PDFViewer>
+            <PDFViewer data={deferredData ?? effectiveData} company={company} />
           </div>
         </div>
       </div>

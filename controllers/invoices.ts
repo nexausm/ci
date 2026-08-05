@@ -42,7 +42,7 @@ type ExternalCostRow = {
   billedDate: string;
 };
 
-function toPayment(p: {
+export function toPayment(p: {
   id: string;
   invoiceId: string;
   date: string;
@@ -64,7 +64,7 @@ function externalCostId(invoiceId: string, itemId: string): string {
   return `ec_${invoiceId}_${itemId}`;
 }
 
-function itemsFromJson(value: unknown): LineItem[] {
+export function itemsFromJson(value: unknown): LineItem[] {
   return value as LineItem[];
 }
 
@@ -76,7 +76,7 @@ function stripExternalCosts(items: LineItem[]): LineItem[] {
   });
 }
 
-function inflateExternalCosts(
+export function inflateExternalCosts(
   items: LineItem[],
   costs: ExternalCostRow[],
 ): LineItem[] {

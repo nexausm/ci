@@ -12,13 +12,17 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "gen:assets": "tsx scripts/gen-assets.ts",
+    "postinstall": "npm run gen:assets",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
-    "@react-pdf/renderer": "^4.5.1",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -28,7 +32,8 @@
     "next": "^16.2.12",
     "next-auth": "^5.0.0-beta.32",
     "next-themes": "^0.4.6",
-    "pdfjs-dist": "^6.2.108",
+    "@sparticuz/chromium": "^138.0.0",
+    "playwright-core": "^1.62.1",
     "prisma": "^7.9.1",
     "qrcode-generator": "^2.0.4",
     "react": "19.2.4",
@@ -47,11 +52,14 @@
     "@types/qrcode-generator": "^0.0.16",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@opennextjs/cloudflare": "^1.20.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
+    "playwright": "^1.62.1",
     "prettier": "^3.9.6",
     "tailwindcss": "^4",
     "tsx": "^4.23.5",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.86.0"
   }
 }
