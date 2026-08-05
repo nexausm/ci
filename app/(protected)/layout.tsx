@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
-import { auth } from "@/auth";
+import { auth } from "@/middlewares/auth";
 import { getCompanyInfo } from "@/lib/company";
 import { CompanyProvider } from "@/app/providers/company-provider";
 import { AppSidebar } from "@/components/app-sidebar";
