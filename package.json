@@ -14,7 +14,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "gen:assets": "tsx scripts/gen-assets.ts",
-    "postinstall": "npm run gen:assets",
+    "postinstall": "prisma generate && npm run gen:assets",
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
