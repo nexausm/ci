@@ -30,11 +30,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PaymentsSection } from "@/app/components/payments-section";
-import { ReferencesSection } from "@/app/components/references-section";
-import { ClientPicker } from "@/app/components/client-picker";
-import { ProductPicker } from "@/app/components/product-picker";
-import { SignedNumberInput } from "@/app/components/signed-number-input";
+import { PaymentsSection } from "@/components/custom/invoice/payments-section";
+import { ReferencesSection } from "@/components/custom/invoice/references-section";
+import { ClientPicker } from "@/components/custom/client/picker";
+import { ProductPicker } from "@/components/custom/product/picker";
+import { SignedNumberInput } from "@/components/custom/shared/signed-number-input";
 import {
   useClients,
   useInvoices,
@@ -50,7 +50,7 @@ import type { Client, CurrencyCode, InvoiceData, Product } from "@/lib/types";
 
 const PDFViewer = dynamic(
   () =>
-    import("@/app/components/invoice-preview").then((m) => m.InvoicePreview),
+    import("@/components/custom/invoice/preview").then((m) => m.InvoicePreview),
   { ssr: false },
 );
 
