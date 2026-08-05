@@ -1,7 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "name": "nexausci",
+  "name": "nci",
+  "workers_dev": true,
+  "preview_urls": false,
   "compatibility_date": "2026-04-15",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
@@ -13,7 +15,7 @@
       // Self-reference service binding, the service name must match the worker name
       // see https://opennext.js.org/cloudflare/caching
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "nexausci",
+      "service": "nci",
     },
   ],
   "vars": {
