@@ -46,6 +46,11 @@ const bareLinuxIncludes = (pkg: string) => [
 ];
 
 const PDF_ROUTE_INCLUDES = [
+  // `generated/assets.ts` reads these from disk at runtime on Node platforms
+  // (see scripts/gen-assets.ts) instead of inlining them as base64 — `public/`
+  // isn't otherwise part of the server function's own filesystem.
+  "./public/fonts/**/*",
+  "./public/logo/**/*",
   ...PLAYWRIGHT_CORE_INCLUDES,
   "./node_modules/@sparticuz/**/*",
   "./node_modules/follow-redirects/**/*",
