@@ -54,9 +54,6 @@ next-env.d.ts
 # prisma generated client
 /generated/
 
-# lockfiles
-package-lock.json
-
 # ide
 .puku
 .puku-cli
