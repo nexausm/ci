@@ -43,6 +43,8 @@ import {
 } from "@/lib/storage";
 import { createDefaultInvoice, newItem, productPriceFor } from "@/lib/defaults";
 import { genId } from "@/lib/id";
+import { invoiceMarkup } from "@/lib/invoice-markup";
+import { printInvoice } from "@/lib/print-pdf";
 import { computeTotals, formatMoney } from "@/lib/totals";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
@@ -221,19 +223,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
     if (!effectiveData) return;
     setDownloading(true);
     try {
-      const res = await fetch("/api/invoices/pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: effectiveData }),
-      });
-      if (!res.ok) throw new Error("PDF generation failed");
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Invoice-${effectiveData.invoiceNumber || "draft"}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
+      await printInvoice(invoiceMarkup(effectiveData, company));
     } catch {
       toast.error("Failed to generate PDF");
     } finally {

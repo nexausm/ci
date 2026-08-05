@@ -53,6 +53,8 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/custom/shared/status-badge";
 import { useClients, useInvoices } from "@/lib/storage";
 import { computeTotals, formatDateLong, formatMoney } from "@/lib/totals";
+import { invoiceMarkup } from "@/lib/invoice-markup";
+import { printInvoice } from "@/lib/print-pdf";
 import { computeStatus } from "@/lib/invoice-status";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
@@ -159,15 +161,11 @@ function Dashboard() {
   }
 
   async function handleDownload(inv: InvoiceData) {
-    const res = await fetch(`/api/invoices/${inv.id}/pdf`);
-    if (!res.ok) throw new Error("PDF generation failed");
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Invoice-${inv.invoiceNumber || "draft"}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      await printInvoice(invoiceMarkup(inv, company));
+    } catch {
+      toast.error("Failed to generate PDF");
+    }
   }
 
   async function confirmDelete() {
