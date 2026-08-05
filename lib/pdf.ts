@@ -101,11 +101,21 @@ async function renderViaBrowserRun(html: string): Promise<Buffer> {
 
 let browserPromise: Promise<Browser> | null = null;
 
+// Built at runtime via `new Function` so the specifier lives inside an opaque
+// string, not analyzable import syntax. This keeps Turbopack (`next dev`),
+// webpack (`next build`), and Cloudflare's esbuild from statically resolving
+// and bundling chromium/playwright-core — while still using native dynamic
+// `import()` resolution at actual execution time.
+const dynamicImport = new Function("specifier", "return import(specifier)") as (
+  specifier: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- module shape is opaque by design
+) => Promise<any>;
+
 async function launchChromium() {
   if (process.env.NODE_ENV === "production") {
     const [sparticuz, core] = await Promise.all([
-      import(/* webpackIgnore: true */ CHROMIUM_PACKAGE),
-      import(/* webpackIgnore: true */ PLAYWRIGHT_CORE_PACKAGE),
+      dynamicImport(CHROMIUM_PACKAGE),
+      dynamicImport(PLAYWRIGHT_CORE_PACKAGE),
     ]);
     return core.chromium.launch({
       args: sparticuz.default.args,
@@ -113,7 +123,7 @@ async function launchChromium() {
       headless: true,
     });
   }
-  const { chromium } = await import(PLAYWRIGHT_PACKAGE);
+  const { chromium } = await dynamicImport(PLAYWRIGHT_PACKAGE);
   return chromium.launch({
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
