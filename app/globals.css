@@ -15,7 +15,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/NotoSansBengali-Regular.woff") format("woff");
+  src: url("/fonts/NotoSansBengali-Regular.woff2") format("woff2");
 }
 
 @font-face {
@@ -23,7 +23,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("/fonts/NotoSansDevanagari-Regular.woff") format("woff");
+  src: url("/fonts/NotoSansDevanagari-Regular.woff2") format("woff2");
 }
 
 @custom-variant dark (&:is(.dark *));

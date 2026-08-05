@@ -1,14 +1,11 @@
 # Build command, publish directory, headers, and redirects stay UI-managed
-# (see the Netlify site's Build & deploy settings) — the build runs
-# `npm run build`, whose `postbuild` lifecycle hook runs
-# scripts/trim-netlify-standalone.mjs.
+# (see the Netlify site's Build & deploy settings). The build runs
+# `npm run build` and `@netlify/plugin-nextjs` bundles the server handler.
 #
-# That script removes known-dead weight (sharp/@img native binaries and
-# next/font's font-metrics table) from `.next/standalone`, which
-# `@netlify/plugin-nextjs` copies verbatim into the `___netlify-server-handler`
-# function. It's what keeps the function zip under Netlify's per-function
-# upload limit.
+# PDF generation is fully client-side (see lib/print-pdf.ts), so the server
+# function no longer carries Chromium/Playwright, which keeps the
+# `___netlify-server-handler` bundle well under Netlify's per-function limit.
 #
-# NOTE: `[functions] included_files` is NOT a way to shrink this handler — the
+# NOTE: `[functions] included_files` is NOT a way to shrink the handler — the
 # plugin treats it as an additive file list only (`!` exclusion globs are
 # ignored for the traced handler bundle), so it's intentionally not used here.
