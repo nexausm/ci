@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { pdf } from "@react-pdf/renderer";
 import { toast } from "sonner";
 import {
   Download,
@@ -52,7 +51,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/app/components/status-badge";
-import { InvoiceDocument } from "@/app/components/invoice-document";
 import { useClients, useInvoices } from "@/lib/storage";
 import { computeTotals, formatDateLong, formatMoney } from "@/lib/totals";
 import { computeStatus } from "@/lib/invoice-status";
@@ -153,9 +151,9 @@ export function Dashboard() {
   }
 
   async function handleDownload(inv: InvoiceData) {
-    const blob = await pdf(
-      <InvoiceDocument data={inv} company={company} />,
-    ).toBlob();
+    const res = await fetch(`/api/invoices/${inv.id}/pdf`);
+    if (!res.ok) throw new Error("PDF generation failed");
+    const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
