@@ -21,6 +21,9 @@
 /.open-next/
 .wrangler/
 
+# netlify
+/.netlify/
+
 # production
 /build
 
