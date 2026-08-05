@@ -6,11 +6,13 @@ const nextConfig: NextConfig = {
   // the `workerd` export conditions instead of the default (no-op) build.
   serverExternalPackages: ["pg-cloudflare"],
   // `outputFileTracingIncludes` copies exactly the globs listed here — it does
-  // not retrace the dependencies of files it copies in. `@sparticuz/chromium`
+  // not retrace the dependencies of files it copies in. `@sparticuz/chromium-min`
   // and `playwright-core` are loaded through an opaque dynamic import (see
   // lib/pdf.ts) that automatic tracing can't follow, so their full transitive
   // `dependencies` closure (per package.json, computed with `npm ls`) has to
-  // be listed explicitly.
+  // be listed explicitly. `chromium-min` (unlike `@sparticuz/chromium`) does
+  // not ship the Chromium binary itself — that's fetched at runtime from a
+  // pinned URL — so this stays a few hundred KB instead of ~80MB.
   outputFileTracingIncludes: {
     "/api/invoices/[id]/pdf": [
       "./node_modules/playwright-core/**/*",

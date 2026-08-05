@@ -10,9 +10,19 @@ import type { Browser } from "playwright-core";
 // limit. On Node platforms (Vercel/Netlify) the packages are traced into the
 // deployment via `outputFileTracingIncludes` in next.config.ts and loaded from
 // node_modules at runtime.
-const CHROMIUM_PACKAGE = atob("QHNwYXJ0aWN1ei9jaHJvbWl1bQ==");
+const CHROMIUM_PACKAGE = atob("QHNwYXJ0aWN1ei9jaHJvbWl1bS1taW4=");
 const PLAYWRIGHT_CORE_PACKAGE = atob("cGxheXdyaWdodC1jb3Jl");
 const PLAYWRIGHT_PACKAGE = atob("cGxheXdyaWdodA==");
+
+// `@sparticuz/chromium-min` ships without the ~66MB Chromium binary (unlike
+// `@sparticuz/chromium`), which is what keeps the Netlify/Vercel function
+// bundle small enough to upload. The binary is instead downloaded from this
+// pinned GitHub release on cold start and cached in /tmp for warm starts. The
+// version segment must match the `@sparticuz/chromium-min` version in
+// package.json exactly — the pack format isn't guaranteed compatible across
+// versions.
+const CHROMIUM_PACK_URL =
+  "https://github.com/Sparticuz/chromium/releases/download/v138.0.2/chromium-v138.0.2-pack.x64.tar";
 
 const FONT_FILES: {
   name: string;
@@ -119,7 +129,7 @@ async function launchChromium() {
     ]);
     return core.chromium.launch({
       args: sparticuz.default.args,
-      executablePath: await sparticuz.default.executablePath(),
+      executablePath: await sparticuz.default.executablePath(CHROMIUM_PACK_URL),
       headless: true,
     });
   }
