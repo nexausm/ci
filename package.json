@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node scripts/trim-netlify-standalone.mjs",
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx --env-file=.env scripts/seed-user.ts",

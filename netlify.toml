@@ -1,31 +1,14 @@
 # Build command, publish directory, headers, and redirects stay UI-managed
-# (see the Netlify site's Build & deploy settings) — this file only trims the
-# Next.js server function's bundle.
+# (see the Netlify site's Build & deploy settings) — the build runs
+# `npm run build`, whose `postbuild` lifecycle hook runs
+# scripts/trim-netlify-standalone.mjs.
 #
-# `next.config.ts`'s `outputFileTracingIncludes` scopes what Next's own
-# tracer records for the two PDF routes, but on Netlify the deployed
-# `___netlify-server-handler` function still came out too large for the
-# platform's per-function upload limit. `included_files` is Netlify's own
-# (documented) mechanism for trimming a function's bundle and runs at the
-# plugin's bundling stage rather than Next's tracing stage, so it's kept here
-# as a second, independent cut of the same known-dead-weight: playwright-core's
-# trace-viewer/recorder/dashboard web UI and `.d.ts` files (never touched by
-# `chromium.launch()` / `page.pdf()`), and the `bare-*` packages' prebuilt
-# native binaries for platforms Netlify's linux-x64 functions never run on.
-[functions]
-  included_files = [
-    "!node_modules/playwright-core/lib/vite/**",
-    "!node_modules/playwright-core/types/**",
-    "!node_modules/bare-fs/prebuilds/darwin-*/**",
-    "!node_modules/bare-fs/prebuilds/win32-*/**",
-    "!node_modules/bare-fs/prebuilds/ios-*/**",
-    "!node_modules/bare-fs/prebuilds/android-*/**",
-    "!node_modules/bare-url/prebuilds/darwin-*/**",
-    "!node_modules/bare-url/prebuilds/win32-*/**",
-    "!node_modules/bare-url/prebuilds/ios-*/**",
-    "!node_modules/bare-url/prebuilds/android-*/**",
-    "!node_modules/bare-path/prebuilds/darwin-*/**",
-    "!node_modules/bare-path/prebuilds/win32-*/**",
-    "!node_modules/bare-path/prebuilds/ios-*/**",
-    "!node_modules/bare-path/prebuilds/android-*/**",
-  ]
+# That script removes known-dead weight (sharp/@img native binaries and
+# next/font's font-metrics table) from `.next/standalone`, which
+# `@netlify/plugin-nextjs` copies verbatim into the `___netlify-server-handler`
+# function. It's what keeps the function zip under Netlify's per-function
+# upload limit.
+#
+# NOTE: `[functions] included_files` is NOT a way to shrink this handler — the
+# plugin treats it as an additive file list only (`!` exclusion globs are
+# ignored for the traced handler bundle), so it's intentionally not used here.
