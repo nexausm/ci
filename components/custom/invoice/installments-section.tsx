@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+import { Download, Loader2, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +28,10 @@ import { genId } from "@/lib/id";
 import { createDefaultInstallment, defaultInstallments } from "@/lib/defaults";
 import { withInstallmentAllocations } from "@/lib/totals";
 import { formatDateLong, formatMoney } from "@/lib/totals";
-import type { Installment, Payment } from "@/lib/types";
+import { downloadInstallmentPdf } from "@/lib/print-pdf";
+import { useCompany } from "@/app/providers/company-provider";
+import { usePrintSettings } from "@/hooks/use-print-settings";
+import type { Installment, InvoiceData, Payment } from "@/lib/types";
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -51,6 +55,7 @@ function InstallmentStatusBadge({ status }: { status: string }) {
 }
 
 export function InstallmentsSection({
+  data,
   installmentsEnabled,
   installments,
   payments,
@@ -60,6 +65,7 @@ export function InstallmentsSection({
   onEnabledChange,
   onInstallmentsChange,
 }: {
+  data: InvoiceData;
   installmentsEnabled: boolean;
   installments: Installment[];
   payments: Payment[];
@@ -71,6 +77,10 @@ export function InstallmentsSection({
 }) {
   const [splitOpen, setSplitOpen] = useState(false);
   const [percentOpen, setPercentOpen] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  const company = useCompany();
+  const { settings: printSettings } = usePrintSettings();
 
   const scheduled = withInstallmentAllocations(installments, payments);
   const sumAmounts = installments.reduce(
@@ -113,6 +123,17 @@ export function InstallmentsSection({
     const alloc = scheduled.find((a) => a.id === id);
     if (!alloc || (alloc.paidAmount ?? 0) > 0.005) return;
     onInstallmentsChange(installments.filter((i) => i.id !== id));
+  }
+
+  async function handleDownloadInstallment(inst: Installment) {
+    setDownloadingId(inst.id);
+    try {
+      await downloadInstallmentPdf(data, inst, company, printSettings);
+    } catch {
+      toast.error("Failed to generate installment PDF");
+    } finally {
+      setDownloadingId(null);
+    }
   }
 
   return (
@@ -178,7 +199,7 @@ export function InstallmentsSection({
                     <TableHead className="text-right">Amount</TableHead>
                     <TableHead className="text-right">Paid</TableHead>
                     <TableHead className="w-24">Status</TableHead>
-                    <TableHead className="w-10" />
+                    <TableHead className="w-20" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -240,21 +261,38 @@ export function InstallmentsSection({
                           />
                         </TableCell>
                         <TableCell>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="size-8 text-muted-foreground hover:text-destructive"
-                            title={
-                              paidAmount > 0.005
-                                ? "Cannot delete an installment that has payments"
-                                : "Remove installment"
-                            }
-                            disabled={paidAmount > 0.005}
-                            onClick={() => removeInstallment(inst.id)}
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-8 text-muted-foreground hover:text-foreground"
+                              title="Download installment PDF"
+                              disabled={downloadingId !== null}
+                              onClick={() => handleDownloadInstallment(inst)}
+                            >
+                              {downloadingId === inst.id ? (
+                                <Loader2 className="size-4 animate-spin" />
+                              ) : (
+                                <Download className="size-4" />
+                              )}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="size-8 text-muted-foreground hover:text-destructive"
+                              title={
+                                paidAmount > 0.005
+                                  ? "Cannot delete an installment that has payments"
+                                  : "Remove installment"
+                              }
+                              disabled={paidAmount > 0.005}
+                              onClick={() => removeInstallment(inst.id)}
+                            >
+                              <Trash2 className="size-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );

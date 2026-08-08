@@ -573,6 +573,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
             </CardHeader>
             <CardContent>
               <InstallmentsSection
+                data={effectiveData}
                 installmentsEnabled={data.installmentsEnabled}
                 installments={data.installments}
                 payments={data.payments}
