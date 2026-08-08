@@ -38,6 +38,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { InstallmentsSection } from "@/components/custom/invoice/installments-section";
 import { PaymentsSection } from "@/components/custom/invoice/payments-section";
 import { ReferencesSection } from "@/components/custom/invoice/references-section";
 import { ClientPicker } from "@/components/custom/client/picker";
@@ -567,10 +568,33 @@ export function InvoiceEditor({ id }: { id?: string }) {
           </Card>
 
           <Card>
+            <CardHeader>
+              <CardTitle>Installments</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <InstallmentsSection
+                installmentsEnabled={data.installmentsEnabled}
+                installments={data.installments}
+                payments={data.payments}
+                total={totals.total}
+                dueDate={data.dueDate}
+                currencySymbol={symbol}
+                onEnabledChange={(enabled) =>
+                  update({ installmentsEnabled: enabled })
+                }
+                onInstallmentsChange={(installments) =>
+                  update({ installments })
+                }
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
             <CardContent>
               <PaymentsSection
                 payments={data.payments}
                 currencySymbol={symbol}
+                installments={data.installments}
                 onChange={(payments) => update({ payments })}
               />
             </CardContent>

@@ -27,24 +27,45 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { PAYMENT_METHODS, type Payment } from "@/lib/types";
+import { PAYMENT_METHODS, type Installment, type Payment } from "@/lib/types";
 import { newPayment } from "@/lib/defaults";
-import { formatDateLong, formatMoney } from "@/lib/totals";
+import {
+  formatDateLong,
+  formatMoney,
+  paymentInstallmentAssignments,
+} from "@/lib/totals";
 import { genId } from "@/lib/id";
 
 export function PaymentsSection({
   payments,
   currencySymbol,
+  installments = [],
   onChange,
 }: {
   payments: Payment[];
   currencySymbol: string;
+  installments?: Installment[];
   onChange: (payments: Payment[]) => void;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Payment | null>(null);
 
   const total = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+  const assignment = paymentInstallmentAssignments(installments, payments);
+  const installmentByIndex = new Map(
+    [...installments]
+      .sort((a, b) => a.seq - b.seq)
+      .map((inst) => [inst.id, inst]),
+  );
+
+  function installmentLabel(paymentId: string): string {
+    const installmentId = assignment[paymentId];
+    if (!installmentId) return "—";
+    const inst = installmentByIndex.get(installmentId);
+    if (!inst) return "—";
+    return `#${inst.seq + 1}${inst.label ? ` · ${inst.label}` : ""}`;
+  }
 
   function openAdd() {
     setEditing(newPayment());
@@ -93,6 +114,7 @@ export function PaymentsSection({
                 <TableHead>Date</TableHead>
                 <TableHead>Method</TableHead>
                 <TableHead>Note</TableHead>
+                {installments.length > 0 && <TableHead>Installment</TableHead>}
                 <TableHead className="text-right">Amount</TableHead>
                 <TableHead className="w-10" />
               </TableRow>
@@ -113,6 +135,11 @@ export function PaymentsSection({
                     <TableCell className="max-w-48 truncate text-muted-foreground">
                       {payment.note || "—"}
                     </TableCell>
+                    {installments.length > 0 && (
+                      <TableCell className="text-muted-foreground">
+                        {installmentLabel(payment.id)}
+                      </TableCell>
+                    )}
                     <TableCell className="text-right font-medium">
                       {formatMoney(Number(payment.amount) || 0, currencySymbol)}
                     </TableCell>

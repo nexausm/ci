@@ -1,7 +1,18 @@
 import qrcode from "qrcode-generator";
-import type { CompanyInfo, InvoiceData, LineItem } from "@/lib/types";
+import type {
+  CompanyInfo,
+  Installment,
+  InvoiceData,
+  LineItem,
+} from "@/lib/types";
 import { CURRENCIES } from "@/lib/currency";
-import { computeTotals, formatMoney, formatDateLong } from "@/lib/totals";
+import {
+  computeTotals,
+  formatMoney,
+  formatDateLong,
+  nextInstallmentDueDate,
+  withInstallmentAllocations,
+} from "@/lib/totals";
 
 const FONT = "'Inter', 'Noto Sans Devanagari', 'Noto Sans Bengali'";
 
@@ -60,6 +71,13 @@ const S = {
   notes: `margin-top:${pt(26)}px;`,
   notesLabel: `font-weight:600;font-size:${pt(9)}px;text-transform:uppercase;margin-bottom:${pt(8)}px;`,
   notesText: `font-size:${pt(10.5)}px;line-height:1.5;`,
+  scheduleHeader: `display:flex;flex-direction:row;border-bottom:${pt(0.75)}px solid #000000;padding-bottom:${pt(6)}px;margin-bottom:${pt(4)}px;`,
+  scheduleRow: `display:flex;flex-direction:row;border-bottom:${pt(0.75)}px solid #BFBFBF;padding-top:${pt(4)}px;padding-bottom:${pt(4)}px;`,
+  colInstallmentIndex: `width:${pt(26)}px;`,
+  colInstallmentLabel: "flex:1;",
+  colInstallmentDue: `width:${pt(88)}px;`,
+  colInstallmentAmount: `width:${pt(78)}px;text-align:right;`,
+  colInstallmentStatus: `width:${pt(58)}px;text-align:right;`,
 };
 
 const T = {
@@ -128,7 +146,28 @@ const ATOMIC = 'data-pgbreak="avoid"';
 const PG_HEADER = 'data-pgtype="table-header"';
 const PG_ROW = 'data-pgtype="item-row"';
 
+function companyBlock(company: CompanyInfo): string {
+  return `<div style="${S.companyBox}">
+    <div style="${S.companyName}">${esc(company.companyName)}</div>
+    ${company.addressLines.map((line) => `<div style="${S.companyLine}">${esc(line)}</div>`).join("")}
+    ${company.phone ? `<div style="${S.companyLine}">${esc(company.phone)}</div>` : ""}
+    ${company.email ? `<div style="${S.companyLine}">${esc(company.email)}</div>` : ""}
+  </div>`;
+}
+
+function metaBox(items: { label: string; value: string }[]): string {
+  return `<div style="${S.metaBox}">${items
+    .map(
+      (item, i) =>
+        `<div style="${S.metaLabel}">${item.label}</div><div style="${S.metaValue}${i === items.length - 1 ? S.metaValueLast : ""}">${esc(item.value)}</div>`,
+    )
+    .join("")}</div>`;
+}
+
 function headerContent(data: InvoiceData, company: CompanyInfo): string {
+  const dueDate = data.installmentsEnabled
+    ? nextInstallmentDueDate(data) || data.dueDate
+    : data.dueDate;
   return `<div ${ATOMIC}>
     <div style="${S.header}">
       ${
@@ -136,20 +175,41 @@ function headerContent(data: InvoiceData, company: CompanyInfo): string {
           ? `<div style="${S.logoBox}"><img style="${S.logo}" src="${esc(company.logoDataUri)}" alt=""/></div>`
           : ""
       }
-      <div style="${S.companyBox}">
-        <div style="${S.companyName}">${esc(company.companyName)}</div>
-        ${company.addressLines.map((line) => `<div style="${S.companyLine}">${esc(line)}</div>`).join("")}
-        ${company.phone ? `<div style="${S.companyLine}">${esc(company.phone)}</div>` : ""}
-        ${company.email ? `<div style="${S.companyLine}">${esc(company.email)}</div>` : ""}
-      </div>
-      <div style="${S.metaBox}">
-        <div style="${S.metaLabel}">Invoice</div>
-        <div style="${S.metaValue}">${esc(data.invoiceNumber || "—")}</div>
-        <div style="${S.metaLabel}">Date</div>
-        <div style="${S.metaValue}">${esc(formatDateLong(data.invoiceDate))}</div>
-        <div style="${S.metaLabel}">Due Date</div>
-        <div style="${S.metaValue}${S.metaValueLast}">${esc(formatDateLong(data.dueDate) || "—")}</div>
-      </div>
+      ${companyBlock(company)}
+      ${metaBox([
+        { label: "Invoice", value: data.invoiceNumber || "—" },
+        { label: "Date", value: formatDateLong(data.invoiceDate) },
+        { label: "Due Date", value: formatDateLong(dueDate) || "—" },
+      ])}
+    </div>
+  </div>`;
+}
+
+function installmentHeaderContent(
+  data: InvoiceData,
+  installment: Installment,
+  company: CompanyInfo,
+): string {
+  const totalCount = Math.max(data.installments.length, 1);
+  return `<div ${ATOMIC}>
+    <div style="${S.header}">
+      ${
+        company.logoDataUri
+          ? `<div style="${S.logoBox}"><img style="${S.logo}" src="${esc(company.logoDataUri)}" alt=""/></div>`
+          : ""
+      }
+      ${companyBlock(company)}
+      ${metaBox([
+        { label: "Invoice", value: data.invoiceNumber || "—" },
+        {
+          label: "Installment",
+          value: `Installment ${installment.seq + 1} of ${totalCount}`,
+        },
+        {
+          label: "Due Date",
+          value: formatDateLong(installment.dueDate) || "—",
+        },
+      ])}
     </div>
   </div>`;
 }
@@ -164,6 +224,15 @@ export function invoiceHeaderChrome(
 ): string {
   return `${invoiceTopBar()}
   <div style="padding:${PAGE_MARGIN.top}px ${PAGE_MARGIN.side}px 0;">${headerContent(data, company)}</div>`;
+}
+
+export function installmentHeaderChrome(
+  data: InvoiceData,
+  installment: Installment,
+  company: CompanyInfo,
+): string {
+  return `${invoiceTopBar()}
+  <div style="padding:${PAGE_MARGIN.top}px ${PAGE_MARGIN.side}px 0;">${installmentHeaderContent(data, installment, company)}</div>`;
 }
 
 export function invoiceFooterChrome(): string {
@@ -321,6 +390,11 @@ function bodyInnerContent(data: InvoiceData, realTable = false): string {
       </div>
     </div>
     ${
+      data.installmentsEnabled && data.installments.length > 0
+        ? scheduleTable(data, symbol)
+        : ""
+    }
+    ${
       data.notes
         ? `<div style="${S.notes}" ${ATOMIC}><div style="${S.notesLabel}">Notes</div><div style="${S.notesText}">${esc(data.notes)}</div></div>`
         : ""
@@ -335,6 +409,168 @@ function bodyInnerContent(data: InvoiceData, realTable = false): string {
             .join("")}</div>`
         : ""
     }`;
+}
+
+function scheduleTable(
+  data: InvoiceData,
+  symbol: string,
+  highlightId?: string,
+): string {
+  const scheduled = withInstallmentAllocations(
+    data.installments,
+    data.payments,
+  );
+  const headerCell = (style: string, label: string) =>
+    `<div style="${S.tableHeaderCell}${style}">${label}</div>`;
+  const rowCell = (style: string, content: string) =>
+    `<div style="${S.cellText}${style}">${content}</div>`;
+  const rows = scheduled
+    .map((inst) => {
+      const statusLabel =
+        inst.status === "paid"
+          ? "Paid"
+          : inst.status === "partial"
+            ? "Partial"
+            : "Unpaid";
+      const highlight = highlightId && inst.id === highlightId;
+      const rowStyle = highlight
+        ? `${S.scheduleRow}font-weight:600;`
+        : S.scheduleRow;
+      return `<div style="${rowStyle}" ${ATOMIC}>
+      ${rowCell(S.colInstallmentIndex, String(inst.seq + 1))}
+      ${rowCell(S.colInstallmentLabel, esc(inst.label || "—"))}
+      ${rowCell(S.colInstallmentDue, esc(formatDateLong(inst.dueDate) || "—"))}
+      ${rowCell(S.colInstallmentAmount, esc(formatMoney(inst.amount, symbol)))}
+      ${rowCell(S.colInstallmentStatus, statusLabel)}
+    </div>`;
+    })
+    .join("");
+  return `<div style="${S.notes}" ${ATOMIC}>
+    <div style="${S.sectionLabel}">Payment Schedule</div>
+    <div style="${S.scheduleHeader}" ${PG_HEADER}>
+      ${headerCell(S.colInstallmentIndex, "#")}
+      ${headerCell(S.colInstallmentLabel, "Label")}
+      ${headerCell(S.colInstallmentDue, "Due Date")}
+      ${headerCell(S.colInstallmentAmount, "Amount")}
+      ${headerCell(S.colInstallmentStatus, "Status")}
+    </div>
+    ${rows}
+  </div>`;
+}
+
+function installmentDetailBlock(
+  data: InvoiceData,
+  installment: Installment,
+  symbol: string,
+): string {
+  const headerCell = (style: string, label: string) =>
+    `<div style="${S.tableHeaderCell}${style}">${label}</div>`;
+  const rowCell = (style: string, content: string) =>
+    `<div style="${S.cellText}${style}">${content}</div>`;
+  return `<div style="${S.notes}" ${ATOMIC}>
+    <div style="${S.sectionLabel}">Installment Details</div>
+    <div style="${S.scheduleHeader}" ${PG_HEADER}>
+      ${headerCell(S.colInstallmentIndex, "#")}
+      ${headerCell(S.colInstallmentLabel, "Label")}
+      ${headerCell(S.colInstallmentAmount, "Amount")}
+    </div>
+    <div style="${S.scheduleRow}">
+      ${rowCell(S.colInstallmentIndex, String(installment.seq + 1))}
+      ${rowCell(S.colInstallmentLabel, esc(installment.label || "—"))}
+      ${rowCell(S.colInstallmentAmount, esc(formatMoney(installment.amount, symbol)))}
+    </div>
+  </div>`;
+}
+
+function installmentBodyInnerContent(
+  data: InvoiceData,
+  installment: Installment,
+): string {
+  const totals = computeTotals(data);
+  const symbol = CURRENCIES[data.currency]?.symbol ?? data.currency;
+  const totalCount = Math.max(data.installments.length, 1);
+  const current =
+    withInstallmentAllocations(data.installments, data.payments).find(
+      (i) => i.id === installment.id,
+    ) ?? installment;
+  const paidAmount = current.paidAmount ?? 0;
+  const dueAmount = Math.max((Number(installment.amount) || 0) - paidAmount, 0);
+
+  return `<div style="${S.billToRow}" ${ATOMIC}>
+      <div style="${S.billToBlock}">
+        <div style="${S.sectionLabel}">Bill To</div>
+        <div style="${S.billToName}">${esc(data.billToName || "Client Name")}</div>
+        ${data.billToType === "organization" && data.billToContactName ? `<div style="${S.billToLine}">${esc(data.billToContactName)}</div>` : ""}
+        ${lines(data.billToAddress, S.billToLine)}
+        ${data.billToPhone ? `<div style="${S.billToLine}">${esc(data.billToPhone)}</div>` : ""}
+        ${data.billToEmail ? `<div style="${S.billToLine}">${esc(data.billToEmail)}</div>` : ""}
+      </div>
+      <div style="${S.qrBox}">${qrSvg(`https://billing.nexaus.cloud/${data.id}`, pt(88))}</div>
+    </div>
+    ${installmentDetailBlock(data, installment, symbol)}
+    <div style="${S.totalsWrap}" ${ATOMIC}>
+      <div style="${S.totalsBox}">
+        ${totalsRow("Invoice Total", esc(formatMoney(totals.total, symbol)), S.totalsFinalLabel, S.totalsFinalValue)}
+        <div style="${S.totalsDivider}"></div>
+        ${totalsRow("Amount Paid", esc(formatMoney(paidAmount, symbol)), S.totalsLabel, S.totalsValue)}
+        <div style="${S.totalsDivider}"></div>
+        <div style="${S.balanceDueLabel}">Installment Amount Due</div>
+        <div style="${S.balanceDueValue}">${esc(data.currency)} ${esc(formatMoney(dueAmount, symbol))}</div>
+      </div>
+    </div>
+    ${
+      data.notes
+        ? `<div style="${S.notes}" ${ATOMIC}><div style="${S.notesLabel}">Notes</div><div style="${S.notesText}">${esc(data.notes)}</div></div>`
+        : ""
+    }
+    <div style="${S.notes}" ${ATOMIC}><div style="${S.notesText}">This is installment ${installment.seq + 1} of ${totalCount} for invoice ${esc(data.invoiceNumber || "—")}. The full invoice total is ${esc(formatMoney(totals.total, symbol))}.</div></div>`;
+}
+
+const INSTALLMENT_STAMP: Record<
+  string,
+  { bg: string; fg: string; label: string }
+> = {
+  paid: { bg: "#16A34A", fg: "#FFFFFF", label: "PAID" },
+  partial: { bg: "#F5B301", fg: "#1F2937", label: "PARTIAL" },
+  unpaid: { bg: "#DC2626", fg: "#FFFFFF", label: "UNPAID" },
+};
+
+function installmentStatusStamp(status: string): string {
+  const stamp = INSTALLMENT_STAMP[status] ?? INSTALLMENT_STAMP.unpaid;
+  return `<div style="position:absolute;top:${pt(6)}px;left:50%;transform:translateX(-50%) rotate(45deg);transform-origin:center;background:${stamp.bg};color:${stamp.fg};font-weight:700;font-size:${pt(16)}px;text-transform:uppercase;letter-spacing:${pt(3)}px;padding:${pt(12)}px ${pt(72)}px;box-shadow:0 ${pt(3)}px ${pt(10)}px rgba(0,0,0,0.25);z-index:10;border:${pt(2)}px solid ${stamp.fg};white-space:nowrap;">${stamp.label}</div>`;
+}
+
+export function installmentMarkup(
+  data: InvoiceData,
+  installment: Installment,
+  opts?: {
+    headerMode?: "first" | "every";
+    company?: CompanyInfo;
+  },
+): string {
+  const page = S.page.replace(
+    "display:flex;flex-direction:column;",
+    "display:block;",
+  );
+  const body = S.body.replace(
+    "flex:1;display:flex;flex-direction:column;",
+    "display:block;",
+  );
+  const headerBlock =
+    opts?.headerMode === "first" && opts.company
+      ? `<div style="padding:0 ${PAGE_MARGIN.side}px 0;">${installmentHeaderContent(data, installment, opts.company)}</div>`
+      : "";
+  const current =
+    withInstallmentAllocations(data.installments, data.payments).find(
+      (i) => i.id === installment.id,
+    ) ?? installment;
+  return `<div style="${page}">
+  ${headerBlock}
+  <div style="position:relative;${body}">
+    ${installmentStatusStamp(current.status ?? "unpaid")}
+    ${installmentBodyInnerContent(data, installment)}
+  </div>
+</div>`;
 }
 
 export function invoiceMarkup(

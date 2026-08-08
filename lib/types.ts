@@ -62,6 +62,9 @@ export interface InvoiceData {
 
   adjustmentValue: number;
 
+  installmentsEnabled: boolean;
+  installments: Installment[];
+
   payments: Payment[];
 
   notes: string;
@@ -84,10 +87,24 @@ export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 export interface Payment {
   id: string;
   invoiceId?: string;
+  installmentId?: string | null;
   date: string;
   amount: number;
   method: PaymentMethod;
   note: string;
+}
+
+export type InstallmentStatus = "unpaid" | "partial" | "paid";
+
+export interface Installment {
+  id: string;
+  invoiceId?: string;
+  seq: number;
+  label: string;
+  dueDate: string;
+  amount: number;
+  paidAmount?: number;
+  status?: InstallmentStatus;
 }
 
 export interface Product {

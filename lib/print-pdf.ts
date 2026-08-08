@@ -12,11 +12,13 @@
 // accepts WOFF2/TTF/OTF.
 
 import type { RenderExtras } from "taepdf";
-import type { CompanyInfo, InvoiceData } from "@/lib/types";
+import type { CompanyInfo, Installment, InvoiceData } from "@/lib/types";
 import type { PrintSettings } from "@/lib/print-settings";
 import {
-  invoiceHeaderChrome,
+  installmentHeaderChrome,
+  installmentMarkup,
   invoiceFooterChrome,
+  invoiceHeaderChrome,
   invoiceTopBar,
   PAGE_MARGIN,
 } from "@/lib/invoice-markup";
@@ -92,6 +94,38 @@ export async function downloadInvoicePdf(
     buildInvoicePrintHtml(markup),
     "A4",
     pdf.name(filename.replace(/\.pdf$/i, "")),
+    undefined,
+    extras,
+  );
+}
+
+export async function downloadInstallmentPdf(
+  data: InvoiceData,
+  installment: Installment,
+  company: CompanyInfo,
+  settings: PrintSettings,
+): Promise<void> {
+  const { default: pdf } = await import("taepdf");
+  const markup = installmentMarkup(data, installment, {
+    headerMode: settings.headerMode,
+    company,
+  });
+  const headerHtml = `${fontFaceStyleTag()}${installmentHeaderChrome(data, installment, company)}`;
+  const footerHtml = `${fontFaceStyleTag()}${invoiceFooterChrome()}`;
+  const extras: RenderExtras = {
+    header: () =>
+      settings.headerMode === "every"
+        ? headerHtml
+        : `${fontFaceStyleTag()}${invoiceTopBar()}<div style="height:${PAGE_MARGIN.top}px"></div>`,
+    footer: (page, totalPages) =>
+      settings.footerMode === "every" || page === totalPages ? footerHtml : "",
+  };
+  await pdf.download(
+    buildInvoicePrintHtml(markup),
+    "A4",
+    pdf.name(
+      `${data.invoiceNumber || "invoice"}-installment-${installment.seq + 1}.pdf`,
+    ),
     undefined,
     extras,
   );

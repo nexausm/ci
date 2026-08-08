@@ -52,9 +52,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/custom/shared/status-badge";
 import { useClients, useInvoices } from "@/lib/storage";
-import { computeTotals, formatDateLong, formatMoney } from "@/lib/totals";
+import {
+  computeTotals,
+  formatDateLong,
+  formatMoney,
+  nextInstallmentDueDate,
+} from "@/lib/totals";
 import { invoiceMarkup } from "@/lib/invoice-markup";
-import { downloadInvoicePdf, buildPrintExtras } from "@/lib/print-pdf";
+import {
+  downloadInstallmentPdf,
+  downloadInvoicePdf,
+  buildPrintExtras,
+} from "@/lib/print-pdf";
 import { computeStatus } from "@/lib/invoice-status";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
@@ -175,6 +184,17 @@ function Dashboard() {
       );
     } catch {
       toast.error("Failed to generate PDF");
+    }
+  }
+
+  async function handleDownloadInstallments(inv: InvoiceData) {
+    if (!inv.installmentsEnabled || inv.installments.length === 0) return;
+    try {
+      for (const installment of inv.installments) {
+        await downloadInstallmentPdf(inv, installment, company, printSettings);
+      }
+    } catch {
+      toast.error("Failed to generate installment PDFs");
     }
   }
 
@@ -357,7 +377,9 @@ function Dashboard() {
                       {formatDateLong(inv.invoiceDate)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {formatDateLong(inv.dueDate) || "—"}
+                      {inv.installmentsEnabled && inv.installments.length > 0
+                        ? formatDateLong(nextInstallmentDueDate(inv)) || "—"
+                        : formatDateLong(inv.dueDate) || "—"}
                     </TableCell>
                     <TableCell className="text-right">
                       {formatMoney(totals.total, symbolForRow(inv.currency))}
@@ -394,6 +416,15 @@ function Dashboard() {
                             <Download className="size-4" />
                             Download PDF
                           </DropdownMenuItem>
+                          {inv.installmentsEnabled &&
+                            inv.installments.length > 0 && (
+                              <DropdownMenuItem
+                                onClick={() => handleDownloadInstallments(inv)}
+                              >
+                                <Download className="size-4" />
+                                Download installment PDFs
+                              </DropdownMenuItem>
+                            )}
                           <DropdownMenuItem
                             variant="destructive"
                             onClick={() => setDeleting(inv)}
