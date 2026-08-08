@@ -7,6 +7,15 @@ generator client {
   importFileExtension    = "ts"
 }
 
+generator scripts {
+  provider               = "prisma-client"
+  output                 = "../generated/prisma-node"
+  runtime                = "nodejs"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = "ts"
+}
+
 datasource db {
   provider = "postgresql"
 }
