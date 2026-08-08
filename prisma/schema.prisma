@@ -72,7 +72,6 @@ model Product {
 model Invoice {
   id                  String         @id
   invoiceNumber       String         @default("")
-  invoiceDate         String         @default("")
   dueDate             String         @default("")
   currency            CurrencyCode   @default(BDT)
   clientId            String?
