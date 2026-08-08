@@ -190,7 +190,8 @@ function installmentHeaderContent(
   installment: Installment,
   company: CompanyInfo,
 ): string {
-  const totalCount = Math.max(data.installments.length, 1);
+  const total = computeTotals(data).total;
+  const symbol = CURRENCIES[data.currency]?.symbol ?? data.currency;
   return `<div ${ATOMIC}>
     <div style="${S.header}">
       ${
@@ -202,8 +203,8 @@ function installmentHeaderContent(
       ${metaBox([
         { label: "Invoice", value: data.invoiceNumber || "—" },
         {
-          label: "Installment",
-          value: `Installment ${installment.seq + 1} of ${totalCount}`,
+          label: "INVOICE TOTAL",
+          value: formatMoney(total, symbol),
         },
         {
           label: "Due Date",
@@ -486,9 +487,7 @@ function installmentBodyInnerContent(
   data: InvoiceData,
   installment: Installment,
 ): string {
-  const totals = computeTotals(data);
   const symbol = CURRENCIES[data.currency]?.symbol ?? data.currency;
-  const totalCount = Math.max(data.installments.length, 1);
   const current =
     withInstallmentAllocations(data.installments, data.payments).find(
       (i) => i.id === installment.id,
@@ -510,8 +509,6 @@ function installmentBodyInnerContent(
     ${installmentDetailBlock(data, installment, symbol)}
     <div style="${S.totalsWrap}" ${ATOMIC}>
       <div style="${S.totalsBox}">
-        ${totalsRow("Invoice Total", esc(formatMoney(totals.total, symbol)), S.totalsFinalLabel, S.totalsFinalValue)}
-        <div style="${S.totalsDivider}"></div>
         ${totalsRow("Amount Paid", esc(formatMoney(paidAmount, symbol)), S.totalsLabel, S.totalsValue)}
         <div style="${S.totalsDivider}"></div>
         <div style="${S.balanceDueLabel}">Installment Amount Due</div>
@@ -522,8 +519,7 @@ function installmentBodyInnerContent(
       data.notes
         ? `<div style="${S.notes}" ${ATOMIC}><div style="${S.notesLabel}">Notes</div><div style="${S.notesText}">${esc(data.notes)}</div></div>`
         : ""
-    }
-    <div style="${S.notes}" ${ATOMIC}><div style="${S.notesText}">This is installment ${installment.seq + 1} of ${totalCount} for invoice ${esc(data.invoiceNumber || "—")}. The full invoice total is ${esc(formatMoney(totals.total, symbol))}.</div></div>`;
+    }`;
 }
 
 const INSTALLMENT_STAMP: Record<
