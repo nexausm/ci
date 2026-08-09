@@ -4,11 +4,13 @@ export type FooterMode = "last" | "every";
 export interface PrintSettings {
   headerMode: HeaderMode;
   footerMode: FooterMode;
+  signatureEnabled: boolean;
 }
 
 export const DEFAULT_PRINT_SETTINGS: PrintSettings = {
   headerMode: "first",
   footerMode: "last",
+  signatureEnabled: true,
 };
 
 const COOKIE_NAME = "invoice_print_settings";
@@ -20,6 +22,7 @@ function sanitizePrintSettings(raw: unknown): PrintSettings {
   return {
     headerMode: stored.headerMode === "every" ? "every" : "first",
     footerMode: stored.footerMode === "every" ? "every" : "last",
+    signatureEnabled: stored.signatureEnabled !== false,
   };
 }
 

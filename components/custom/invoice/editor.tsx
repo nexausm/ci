@@ -937,6 +937,20 @@ export function InvoiceEditor({ id }: { id?: string }) {
                     }
                   />
                 </div>
+                <div className="flex items-center justify-between gap-3">
+                  <Label htmlFor="signatureEnabled" className="font-normal">
+                    Show signature area
+                  </Label>
+                  <Switch
+                    id="signatureEnabled"
+                    checked={printSettings.signatureEnabled}
+                    onCheckedChange={(checked) =>
+                      updatePrintSettings({
+                        signatureEnabled: checked,
+                      })
+                    }
+                  />
+                </div>
               </PopoverContent>
             </Popover>
             <Button
