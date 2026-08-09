@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { sanitizeInvoice, sanitizeLineItem } from "@/lib/defaults";
+import {
+  sanitizeInvoice,
+  sanitizeLineItem,
+  sanitizeInstallment,
+} from "@/lib/defaults";
+import { paymentInstallmentAssignments } from "@/lib/totals";
 import type {
   ExternalCostInfo,
+  Installment,
   LineItem,
   Payment,
   PaymentMethod,
@@ -11,7 +17,6 @@ import type {
 
 const PATCH_FIELDS = [
   "invoiceNumber",
-  "invoiceDate",
   "dueDate",
   "currency",
   "clientId",
@@ -30,6 +35,7 @@ const PATCH_FIELDS = [
   "taxLabel",
   "taxValue",
   "adjustmentValue",
+  "installmentsEnabled",
   "notes",
   "state",
   "updatedAt",
@@ -45,6 +51,7 @@ type ExternalCostRow = {
 export function toPayment(p: {
   id: string;
   invoiceId: string;
+  installmentId: string | null;
   date: string;
   amount: number;
   method: string;
@@ -53,10 +60,29 @@ export function toPayment(p: {
   return {
     id: p.id,
     invoiceId: p.invoiceId,
+    installmentId: p.installmentId,
     date: p.date,
     amount: p.amount,
     method: p.method as PaymentMethod,
     note: p.note,
+  };
+}
+
+export function toInstallment(p: {
+  id: string;
+  invoiceId: string;
+  seq: number;
+  label: string;
+  dueDate: string;
+  amount: number;
+}): Installment {
+  return {
+    id: p.id,
+    invoiceId: p.invoiceId,
+    seq: p.seq,
+    label: p.label,
+    dueDate: p.dueDate,
+    amount: p.amount,
   };
 }
 
@@ -129,16 +155,49 @@ async function syncExternalCosts(invoiceId: string, items: LineItem[]) {
   });
 }
 
-async function syncPayments(invoiceId: string, payments: Payment[]) {
-  const incoming = payments.filter((p) => p.id);
-  const incomingIds = new Set(incoming.map((p) => p.id));
-  for (const payment of incoming) {
-    const { id, invoiceId: _invoiceId, ...rest } = payment;
+async function syncInstallments(
+  invoiceId: string,
+  installments: Installment[],
+) {
+  const incoming = installments.filter((i) => i.id);
+  const incomingIds = new Set(incoming.map((i) => i.id));
+  for (const installment of incoming) {
+    const { id, invoiceId: _invoiceId, ...rest } = installment;
     void _invoiceId;
-    await prisma.payment.upsert({
+    await prisma.installment.upsert({
       where: { id },
       create: { id, invoiceId, ...rest },
       update: { invoiceId, ...rest },
+    });
+  }
+  await prisma.installment.deleteMany({
+    where:
+      incomingIds.size === 0
+        ? { invoiceId }
+        : { invoiceId, id: { notIn: Array.from(incomingIds) } },
+  });
+}
+
+async function syncPayments(invoiceId: string, payments: Payment[]) {
+  const incoming = payments.filter((p) => p.id);
+  const incomingIds = new Set(incoming.map((p) => p.id));
+  const installments = await prisma.installment.findMany({
+    where: { invoiceId },
+  });
+  const assignment = paymentInstallmentAssignments(installments, incoming);
+  for (const payment of incoming) {
+    const {
+      id,
+      invoiceId: _invoiceId,
+      installmentId: _installmentId,
+      ...rest
+    } = payment;
+    void _invoiceId;
+    const installmentId = _installmentId ?? assignment[payment.id] ?? null;
+    await prisma.payment.upsert({
+      where: { id },
+      create: { id, invoiceId, ...rest, installmentId },
+      update: { invoiceId, ...rest, installmentId },
     });
   }
   await prisma.payment.deleteMany({
@@ -151,28 +210,31 @@ async function syncPayments(invoiceId: string, payments: Payment[]) {
 
 export async function getInvoices() {
   const docs = await prisma.invoice.findMany({
-    include: { payments: true, externalCosts: true },
+    include: { payments: true, externalCosts: true, installments: true },
     orderBy: { createdAt: "asc" },
   });
-  const invoices = docs.map(({ payments, externalCosts, ...invoice }) => {
-    const items = inflateExternalCosts(
-      itemsFromJson(invoice.items),
-      externalCosts,
-    );
-    return sanitizeInvoice({
-      ...invoice,
-      id: invoice.id,
-      items,
-      payments: payments.map(toPayment),
-    });
-  });
+  const invoices = docs.map(
+    ({ payments, externalCosts, installments, ...invoice }) => {
+      const items = inflateExternalCosts(
+        itemsFromJson(invoice.items),
+        externalCosts,
+      );
+      return sanitizeInvoice({
+        ...invoice,
+        id: invoice.id,
+        items,
+        payments: payments.map(toPayment),
+        installments: installments.map(toInstallment),
+      });
+    },
+  );
   return NextResponse.json(invoices);
 }
 
 export async function createInvoice(req: Request) {
   const body = await req.json();
   const invoice = sanitizeInvoice(body);
-  const { id, payments = [], items, ...rest } = invoice;
+  const { id, payments = [], installments = [], items, ...rest } = invoice;
   const data = {
     ...rest,
     items: stripExternalCosts(items) as unknown as Prisma.InputJsonValue,
@@ -182,20 +244,27 @@ export async function createInvoice(req: Request) {
     create: { id, ...data },
     update: data,
   });
+  await syncInstallments(id, installments);
   await syncPayments(id, payments);
   await syncExternalCosts(id, items);
   const doc = await prisma.invoice.findUnique({
     where: { id },
-    include: { payments: true, externalCosts: true },
+    include: { payments: true, externalCosts: true, installments: true },
   });
   if (!doc) return NextResponse.json(invoice);
-  const { payments: storedPayments, externalCosts, ...stored } = doc;
+  const {
+    payments: storedPayments,
+    externalCosts,
+    installments: installmentDocs,
+    ...stored
+  } = doc;
   return NextResponse.json(
     sanitizeInvoice({
       ...stored,
       id: stored.id,
       items: inflateExternalCosts(itemsFromJson(stored.items), externalCosts),
       payments: storedPayments.map(toPayment),
+      installments: installmentDocs.map(toInstallment),
     }),
   );
 }
@@ -219,7 +288,11 @@ export async function updateInvoice(
       patchItems,
     ) as unknown as Prisma.InputJsonValue;
   }
-  if (Object.keys(set).length === 0) {
+  const patchInstallments = Array.isArray(body.installments)
+    ? body.installments.map(sanitizeInstallment)
+    : undefined;
+  if (set.installmentsEnabled === true) set.dueDate = "";
+  if (Object.keys(set).length === 0 && !patchInstallments) {
     return NextResponse.json(
       { error: "no valid fields to update" },
       { status: 400 },
@@ -239,19 +312,21 @@ export async function updateInvoice(
     }
     throw err;
   }
+  if (patchInstallments) await syncInstallments(id, patchInstallments);
   if (patchItems) await syncExternalCosts(id, patchItems);
   const doc = await prisma.invoice.findUnique({
     where: { id },
-    include: { payments: true, externalCosts: true },
+    include: { payments: true, externalCosts: true, installments: true },
   });
   if (!doc) return NextResponse.json(null, { status: 404 });
-  const { payments, externalCosts, ...stored } = doc;
+  const { payments, externalCosts, installments, ...stored } = doc;
   return NextResponse.json(
     sanitizeInvoice({
       ...stored,
       id: stored.id,
       items: inflateExternalCosts(itemsFromJson(stored.items), externalCosts),
       payments: payments.map(toPayment),
+      installments: installments.map(toInstallment),
     }),
   );
 }
@@ -263,16 +338,17 @@ export async function getInvoice(
   const { id } = await params;
   const doc = await prisma.invoice.findUnique({
     where: { id },
-    include: { payments: true, externalCosts: true },
+    include: { payments: true, externalCosts: true, installments: true },
   });
   if (!doc) return NextResponse.json(null, { status: 404 });
-  const { payments, externalCosts, ...stored } = doc;
+  const { payments, externalCosts, installments, ...stored } = doc;
   return NextResponse.json(
     sanitizeInvoice({
       ...stored,
       id: stored.id,
       items: inflateExternalCosts(itemsFromJson(stored.items), externalCosts),
       payments: payments.map(toPayment),
+      installments: installments.map(toInstallment),
     }),
   );
 }
