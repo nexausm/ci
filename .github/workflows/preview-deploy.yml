@@ -60,9 +60,9 @@ jobs:
           cat > .vercel/project.json <<EOF
           {"orgId":"${VERCEL_ORG_ID}","projectId":"${VERCEL_PROJECT_ID}"}
           EOF
-          npx --yes vercel@latest pull --yes --environment=preview --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
-          npx --yes vercel@latest build --yes --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID"
-          URL=$(npx --yes vercel@latest deploy --prebuilt --yes --token="$VERCEL_TOKEN" --scope="$VERCEL_ORG_ID" \
+          npx --yes vercel@latest pull --yes --environment=preview --scope="$VERCEL_ORG_ID"
+          npx --yes vercel@latest build --yes --scope="$VERCEL_ORG_ID"
+          URL=$(npx --yes vercel@latest deploy --prebuilt --yes --scope="$VERCEL_ORG_ID" \
             | grep -oE 'https://[^[:space:]]+' | tail -1)
           test -n "$URL" || exit 1
           echo "url=$URL" >> "$GITHUB_OUTPUT"
@@ -75,8 +75,8 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         run: |
-          npx --yes @netlify/cli build --json > netlify-build.json
-          npx --yes @netlify/cli deploy --dir=.next --json \
+          npx --yes netlify-cli build --json > netlify-build.json
+          npx --yes netlify-cli deploy --dir=.next --json \
             --message="Preview PR #${{ github.event.pull_request.number }}" > netlify-deploy.json
           URL=$(jq -r '.deploy_url // empty' netlify-deploy.json)
           test -n "$URL" || { echo "Netlify deploy failed"; cat netlify-build.json netlify-deploy.json; exit 1; }
