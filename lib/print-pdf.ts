@@ -14,6 +14,7 @@
 import type { RenderExtras } from "taepdf";
 import type { CompanyInfo, Installment, InvoiceData } from "@/lib/types";
 import type { PrintSettings } from "@/lib/print-settings";
+import type { InvoiceTemplate } from "@/lib/invoice-templates";
 import {
   installmentHeaderChrome,
   installmentMarkup,
@@ -80,19 +81,19 @@ export function buildPrintExtras(
   company: CompanyInfo,
   printDate?: string,
   timeZone?: string,
+  template?: InvoiceTemplate,
+  uploadedLogoDataUrl?: string | null,
 ): RenderExtras {
-  const headerHtml = `${fontFaceStyleTag()}${invoiceHeaderChrome(data, company, printDate, timeZone)}`;
-  const footerHtml = `${fontFaceStyleTag()}${invoiceFooterChrome()}`;
+  const tmpl = template;
+  const headerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.headerChrome(data, company, printDate, timeZone, uploadedLogoDataUrl) : invoiceHeaderChrome(data, company, printDate, timeZone)}`;
+  const footerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.footerChrome() : invoiceFooterChrome()}`;
+  const topBarHtml = tmpl ? tmpl.topBar() : invoiceTopBar();
+  const pageMargin = tmpl ? tmpl.pageMargin : PAGE_MARGIN;
   return {
-    // With headerMode "every" the full chrome repeats on every page. With
-    // "first" the header content lives in the page-1 flow (see invoiceMarkup),
-    // so the band only needs to repeat the blue top bar plus the blank top
-    // margin — reserving a full header-height band on every page is exactly
-    // what leaves a header-sized blank band on pages 2+.
     header: () =>
       settings.headerMode === "every"
         ? headerHtml
-        : `${fontFaceStyleTag()}${invoiceTopBar()}<div style="height:${PAGE_MARGIN.top}px"></div>`,
+        : `${fontFaceStyleTag()}${topBarHtml}<div style="height:${pageMargin.top}px"></div>`,
     footer: (page, totalPages) =>
       settings.footerMode === "every" || page === totalPages ? footerHtml : "",
   };
@@ -118,19 +119,28 @@ export async function downloadInstallmentPdf(
   installment: Installment,
   company: CompanyInfo,
   settings: PrintSettings,
+  template?: InvoiceTemplate,
 ): Promise<void> {
   const { default: pdf } = await import("taepdf");
-  const markup = installmentMarkup(data, installment, {
-    headerMode: settings.headerMode,
-    company,
-  });
-  const headerHtml = `${fontFaceStyleTag()}${installmentHeaderChrome(data, installment, company)}`;
-  const footerHtml = `${fontFaceStyleTag()}${invoiceFooterChrome()}`;
+  const tmpl = template;
+  const markup = tmpl?.installmentMarkup
+    ? tmpl.installmentMarkup(data, installment, {
+        headerMode: settings.headerMode,
+        company,
+      })
+    : installmentMarkup(data, installment, {
+        headerMode: settings.headerMode,
+        company,
+      });
+  const headerHtml = `${fontFaceStyleTag()}${tmpl?.installmentHeaderChrome ? tmpl.installmentHeaderChrome(data, installment, company) : installmentHeaderChrome(data, installment, company)}`;
+  const footerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.footerChrome() : invoiceFooterChrome()}`;
+  const topBarHtml = tmpl ? tmpl.topBar() : invoiceTopBar();
+  const pageMargin = tmpl ? tmpl.pageMargin : PAGE_MARGIN;
   const extras: RenderExtras = {
     header: () =>
       settings.headerMode === "every"
         ? headerHtml
-        : `${fontFaceStyleTag()}${invoiceTopBar()}<div style="height:${PAGE_MARGIN.top}px"></div>`,
+        : `${fontFaceStyleTag()}${topBarHtml}<div style="height:${pageMargin.top}px"></div>`,
     footer: (page, totalPages) =>
       settings.footerMode === "every" || page === totalPages ? footerHtml : "",
   };

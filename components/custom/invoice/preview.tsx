@@ -1,14 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  invoiceMarkup,
-  invoiceHeaderChrome,
-  invoiceFooterChrome,
-  invoiceTopBar,
-  PAGE_MARGIN,
-  TOP_BAR_HEIGHT,
-} from "@/lib/invoice-markup";
+import { getTemplate } from "@/lib/invoice-templates";
 import { usePrintSettings } from "@/hooks/use-print-settings";
 import { useServerNow } from "@/hooks/use-server-now";
 import { getUserTimeZone } from "@/lib/print-pdf";
@@ -41,6 +34,9 @@ function paginate(
   headerHtml: string,
   footerHtml: string,
   settings: PrintSettings,
+  pageMargin: { side: number; bottom: number; top: number },
+  topBarHeight: number,
+  topBarFn: () => string,
 ): PaginatedMarkup {
   const hidden = document.createElement("div");
   hidden.style.cssText = `position:fixed;top:-99999px;left:-99999px;width:${A4_WIDTH}px;height:auto;visibility:hidden;`;
@@ -58,20 +54,16 @@ function paginate(
     const footerH = footerProbe.getBoundingClientRect().height;
     hidden.removeChild(footerProbe);
 
-    // Page 0's header is prepended to the flow before measuring (see below),
-    // so its space is already accounted for inside the content layout — the
-    // seam math must not reserve it again. Non-first pages reserve the top bar
-    // on top of the blank top margin, since the bar repeats on every page.
     const topReserve = (pageIndex: number) =>
       pageIndex === 0
         ? 0
         : settings.headerMode === "every"
           ? headerH
-          : PAGE_MARGIN.top + TOP_BAR_HEIGHT;
+          : pageMargin.top + topBarHeight;
     const hasFooter = (pageIndex: number, isLast: boolean) =>
       settings.footerMode === "every" || isLast;
     const bottomReserve = (pageIndex: number, isLast: boolean) =>
-      hasFooter(pageIndex, isLast) ? footerH : PAGE_MARGIN.bottom;
+      hasFooter(pageIndex, isLast) ? footerH : pageMargin.bottom;
 
     hidden.innerHTML = bodyMarkup;
     // Page 0 always gets a real header. Prepending it before any measuring
@@ -185,7 +177,7 @@ function paginate(
         const padToFooter = A4_HEIGHT - footerH - contentBottom;
         if (padToFooter > 0) parent.insertBefore(makeSpacer(padToFooter), unit);
         const footer = makeFragment(footerHtml);
-        footer.style.margin = `0 -${PAGE_MARGIN.side}px`;
+        footer.style.margin = `0 -${pageMargin.side}px`;
         footer.style.overflow = "hidden";
         parent.insertBefore(footer, unit);
       } else {
@@ -198,23 +190,13 @@ function paginate(
         settings.headerMode === "every"
           ? makeFragment(headerHtml)
           : // Header only on page 0, but the top bar still repeats: a full-width
-            // blue band plus the blank top margin the chrome would otherwise
+            // band plus the blank top margin the chrome would otherwise
             // leave above its content.
             makeFragment(
-              `${invoiceTopBar()}<div style="height:${PAGE_MARGIN.top}px"></div>`,
+              `${topBarFn()}<div style="height:${pageMargin.top}px"></div>`,
             );
       {
-        // Header fragments are inserted inside the padded body div, so pull
-        // them back out to full page width with negative side margins —
-        // matching page 0's header, which is a direct child of the page.
-        marker.style.margin = `0 -${PAGE_MARGIN.side}px`;
-        // A header fragment can land inside the body's flex column (when the
-        // seam falls before a body-level block). There, the automatic
-        // min-height plus the header's trailing margins (which collapse
-        // through the content) inflate the fragment past its laid-out height,
-        // so it renders taller than the probe the seam math reserves. Overflow
-        // hidden makes the fragment a scroll container (automatic min size 0)
-        // and contains the collapsed margin, so it keeps its true height.
+        marker.style.margin = `0 -${pageMargin.side}px`;
         marker.style.overflow = "hidden";
       }
       parent.insertBefore(marker, unit);
@@ -260,9 +242,13 @@ function paginate(
 export function InvoicePreview({
   data,
   company,
+  templateId,
+  uploadedLogoDataUrl,
 }: {
   data: InvoiceData;
   company: CompanyInfo;
+  templateId?: string;
+  uploadedLogoDataUrl?: string | null;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { settings } = usePrintSettings();
@@ -272,6 +258,10 @@ export function InvoicePreview({
   const [renderedHtml, setRenderedHtml] = useState("");
   const [pageOffsets, setPageOffsets] = useState<number[]>([0]);
   const [page, setPage] = useState(0);
+
+  const template = getTemplate(templateId ?? "standard");
+  const PAGE_MARGIN = template.pageMargin;
+  const TOP_BAR_HEIGHT = template.topBarHeight;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -304,24 +294,44 @@ export function InvoicePreview({
   }, [pageOffsets]);
 
   const bodyMarkup = useMemo(
-    () => invoiceMarkup(data, { printDate, timeZone }),
-    [data, printDate, timeZone],
+    () =>
+      template.markup(data, {
+        printDate,
+        timeZone,
+        uploadedLogoDataUrl,
+      }),
+    [data, printDate, timeZone, template, uploadedLogoDataUrl],
   );
   const headerHtml = useMemo(
-    () => invoiceHeaderChrome(data, company, printDate, timeZone),
-    [data, company, printDate, timeZone],
+    () =>
+      template.headerChrome(
+        data,
+        company,
+        printDate,
+        timeZone,
+        uploadedLogoDataUrl,
+      ),
+    [data, company, printDate, timeZone, template, uploadedLogoDataUrl],
   );
-  const footerHtml = useMemo(() => invoiceFooterChrome(), []);
+  const footerHtml = useMemo(() => template.footerChrome(), [template]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const result = paginate(bodyMarkup, headerHtml, footerHtml, settings);
+      const result = paginate(
+        bodyMarkup,
+        headerHtml,
+        footerHtml,
+        settings,
+        PAGE_MARGIN,
+        TOP_BAR_HEIGHT,
+        template.topBar,
+      );
       setRenderedHtml(result.html);
       setPageOffsets(result.pageOffsets);
       setPage((p) => Math.min(p, result.pageOffsets.length - 1));
     }, 0);
     return () => clearTimeout(timer);
-  }, [bodyMarkup, headerHtml, footerHtml, settings]);
+  }, [bodyMarkup, headerHtml, footerHtml, settings, PAGE_MARGIN, TOP_BAR_HEIGHT, template]);
 
   return (
     <div
