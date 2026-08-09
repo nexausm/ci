@@ -1,0 +1,250 @@
+name: Preview deploy (Vercel · Netlify · Cloudflare)
+
+on:
+  pull_request:
+    branches: [staging]
+    types: [opened, synchronize, reopened, closed]
+
+concurrency:
+  group: preview-deploy-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+  AUTH_SESSION_MAX_AGE: ${{ secrets.AUTH_SESSION_MAX_AGE }}
+  AUTH_TRUST_HOST: "true"
+
+jobs:
+  deploy:
+    name: Deploy · ${{ matrix.platform }}
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [vercel, netlify, cloudflare]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write build-time env
+        run: |
+          cat > .env <<'EOF'
+          AUTH_SECRET=${{ secrets.AUTH_SECRET }}
+          AUTH_SESSION_MAX_AGE=${{ secrets.AUTH_SESSION_MAX_AGE }}
+          AUTH_TRUST_HOST=true
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          EOF
+
+      - name: Deploy Vercel preview
+        if: matrix.platform == 'vercel'
+        id: vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          mkdir -p .vercel
+          cat > .vercel/project.json <<EOF
+          {"orgId":"${VERCEL_ORG_ID}","projectId":"${VERCEL_PROJECT_ID}"}
+          EOF
+          npx --yes vercel@latest pull --yes --environment=preview --scope="$VERCEL_ORG_ID"
+          npx --yes vercel@latest build --yes --scope="$VERCEL_ORG_ID"
+          URL=$(npx --yes vercel@latest deploy --prebuilt --yes --scope="$VERCEL_ORG_ID" \
+            | grep -oE 'https://[^[:space:]]+' | tail -1)
+          test -n "$URL" || exit 1
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "$URL" > vercel.url
+
+      - name: Deploy Netlify preview
+        if: matrix.platform == 'netlify'
+        id: netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          npx --yes netlify-cli build
+          npx --yes netlify-cli deploy --dir=.netlify/static --no-build --json \
+            --message="Preview PR #${{ github.event.pull_request.number }}" > netlify-deploy.json
+          URL=$(jq -r '.deploy_url // empty' netlify-deploy.json)
+          test -n "$URL" || { echo "Netlify deploy failed"; cat netlify-deploy.json; exit 1; }
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "$URL" > netlify.url
+
+      - name: Build & deploy Cloudflare preview
+        if: matrix.platform == 'cloudflare'
+        id: cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npm run cf:build
+          WORKER="nci-pr-${{ github.event.pull_request.number }}"
+          node - "$WORKER" <<'EOF'
+          const fs = require("fs");
+          const name = process.argv[2];
+          const raw = fs
+            .readFileSync("wrangler.jsonc", "utf8")
+            .replace(/\/\/.*$/gm, "")
+            .replace(/\/\*[\s\S]*?\*\//g, "")
+            .replace(/,\s*([}\]])/g, "$1");
+          const cfg = JSON.parse(raw);
+          cfg.name = name;
+          cfg.services = [{ binding: "WORKER_SELF_REFERENCE", service: name }];
+          fs.writeFileSync("wrangler.preview.jsonc", JSON.stringify(cfg, null, 2));
+          EOF
+          npx wrangler deploy --config wrangler.preview.jsonc > wrangler-deploy.log
+          URL=$(grep -oE 'https://[a-zA-Z0-9.-]+\.workers\.dev' wrangler-deploy.log | head -1)
+          test -n "$URL" || { cat wrangler-deploy.log; exit 1; }
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "$URL" > cloudflare.url
+
+      - name: Upload preview URL
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-deploy-${{ matrix.platform }}
+          path: ${{ matrix.platform }}.url
+          if-no-files-found: warn
+
+  report:
+    name: Report preview URLs
+    if: always() && github.event.action != 'closed'
+    needs: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: preview-deploy-*
+          path: artifacts
+          merge-multiple: true
+
+      - name: Collect & smoke test preview URLs
+        id: collect
+        run: |
+          for p in vercel netlify cloudflare; do
+            f="artifacts/$p.url"
+            if [ ! -f "$f" ]; then
+              echo "${p}_status=failed" >> "$GITHUB_OUTPUT"
+              echo "$p: no preview URL (deploy failed)"
+              continue
+            fi
+            url=$(tr -d ' \r\n' < "$f")
+            code=000
+            for attempt in 1 2 3; do
+              code=$(curl -sS -o /dev/null -w '%{http_code}' -L --max-time 120 "$url" || true)
+              case "$code" in
+                2*|3*) break ;;
+              esac
+              sleep 15
+            done
+            echo "${p}_url=$url" >> "$GITHUB_OUTPUT"
+            echo "${p}_status=$code" >> "$GITHUB_OUTPUT"
+            echo "$p: $code $url"
+          done
+
+      - name: Post preview URLs on the PR
+        uses: actions/github-script@v7
+        env:
+          VERCEL_URL: ${{ steps.collect.outputs.vercel_url }}
+          VERCEL_STATUS: ${{ steps.collect.outputs.vercel_status }}
+          NETLIFY_URL: ${{ steps.collect.outputs.netlify_url }}
+          NETLIFY_STATUS: ${{ steps.collect.outputs.netlify_status }}
+          CLOUDFLARE_URL: ${{ steps.collect.outputs.cloudflare_url }}
+          CLOUDFLARE_STATUS: ${{ steps.collect.outputs.cloudflare_status }}
+        with:
+          script: |
+            const cell = (url, status) => {
+              if (!url) return { status: "failed", url: null };
+              const ok = /^[23]\d\d$/.test(status || "");
+              return { status: ok ? status : `failed (${status})`, url };
+            };
+            const v = cell(process.env.VERCEL_URL, process.env.VERCEL_STATUS);
+            const n = cell(process.env.NETLIFY_URL, process.env.NETLIFY_STATUS);
+            const c = cell(process.env.CLOUDFLARE_URL, process.env.CLOUDFLARE_STATUS);
+            const row = (name, d) =>
+              `| ${name} | ${d.status} | ${d.url ? `[${d.url}](${d.url})` : "-"} |`;
+            const body = [
+              "### Preview deployments",
+              "",
+              "| Platform | Status | URL |",
+              "|---|---|---|",
+              row("Vercel", v),
+              row("Netlify", n),
+              row("Cloudflare Workers", c),
+              "",
+              "<!-- preview-deploy-report -->",
+            ].join("\n");
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const marker = "<!-- preview-deploy-report -->";
+            const existing = comments.find((x) => x.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Fail if any preview is missing or unhealthy
+        env:
+          V_STATUS: ${{ steps.collect.outputs.vercel_status }}
+          N_STATUS: ${{ steps.collect.outputs.netlify_status }}
+          C_STATUS: ${{ steps.collect.outputs.cloudflare_status }}
+        run: |
+          ok=1
+          for s in "$V_STATUS" "$N_STATUS" "$C_STATUS"; do
+            case "$s" in
+              2??|3??) ;;
+              *) echo "unhealthy preview: $s"; ok=0 ;;
+            esac
+          done
+          [ "$ok" = 1 ] || exit 1
+
+  cleanup:
+    name: Cleanup Cloudflare preview worker
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Delete preview worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # Direct API delete: `wrangler delete` also lists KV namespaces, which
+          # fails with a Workers-Scripts-Edit-only token (auth error 10000).
+          curl -fsS -X DELETE \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/nci-pr-${{ github.event.pull_request.number }}" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -o /dev/null \
+            || echo "no preview worker to delete (or already deleted)"

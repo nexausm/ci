@@ -2,13 +2,22 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { sanitizePayment } from "@/lib/defaults";
+import { paymentInstallmentAssignments } from "@/lib/totals";
 import type { Payment, PaymentMethod } from "@/lib/types";
 
-const PATCH_FIELDS = ["invoiceId", "date", "amount", "method", "note"] as const;
+const PATCH_FIELDS = [
+  "invoiceId",
+  "installmentId",
+  "date",
+  "amount",
+  "method",
+  "note",
+] as const;
 
 function toPayment(p: {
   id: string;
   invoiceId: string;
+  installmentId: string | null;
   date: string;
   amount: number;
   method: string;
@@ -17,6 +26,7 @@ function toPayment(p: {
   return {
     id: p.id,
     invoiceId: p.invoiceId,
+    installmentId: p.installmentId,
     date: p.date,
     amount: p.amount,
     method: p.method as PaymentMethod,
@@ -55,12 +65,28 @@ export async function createPayment(req: Request) {
       { status: 400 },
     );
   }
+  let installmentId = payment.installmentId ?? null;
+  if (!installmentId) {
+    const installments = await prisma.installment.findMany({
+      where: { invoiceId: payment.invoiceId },
+    });
+    if (installments.length > 0) {
+      const existing = await prisma.payment.findMany({
+        where: { invoiceId: payment.invoiceId },
+      });
+      const assignment = paymentInstallmentAssignments(installments, [
+        ...existing.map(toPayment),
+        payment,
+      ]);
+      installmentId = assignment[payment.id] ?? null;
+    }
+  }
   const { id, invoiceId, ...data } = payment;
   try {
     await prisma.payment.upsert({
       where: { id },
-      create: { id, invoiceId, ...data },
-      update: { invoiceId, ...data },
+      create: { id, invoiceId, ...data, installmentId },
+      update: { invoiceId, ...data, installmentId },
     });
   } catch (err) {
     if (isForeignKey(err)) {
@@ -68,7 +94,7 @@ export async function createPayment(req: Request) {
     }
     throw err;
   }
-  return NextResponse.json(payment);
+  return NextResponse.json({ ...payment, installmentId });
 }
 
 export async function updatePayment(

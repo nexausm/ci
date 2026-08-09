@@ -1,6 +1,7 @@
 import type {
   Client,
   CurrencyCode,
+  Installment,
   InvoiceData,
   LineItem,
   Payment,
@@ -14,7 +15,7 @@ export function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function addDaysISO(iso: string, days: number): string {
+export function addDaysISO(iso: string, days: number): string {
   const [y, m, d] = iso.split("-").map(Number);
   const date = new Date(Date.UTC(y, m - 1, d));
   date.setUTCDate(date.getUTCDate() + days);
@@ -51,7 +52,6 @@ export function createDefaultInvoice(): InvoiceData {
   return {
     id: genId(),
     invoiceNumber: "",
-    invoiceDate: today,
     dueDate: addDaysISO(today, 14),
     currency: "BDT",
 
@@ -76,6 +76,9 @@ export function createDefaultInvoice(): InvoiceData {
     taxValue: 0,
 
     adjustmentValue: 0,
+
+    installmentsEnabled: false,
+    installments: [],
 
     payments: [],
 
@@ -158,6 +161,54 @@ export function sanitizePayment(raw: unknown): Payment {
     ...stored,
     method,
     amount: Number(stored.amount) || 0,
+    installmentId:
+      stored.installmentId === null ||
+      stored.installmentId === undefined ||
+      stored.installmentId === ""
+        ? null
+        : stored.installmentId,
+  };
+}
+
+export function createDefaultInstallment(): Installment {
+  return {
+    id: genId(),
+    seq: 0,
+    label: "",
+    dueDate: todayISO(),
+    amount: 0,
+  };
+}
+
+export function defaultInstallments(
+  total: number,
+  dueDate: string,
+  n: number,
+): Installment[] {
+  const count = Math.max(1, Math.floor(n) || 1);
+  const each = Math.round((total / count) * 100) / 100;
+  return Array.from({ length: count }, (_, i) => ({
+    id: genId(),
+    seq: i,
+    label: i === 0 ? "Deposit" : "",
+    dueDate: addDaysISO(dueDate, i * 30),
+    amount:
+      i === count - 1
+        ? Math.round((total - each * (count - 1)) * 100) / 100
+        : each,
+  }));
+}
+
+export function sanitizeInstallment(raw: unknown): Installment {
+  const defaults = createDefaultInstallment();
+  if (!raw || typeof raw !== "object") return defaults;
+  const stored = raw as Partial<Installment>;
+  return {
+    id: String(stored.id ?? defaults.id),
+    seq: Number(stored.seq) || 0,
+    label: String(stored.label ?? ""),
+    dueDate: String(stored.dueDate ?? ""),
+    amount: Number(stored.amount) || 0,
   };
 }
 
@@ -195,14 +246,22 @@ export function sanitizeInvoice(raw: unknown): InvoiceData {
   const currency: CurrencyCode = CURRENCIES[stored.currency as CurrencyCode]
     ? (stored.currency as CurrencyCode)
     : defaults.currency;
+  const installmentsEnabled = Boolean(stored.installmentsEnabled);
   return {
     ...defaults,
     ...stored,
     currency,
+    dueDate: installmentsEnabled
+      ? ""
+      : String(stored.dueDate ?? defaults.dueDate),
+    installmentsEnabled,
     items:
       Array.isArray(stored.items) && stored.items.length > 0
         ? stored.items.map(sanitizeLineItem)
         : defaults.items,
+    installments: Array.isArray(stored.installments)
+      ? stored.installments.map(sanitizeInstallment)
+      : [],
     payments: Array.isArray(stored.payments) ? stored.payments : [],
   };
 }
