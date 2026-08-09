@@ -76,7 +76,7 @@ jobs:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         run: |
           npx --yes netlify-cli build
-          npx --yes netlify-cli deploy --dir=.next --no-build --json \
+          npx --yes netlify-cli deploy --dir=.netlify/static --no-build --json \
             --message="Preview PR #${{ github.event.pull_request.number }}" > netlify-deploy.json
           URL=$(jq -r '.deploy_url // empty' netlify-deploy.json)
           test -n "$URL" || { echo "Netlify deploy failed"; cat netlify-deploy.json; exit 1; }
