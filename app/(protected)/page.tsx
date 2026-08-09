@@ -52,12 +52,24 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/custom/shared/status-badge";
 import { useClients, useInvoices } from "@/lib/storage";
-import { computeTotals, formatDateLong, formatMoney } from "@/lib/totals";
+import {
+  computeTotals,
+  formatDateLong,
+  formatMoney,
+  nextInstallmentDueDate,
+} from "@/lib/totals";
 import { invoiceMarkup } from "@/lib/invoice-markup";
-import { downloadInvoicePdf } from "@/lib/print-pdf";
+import {
+  downloadInstallmentPdf,
+  downloadInvoicePdf,
+  buildPrintExtras,
+  fetchServerNow,
+  getUserTimeZone,
+} from "@/lib/print-pdf";
 import { computeStatus } from "@/lib/invoice-status";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
+import { usePrintSettings } from "@/hooks/use-print-settings";
 import type { InvoiceData, InvoiceStatus } from "@/lib/types";
 
 const STATUS_FILTERS: { value: InvoiceStatus | "all"; label: string }[] = [
@@ -81,6 +93,7 @@ function Dashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const company = useCompany();
+  const { settings: printSettings } = usePrintSettings();
   const { clients } = useClients();
   const { invoices, loaded, removeInvoice } = useInvoices();
 
@@ -162,12 +175,32 @@ function Dashboard() {
 
   async function handleDownload(inv: InvoiceData) {
     try {
+      const printDate = await fetchServerNow();
+      const timeZone = getUserTimeZone();
       await downloadInvoicePdf(
-        invoiceMarkup(inv, company),
+        invoiceMarkup(inv, {
+          realTable: true,
+          headerMode: printSettings.headerMode,
+          company,
+          printDate,
+          timeZone,
+        }),
         `${inv.invoiceNumber || "invoice"}.pdf`,
+        buildPrintExtras(printSettings, inv, company, printDate, timeZone),
       );
     } catch {
       toast.error("Failed to generate PDF");
+    }
+  }
+
+  async function handleDownloadInstallments(inv: InvoiceData) {
+    if (!inv.installmentsEnabled || inv.installments.length === 0) return;
+    try {
+      for (const installment of inv.installments) {
+        await downloadInstallmentPdf(inv, installment, company, printSettings);
+      }
+    } catch {
+      toast.error("Failed to generate installment PDFs");
     }
   }
 
@@ -291,7 +324,6 @@ function Dashboard() {
               <TableRow>
                 <TableHead className="w-32.5">Invoice</TableHead>
                 <TableHead>Client</TableHead>
-                <TableHead className="w-25">Issued</TableHead>
                 <TableHead className="w-25">Due</TableHead>
                 <TableHead className="w-27.5 text-right">Total</TableHead>
                 <TableHead className="w-30 text-right">Balance due</TableHead>
@@ -303,7 +335,7 @@ function Dashboard() {
               {!loaded ? (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={7}
                     className="h-24 text-center text-muted-foreground"
                   >
                     Loading…
@@ -311,7 +343,7 @@ function Dashboard() {
                 </TableRow>
               ) : rows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-32 text-center">
+                  <TableCell colSpan={7} className="h-32 text-center">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <FileText className="size-8" />
                       <p>
@@ -347,10 +379,9 @@ function Dashboard() {
                       {inv.billToName || clientName(inv.clientId)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {formatDateLong(inv.invoiceDate)}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {formatDateLong(inv.dueDate) || "—"}
+                      {inv.installmentsEnabled && inv.installments.length > 0
+                        ? formatDateLong(nextInstallmentDueDate(inv)) || "—"
+                        : formatDateLong(inv.dueDate) || "—"}
                     </TableCell>
                     <TableCell className="text-right">
                       {formatMoney(totals.total, symbolForRow(inv.currency))}
@@ -387,6 +418,15 @@ function Dashboard() {
                             <Download className="size-4" />
                             Download PDF
                           </DropdownMenuItem>
+                          {inv.installmentsEnabled &&
+                            inv.installments.length > 0 && (
+                              <DropdownMenuItem
+                                onClick={() => handleDownloadInstallments(inv)}
+                              >
+                                <Download className="size-4" />
+                                Download installment PDFs
+                              </DropdownMenuItem>
+                            )}
                           <DropdownMenuItem
                             variant="destructive"
                             onClick={() => setDeleting(inv)}

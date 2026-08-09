@@ -1,11 +1,27 @@
 import type { InvoiceData, InvoiceStatus, InvoiceTotals } from "./types";
 import { todayISO } from "./defaults";
+import { withInstallmentAllocations } from "./totals";
 
 export function computeStatus(
   data: InvoiceData,
   totals: InvoiceTotals,
 ): InvoiceStatus {
   if (data.state === "draft") return "draft";
+  if (data.installmentsEnabled && data.installments.length > 0) {
+    const scheduled = withInstallmentAllocations(
+      data.installments,
+      data.payments,
+    );
+    const allPaid = scheduled.every((inst) => inst.status === "paid");
+    if (allPaid) return "paid";
+    const anyOverdue = scheduled.some(
+      (inst) =>
+        inst.status !== "paid" && inst.dueDate && inst.dueDate < todayISO(),
+    );
+    if (anyOverdue) return "overdue";
+    if (totals.amountPaid > 0) return "partial";
+    return "sent";
+  }
   if (totals.total > 0 && totals.balanceDue <= 0) return "paid";
   if (totals.amountPaid > 0) return "partial";
   if (data.dueDate && data.dueDate < todayISO()) return "overdue";
