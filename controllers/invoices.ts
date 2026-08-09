@@ -17,7 +17,6 @@ import type {
 
 const PATCH_FIELDS = [
   "invoiceNumber",
-  "invoiceDate",
   "dueDate",
   "currency",
   "clientId",

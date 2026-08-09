@@ -53,7 +53,12 @@ import {
 import { createDefaultInvoice, newItem, productPriceFor } from "@/lib/defaults";
 import { genId } from "@/lib/id";
 import { invoiceMarkup } from "@/lib/invoice-markup";
-import { downloadInvoicePdf, buildPrintExtras } from "@/lib/print-pdf";
+import {
+  downloadInvoicePdf,
+  buildPrintExtras,
+  fetchServerNow,
+  getUserTimeZone,
+} from "@/lib/print-pdf";
 import { computeTotals, formatMoney } from "@/lib/totals";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
@@ -235,12 +240,22 @@ export function InvoiceEditor({ id }: { id?: string }) {
     if (!effectiveData) return;
     setDownloading(true);
     try {
+      const printDate = await fetchServerNow();
+      const timeZone = getUserTimeZone();
       const markup = invoiceMarkup(effectiveData, {
         realTable: true,
         headerMode: printSettings.headerMode,
         company,
+        printDate,
+        timeZone,
       });
-      const extras = buildPrintExtras(printSettings, effectiveData, company);
+      const extras = buildPrintExtras(
+        printSettings,
+        effectiveData,
+        company,
+        printDate,
+        timeZone,
+      );
       await downloadInvoicePdf(
         markup,
         `${effectiveData.invoiceNumber || "invoice"}.pdf`,
@@ -305,14 +320,6 @@ export function InvoiceEditor({ id }: { id?: string }) {
                   value={data.invoiceNumber}
                   onChange={(e) => update({ invoiceNumber: e.target.value })}
                   placeholder="INV-0001"
-                />
-              </Field>
-              <Field label="Date" htmlFor="invoiceDate">
-                <Input
-                  id="invoiceDate"
-                  type="date"
-                  value={data.invoiceDate}
-                  onChange={(e) => update({ invoiceDate: e.target.value })}
                 />
               </Field>
               <Field label="Due date" htmlFor="dueDate">

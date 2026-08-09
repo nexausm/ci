@@ -36,7 +36,6 @@ export type InvoiceState = "draft" | "sent";
 export interface InvoiceData {
   id: string;
   invoiceNumber: string;
-  invoiceDate: string;
   dueDate: string;
   currency: CurrencyCode;
 

@@ -61,13 +61,27 @@ export function buildInvoicePrintHtml(markup: string): string {
   return `${fontFaceStyleTag()}${markup}`;
 }
 
+export async function fetchServerNow(): Promise<string> {
+  const res = await fetch("/api/time", { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch server time");
+  const data = (await res.json()) as { iso?: string };
+  return data.iso ?? new Date().toISOString();
+}
+
+export function getUserTimeZone(): string {
+  if (typeof Intl === "undefined") return "UTC";
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+}
+
 // Each callback's returned HTML needs its own @font-face block — taepdf parses/registers header/footer fonts independently from the main template.
 export function buildPrintExtras(
   settings: PrintSettings,
   data: InvoiceData,
   company: CompanyInfo,
+  printDate?: string,
+  timeZone?: string,
 ): RenderExtras {
-  const headerHtml = `${fontFaceStyleTag()}${invoiceHeaderChrome(data, company)}`;
+  const headerHtml = `${fontFaceStyleTag()}${invoiceHeaderChrome(data, company, printDate, timeZone)}`;
   const footerHtml = `${fontFaceStyleTag()}${invoiceFooterChrome()}`;
   return {
     // With headerMode "every" the full chrome repeats on every page. With

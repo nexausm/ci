@@ -60,9 +60,7 @@ export default async function PublicInvoicePage({
   const fullyPaid = totals.amountPaid > 0 && totals.balanceDue <= 0.005;
 
   const sentences = [
-    `Invoice ${data.invoiceNumber || "—"} was issued on ${formatDateLong(
-      data.invoiceDate,
-    )} for a total of ${money(totals.total)}.`,
+    `Invoice ${data.invoiceNumber || "—"} has a total of ${money(totals.total)}.`,
   ];
 
   if (totals.credits > 0) {

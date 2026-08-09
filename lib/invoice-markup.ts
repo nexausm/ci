@@ -10,6 +10,7 @@ import {
   computeTotals,
   formatMoney,
   formatDateLong,
+  formatDateTimeInZone,
   nextInstallmentDueDate,
   withInstallmentAllocations,
 } from "@/lib/totals";
@@ -164,7 +165,12 @@ function metaBox(items: { label: string; value: string }[]): string {
     .join("")}</div>`;
 }
 
-function headerContent(data: InvoiceData, company: CompanyInfo): string {
+function headerContent(
+  data: InvoiceData,
+  company: CompanyInfo,
+  printDate?: string,
+  timeZone?: string,
+): string {
   const dueDate = data.installmentsEnabled
     ? nextInstallmentDueDate(data) || data.dueDate
     : data.dueDate;
@@ -178,7 +184,10 @@ function headerContent(data: InvoiceData, company: CompanyInfo): string {
       ${companyBlock(company)}
       ${metaBox([
         { label: "Invoice", value: data.invoiceNumber || "—" },
-        { label: "Date", value: formatDateLong(data.invoiceDate) },
+        {
+          label: "Print Date",
+          value: printDate ? formatDateTimeInZone(printDate, timeZone) : "—",
+        },
         { label: "Due Date", value: formatDateLong(dueDate) || "—" },
       ])}
     </div>
@@ -222,9 +231,11 @@ export function invoiceTopBar(): string {
 export function invoiceHeaderChrome(
   data: InvoiceData,
   company: CompanyInfo,
+  printDate?: string,
+  timeZone?: string,
 ): string {
   return `${invoiceTopBar()}
-  <div style="padding:${PAGE_MARGIN.top}px ${PAGE_MARGIN.side}px 0;">${headerContent(data, company)}</div>`;
+  <div style="padding:${PAGE_MARGIN.top}px ${PAGE_MARGIN.side}px 0;">${headerContent(data, company, printDate, timeZone)}</div>`;
 }
 
 export function installmentHeaderChrome(
@@ -575,6 +586,8 @@ export function invoiceMarkup(
     realTable?: boolean;
     headerMode?: "first" | "every";
     company?: CompanyInfo;
+    printDate?: string;
+    timeZone?: string;
   },
 ): string {
   if (opts?.realTable) {
@@ -589,7 +602,7 @@ export function invoiceMarkup(
 
     const headerBlock =
       opts?.headerMode === "first" && opts.company
-        ? `<div style="padding:0 ${PAGE_MARGIN.side}px 0;">${headerContent(data, opts.company)}</div>`
+        ? `<div style="padding:0 ${PAGE_MARGIN.side}px 0;">${headerContent(data, opts.company, opts.printDate, opts.timeZone)}</div>`
         : "";
     return `<div style="${page}">
   ${headerBlock}

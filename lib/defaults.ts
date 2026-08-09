@@ -52,7 +52,6 @@ export function createDefaultInvoice(): InvoiceData {
   return {
     id: genId(),
     invoiceNumber: "",
-    invoiceDate: today,
     dueDate: addDaysISO(today, 14),
     currency: "BDT",
 

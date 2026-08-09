@@ -10,6 +10,8 @@ import {
   TOP_BAR_HEIGHT,
 } from "@/lib/invoice-markup";
 import { usePrintSettings } from "@/hooks/use-print-settings";
+import { useServerNow } from "@/hooks/use-server-now";
+import { getUserTimeZone } from "@/lib/print-pdf";
 import type { PrintSettings } from "@/lib/print-settings";
 import type { CompanyInfo, InvoiceData } from "@/lib/types";
 
@@ -264,6 +266,8 @@ export function InvoicePreview({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { settings } = usePrintSettings();
+  const printDate = useServerNow();
+  const timeZone = getUserTimeZone();
   const [scale, setScale] = useState(1);
   const [renderedHtml, setRenderedHtml] = useState("");
   const [pageOffsets, setPageOffsets] = useState<number[]>([0]);
@@ -299,10 +303,13 @@ export function InvoicePreview({
     return () => container.removeEventListener("wheel", onWheel);
   }, [pageOffsets]);
 
-  const bodyMarkup = useMemo(() => invoiceMarkup(data), [data]);
+  const bodyMarkup = useMemo(
+    () => invoiceMarkup(data, { printDate, timeZone }),
+    [data, printDate, timeZone],
+  );
   const headerHtml = useMemo(
-    () => invoiceHeaderChrome(data, company),
-    [data, company],
+    () => invoiceHeaderChrome(data, company, printDate, timeZone),
+    [data, company, printDate, timeZone],
   );
   const footerHtml = useMemo(() => invoiceFooterChrome(), []);
 

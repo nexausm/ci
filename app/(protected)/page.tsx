@@ -63,6 +63,8 @@ import {
   downloadInstallmentPdf,
   downloadInvoicePdf,
   buildPrintExtras,
+  fetchServerNow,
+  getUserTimeZone,
 } from "@/lib/print-pdf";
 import { computeStatus } from "@/lib/invoice-status";
 import { CURRENCIES } from "@/lib/currency";
@@ -173,14 +175,18 @@ function Dashboard() {
 
   async function handleDownload(inv: InvoiceData) {
     try {
+      const printDate = await fetchServerNow();
+      const timeZone = getUserTimeZone();
       await downloadInvoicePdf(
         invoiceMarkup(inv, {
           realTable: true,
           headerMode: printSettings.headerMode,
           company,
+          printDate,
+          timeZone,
         }),
         `${inv.invoiceNumber || "invoice"}.pdf`,
-        buildPrintExtras(printSettings, inv, company),
+        buildPrintExtras(printSettings, inv, company, printDate, timeZone),
       );
     } catch {
       toast.error("Failed to generate PDF");
@@ -318,7 +324,6 @@ function Dashboard() {
               <TableRow>
                 <TableHead className="w-32.5">Invoice</TableHead>
                 <TableHead>Client</TableHead>
-                <TableHead className="w-25">Issued</TableHead>
                 <TableHead className="w-25">Due</TableHead>
                 <TableHead className="w-27.5 text-right">Total</TableHead>
                 <TableHead className="w-30 text-right">Balance due</TableHead>
@@ -330,7 +335,7 @@ function Dashboard() {
               {!loaded ? (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={7}
                     className="h-24 text-center text-muted-foreground"
                   >
                     Loading…
@@ -338,7 +343,7 @@ function Dashboard() {
                 </TableRow>
               ) : rows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-32 text-center">
+                  <TableCell colSpan={7} className="h-32 text-center">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <FileText className="size-8" />
                       <p>
@@ -372,9 +377,6 @@ function Dashboard() {
                     </TableCell>
                     <TableCell className="truncate text-muted-foreground">
                       {inv.billToName || clientName(inv.clientId)}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {formatDateLong(inv.invoiceDate)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {inv.installmentsEnabled && inv.installments.length > 0
