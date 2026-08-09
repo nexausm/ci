@@ -100,11 +100,15 @@ export function withInstallmentAllocations(
 export function nextInstallmentDueDate(
   data: Pick<InvoiceData, "installmentsEnabled" | "installments" | "payments">,
 ): string {
-  const next = withInstallmentAllocations(
+  const scheduled = withInstallmentAllocations(
     data.installments,
     data.payments,
-  ).find((inst) => (inst.paidAmount ?? 0) < (Number(inst.amount) || 0) - EPS);
-  return next?.dueDate ?? "";
+  );
+  const next = scheduled.find(
+    (inst) => (inst.paidAmount ?? 0) < (Number(inst.amount) || 0) - EPS,
+  );
+  if (next) return next.dueDate ?? "";
+  return scheduled[scheduled.length - 1]?.dueDate ?? "";
 }
 
 export function computeTotals(data: InvoiceData): InvoiceTotals {

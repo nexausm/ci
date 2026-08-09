@@ -59,7 +59,11 @@ import {
   fetchServerNow,
   getUserTimeZone,
 } from "@/lib/print-pdf";
-import { computeTotals, formatMoney } from "@/lib/totals";
+import {
+  computeTotals,
+  formatMoney,
+  nextInstallmentDueDate,
+} from "@/lib/totals";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
 import { usePrintSettings } from "@/hooks/use-print-settings";
@@ -121,6 +125,11 @@ export function InvoiceEditor({ id }: { id?: string }) {
 
   const totals = data ? computeTotals(data) : null;
   const symbol = data ? (CURRENCIES[data.currency]?.symbol ?? "$") : "$";
+  const effectiveDueDate = data
+    ? data.installmentsEnabled
+      ? nextInstallmentDueDate(data)
+      : data.dueDate
+    : "";
 
   function update(patch: Partial<InvoiceData>) {
     setData((d) => (d ? { ...d, ...patch } : d));
@@ -221,6 +230,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
     try {
       const toSave: InvoiceData = {
         ...effectiveData,
+        dueDate: effectiveData.installmentsEnabled ? "" : effectiveData.dueDate,
         updatedAt: new Date().toISOString(),
       };
       await upsertInvoice(toSave);
@@ -326,9 +336,15 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 <Input
                   id="dueDate"
                   type="date"
-                  value={data.dueDate}
+                  value={effectiveDueDate}
+                  disabled={data.installmentsEnabled}
                   onChange={(e) => update({ dueDate: e.target.value })}
                 />
+                {data.installmentsEnabled && (
+                  <p className="text-xs text-muted-foreground">
+                    Set by installments
+                  </p>
+                )}
               </Field>
               <Field label="Currency" htmlFor="currency">
                 <Select
@@ -588,7 +604,11 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 dueDate={data.dueDate}
                 currencySymbol={symbol}
                 onEnabledChange={(enabled) =>
-                  update({ installmentsEnabled: enabled })
+                  update(
+                    enabled
+                      ? { installmentsEnabled: true, dueDate: "" }
+                      : { installmentsEnabled: false },
+                  )
                 }
                 onInstallmentsChange={(installments) =>
                   update({ installments })

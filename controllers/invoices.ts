@@ -291,6 +291,7 @@ export async function updateInvoice(
   const patchInstallments = Array.isArray(body.installments)
     ? body.installments.map(sanitizeInstallment)
     : undefined;
+  if (set.installmentsEnabled === true) set.dueDate = "";
   if (Object.keys(set).length === 0 && !patchInstallments) {
     return NextResponse.json(
       { error: "no valid fields to update" },

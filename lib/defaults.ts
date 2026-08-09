@@ -246,10 +246,15 @@ export function sanitizeInvoice(raw: unknown): InvoiceData {
   const currency: CurrencyCode = CURRENCIES[stored.currency as CurrencyCode]
     ? (stored.currency as CurrencyCode)
     : defaults.currency;
+  const installmentsEnabled = Boolean(stored.installmentsEnabled);
   return {
     ...defaults,
     ...stored,
     currency,
+    dueDate: installmentsEnabled
+      ? ""
+      : String(stored.dueDate ?? defaults.dueDate),
+    installmentsEnabled,
     items:
       Array.isArray(stored.items) && stored.items.length > 0
         ? stored.items.map(sanitizeLineItem)
@@ -257,7 +262,6 @@ export function sanitizeInvoice(raw: unknown): InvoiceData {
     installments: Array.isArray(stored.installments)
       ? stored.installments.map(sanitizeInstallment)
       : [],
-    installmentsEnabled: Boolean(stored.installmentsEnabled),
     payments: Array.isArray(stored.payments) ? stored.payments : [],
   };
 }
