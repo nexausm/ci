@@ -7,15 +7,6 @@ generator client {
   importFileExtension    = "ts"
 }
 
-generator scripts {
-  provider               = "prisma-client"
-  output                 = "../generated/prisma-node"
-  runtime                = "nodejs"
-  moduleFormat           = "esm"
-  generatedFileExtension = "ts"
-  importFileExtension    = "ts"
-}
-
 datasource db {
   provider = "postgresql"
 }
@@ -70,63 +61,45 @@ model Product {
 }
 
 model Invoice {
-  id                  String         @id
-  invoiceNumber       String         @default("")
-  dueDate             String         @default("")
-  currency            CurrencyCode   @default(BDT)
-  clientId            String?
-  billToType          ClientType     @default(individual)
-  billToName          String         @default("")
-  billToContactName   String         @default("")
-  billToAddress       String         @default("")
-  billToPhone         String         @default("")
-  billToEmail         String         @default("")
-  items               Json           @default("[]")
-  discountEnabled     Boolean        @default(false)
-  discountValue       Float          @default(0)
-  creditsEnabled      Boolean        @default(false)
-  creditsValue        Float          @default(0)
-  taxEnabled          Boolean        @default(false)
-  taxLabel            String         @default("Tax")
-  taxValue            Float          @default(0)
-  adjustmentValue     Float          @default(0)
-  notes               String         @default("")
-  state               InvoiceState   @default(draft)
-  installmentsEnabled Boolean        @default(false)
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
-  payments            Payment[]
-  externalCosts       ExternalCost[]
-  installments        Installment[]
+  id                String         @id
+  invoiceNumber     String         @default("")
+  invoiceDate       String         @default("")
+  dueDate           String         @default("")
+  currency          CurrencyCode   @default(BDT)
+  clientId          String?
+  billToType        ClientType     @default(individual)
+  billToName        String         @default("")
+  billToContactName String         @default("")
+  billToAddress     String         @default("")
+  billToPhone       String         @default("")
+  billToEmail       String         @default("")
+  items             Json           @default("[]")
+  discountEnabled   Boolean        @default(false)
+  discountValue     Float          @default(0)
+  creditsEnabled    Boolean        @default(false)
+  creditsValue      Float          @default(0)
+  taxEnabled        Boolean        @default(false)
+  taxLabel          String         @default("Tax")
+  taxValue          Float          @default(0)
+  adjustmentValue   Float          @default(0)
+  notes             String         @default("")
+  state             InvoiceState   @default(draft)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  payments          Payment[]
+  externalCosts     ExternalCost[]
 }
 
 model Payment {
-  id            String       @id
-  invoiceId     String
-  invoice       Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  installmentId String?
-  installment   Installment? @relation(fields: [installmentId], references: [id], onDelete: SetNull)
-  date          String       @default("")
-  amount        Float        @default(0)
-  method        String       @default("Cash")
-  note          String       @default("")
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-}
-
-model Installment {
-  id        String    @id
+  id        String   @id
   invoiceId String
-  invoice   Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  seq       Int       @default(0)
-  label     String    @default("")
-  dueDate   String    @default("")
-  amount    Float     @default(0)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  payments  Payment[]
-
-  @@index([invoiceId])
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  date      String   @default("")
+  amount    Float    @default(0)
+  method    String   @default("Cash")
+  note      String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ExternalCost {

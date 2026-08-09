@@ -1,11 +1,6 @@
-import { PrismaClient } from "../generated/prisma-node/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { prisma } from "../lib/prisma";
 import { genId } from "../lib/id";
 import { hashPassword } from "../lib/password";
-
-const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
-});
 
 async function main() {
   const email = (process.env.SEED_USER_EMAIL ?? "admin@nexaus.cloud")
@@ -31,7 +26,6 @@ async function main() {
     update: { name, passwordHash },
   });
 
-  await prisma.$disconnect();
   console.log(`Seeded user: ${email}`);
 }
 

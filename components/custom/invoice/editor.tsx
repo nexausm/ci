@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { Download, Loader2, Plus, Settings2, Trash2 } from "lucide-react";
+import { Download, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,14 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -38,7 +30,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { InstallmentsSection } from "@/components/custom/invoice/installments-section";
 import { PaymentsSection } from "@/components/custom/invoice/payments-section";
 import { ReferencesSection } from "@/components/custom/invoice/references-section";
 import { ClientPicker } from "@/components/custom/client/picker";
@@ -53,20 +44,10 @@ import {
 import { createDefaultInvoice, newItem, productPriceFor } from "@/lib/defaults";
 import { genId } from "@/lib/id";
 import { invoiceMarkup } from "@/lib/invoice-markup";
-import {
-  downloadInvoicePdf,
-  buildPrintExtras,
-  fetchServerNow,
-  getUserTimeZone,
-} from "@/lib/print-pdf";
-import {
-  computeTotals,
-  formatMoney,
-  nextInstallmentDueDate,
-} from "@/lib/totals";
+import { downloadInvoicePdf } from "@/lib/print-pdf";
+import { computeTotals, formatMoney } from "@/lib/totals";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
-import { usePrintSettings } from "@/hooks/use-print-settings";
 import type { Client, CurrencyCode, InvoiceData, Product } from "@/lib/types";
 
 const PDFViewer = dynamic(
@@ -95,8 +76,6 @@ function Field({
 export function InvoiceEditor({ id }: { id?: string }) {
   const router = useRouter();
   const company = useCompany();
-  const { settings: printSettings, update: updatePrintSettings } =
-    usePrintSettings();
   const { clients } = useClients();
   const { products } = useProducts();
   const { upsertInvoice, removeInvoice } = useInvoices();
@@ -125,11 +104,6 @@ export function InvoiceEditor({ id }: { id?: string }) {
 
   const totals = data ? computeTotals(data) : null;
   const symbol = data ? (CURRENCIES[data.currency]?.symbol ?? "$") : "$";
-  const effectiveDueDate = data
-    ? data.installmentsEnabled
-      ? nextInstallmentDueDate(data)
-      : data.dueDate
-    : "";
 
   function update(patch: Partial<InvoiceData>) {
     setData((d) => (d ? { ...d, ...patch } : d));
@@ -230,7 +204,6 @@ export function InvoiceEditor({ id }: { id?: string }) {
     try {
       const toSave: InvoiceData = {
         ...effectiveData,
-        dueDate: effectiveData.installmentsEnabled ? "" : effectiveData.dueDate,
         updatedAt: new Date().toISOString(),
       };
       await upsertInvoice(toSave);
@@ -250,26 +223,9 @@ export function InvoiceEditor({ id }: { id?: string }) {
     if (!effectiveData) return;
     setDownloading(true);
     try {
-      const printDate = await fetchServerNow();
-      const timeZone = getUserTimeZone();
-      const markup = invoiceMarkup(effectiveData, {
-        realTable: true,
-        headerMode: printSettings.headerMode,
-        company,
-        printDate,
-        timeZone,
-      });
-      const extras = buildPrintExtras(
-        printSettings,
-        effectiveData,
-        company,
-        printDate,
-        timeZone,
-      );
       await downloadInvoicePdf(
-        markup,
+        invoiceMarkup(effectiveData, company),
         `${effectiveData.invoiceNumber || "invoice"}.pdf`,
-        extras,
       );
     } catch {
       toast.error("Failed to generate PDF");
@@ -332,19 +288,21 @@ export function InvoiceEditor({ id }: { id?: string }) {
                   placeholder="INV-0001"
                 />
               </Field>
+              <Field label="Date" htmlFor="invoiceDate">
+                <Input
+                  id="invoiceDate"
+                  type="date"
+                  value={data.invoiceDate}
+                  onChange={(e) => update({ invoiceDate: e.target.value })}
+                />
+              </Field>
               <Field label="Due date" htmlFor="dueDate">
                 <Input
                   id="dueDate"
                   type="date"
-                  value={effectiveDueDate}
-                  disabled={data.installmentsEnabled}
+                  value={data.dueDate}
                   onChange={(e) => update({ dueDate: e.target.value })}
                 />
-                {data.installmentsEnabled && (
-                  <p className="text-xs text-muted-foreground">
-                    Set by installments
-                  </p>
-                )}
               </Field>
               <Field label="Currency" htmlFor="currency">
                 <Select
@@ -591,38 +549,10 @@ export function InvoiceEditor({ id }: { id?: string }) {
           </Card>
 
           <Card>
-            <CardHeader>
-              <CardTitle>Installments</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <InstallmentsSection
-                data={effectiveData}
-                installmentsEnabled={data.installmentsEnabled}
-                installments={data.installments}
-                payments={data.payments}
-                total={totals.total}
-                dueDate={data.dueDate}
-                currencySymbol={symbol}
-                onEnabledChange={(enabled) =>
-                  update(
-                    enabled
-                      ? { installmentsEnabled: true, dueDate: "" }
-                      : { installmentsEnabled: false },
-                  )
-                }
-                onInstallmentsChange={(installments) =>
-                  update({ installments })
-                }
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
             <CardContent>
               <PaymentsSection
                 payments={data.payments}
                 currencySymbol={symbol}
-                installments={data.installments}
                 onChange={(payments) => update({ payments })}
               />
             </CardContent>
@@ -715,58 +645,6 @@ export function InvoiceEditor({ id }: { id?: string }) {
                 <span className="hidden sm:inline">Delete</span>
               </Button>
             )}
-            <Popover>
-              <PopoverTrigger
-                render={
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    aria-label="Print settings"
-                  />
-                }
-              >
-                <Settings2 className="size-4" />
-              </PopoverTrigger>
-              <PopoverContent align="end">
-                <PopoverHeader>
-                  <PopoverTitle>Print settings</PopoverTitle>
-                  <PopoverDescription>
-                    Controls the preview and exported PDF when an invoice spans
-                    multiple pages. Bill to always appears once, on the first
-                    page.
-                  </PopoverDescription>
-                </PopoverHeader>
-                <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor="headerMode" className="font-normal">
-                    Repeat header on every page
-                  </Label>
-                  <Switch
-                    id="headerMode"
-                    checked={printSettings.headerMode === "every"}
-                    onCheckedChange={(checked) =>
-                      updatePrintSettings({
-                        headerMode: checked ? "every" : "first",
-                      })
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor="footerMode" className="font-normal">
-                    Repeat footer on every page
-                  </Label>
-                  <Switch
-                    id="footerMode"
-                    checked={printSettings.footerMode === "every"}
-                    onCheckedChange={(checked) =>
-                      updatePrintSettings({
-                        footerMode: checked ? "every" : "last",
-                      })
-                    }
-                  />
-                </div>
-              </PopoverContent>
-            </Popover>
             <Button
               variant="outline"
               size="sm"

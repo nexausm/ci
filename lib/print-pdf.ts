@@ -11,18 +11,6 @@
 // The Bengali/Devanagari Noto fonts are shipped as WOFF2 because taepdf only
 // accepts WOFF2/TTF/OTF.
 
-import type { RenderExtras } from "taepdf";
-import type { CompanyInfo, Installment, InvoiceData } from "@/lib/types";
-import type { PrintSettings } from "@/lib/print-settings";
-import {
-  installmentHeaderChrome,
-  installmentMarkup,
-  invoiceFooterChrome,
-  invoiceHeaderChrome,
-  invoiceTopBar,
-  PAGE_MARGIN,
-} from "@/lib/invoice-markup";
-
 const FONT_FACES: {
   family: string;
   weight: string;
@@ -49,98 +37,23 @@ const FONT_FACES: {
   },
 ];
 
-function fontFaceStyleTag(): string {
+export function buildInvoicePrintHtml(markup: string): string {
   const faces = FONT_FACES.map(
     ({ family, weight, format, url }) =>
       `@font-face{font-family:${family};font-style:normal;font-weight:${weight};font-display:swap;src:url(${url}) format('${format}');}`,
   ).join("\n");
-  return `<style>${faces}</style>`;
-}
 
-export function buildInvoicePrintHtml(markup: string): string {
-  return `${fontFaceStyleTag()}${markup}`;
-}
-
-export async function fetchServerNow(): Promise<string> {
-  const res = await fetch("/api/time", { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch server time");
-  const data = (await res.json()) as { iso?: string };
-  return data.iso ?? new Date().toISOString();
-}
-
-export function getUserTimeZone(): string {
-  if (typeof Intl === "undefined") return "UTC";
-  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-}
-
-// Each callback's returned HTML needs its own @font-face block — taepdf parses/registers header/footer fonts independently from the main template.
-export function buildPrintExtras(
-  settings: PrintSettings,
-  data: InvoiceData,
-  company: CompanyInfo,
-  printDate?: string,
-  timeZone?: string,
-): RenderExtras {
-  const headerHtml = `${fontFaceStyleTag()}${invoiceHeaderChrome(data, company, printDate, timeZone)}`;
-  const footerHtml = `${fontFaceStyleTag()}${invoiceFooterChrome()}`;
-  return {
-    // With headerMode "every" the full chrome repeats on every page. With
-    // "first" the header content lives in the page-1 flow (see invoiceMarkup),
-    // so the band only needs to repeat the blue top bar plus the blank top
-    // margin — reserving a full header-height band on every page is exactly
-    // what leaves a header-sized blank band on pages 2+.
-    header: () =>
-      settings.headerMode === "every"
-        ? headerHtml
-        : `${fontFaceStyleTag()}${invoiceTopBar()}<div style="height:${PAGE_MARGIN.top}px"></div>`,
-    footer: (page, totalPages) =>
-      settings.footerMode === "every" || page === totalPages ? footerHtml : "",
-  };
+  return `<style>${faces}</style>${markup}`;
 }
 
 export async function downloadInvoicePdf(
   markup: string,
   filename = "invoice.pdf",
-  extras?: RenderExtras,
 ): Promise<void> {
   const { default: pdf } = await import("taepdf");
   await pdf.download(
     buildInvoicePrintHtml(markup),
     "A4",
     pdf.name(filename.replace(/\.pdf$/i, "")),
-    undefined,
-    extras,
-  );
-}
-
-export async function downloadInstallmentPdf(
-  data: InvoiceData,
-  installment: Installment,
-  company: CompanyInfo,
-  settings: PrintSettings,
-): Promise<void> {
-  const { default: pdf } = await import("taepdf");
-  const markup = installmentMarkup(data, installment, {
-    headerMode: settings.headerMode,
-    company,
-  });
-  const headerHtml = `${fontFaceStyleTag()}${installmentHeaderChrome(data, installment, company)}`;
-  const footerHtml = `${fontFaceStyleTag()}${invoiceFooterChrome()}`;
-  const extras: RenderExtras = {
-    header: () =>
-      settings.headerMode === "every"
-        ? headerHtml
-        : `${fontFaceStyleTag()}${invoiceTopBar()}<div style="height:${PAGE_MARGIN.top}px"></div>`,
-    footer: (page, totalPages) =>
-      settings.footerMode === "every" || page === totalPages ? footerHtml : "",
-  };
-  await pdf.download(
-    buildInvoicePrintHtml(markup),
-    "A4",
-    pdf.name(
-      `${data.invoiceNumber || "invoice"}-installment-${installment.seq + 1}.pdf`,
-    ),
-    undefined,
-    extras,
   );
 }
