@@ -314,8 +314,8 @@ export function InvoicePreview({
     [data, company, printDate, timeZone, template, uploadedLogoDataUrl],
   );
   const footerHtml = useMemo(
-    () => template.footerChrome(company, settings.signatureEnabled, data.id),
-    [template, company, settings.signatureEnabled, data.id],
+    () => template.footerChrome(company, data.id),
+    [template, company, data.id],
   );
 
   useEffect(() => {

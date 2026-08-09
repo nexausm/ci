@@ -47,9 +47,6 @@ const S = {
   tdRight: `border:1px solid #000;padding:${pt(5)}px ${pt(6)}px;text-align:right;vertical-align:top;`,
   fillerRow: `border:1px solid #000;height:${pt(20)}px;`,
   totalRow: `font-weight:700;`,
-  takaWords: `font-family:${FONT};font-size:${pt(10)}px;margin-bottom:${pt(10)}px;`,
-  takaLabel: `font-weight:700;white-space:nowrap;margin-right:${pt(4)}px;`,
-  takaValue: `border-bottom:1px solid #000;padding:0 ${pt(4)}px;font-style:italic;flex:1;`,
   sectionLabel: `font-weight:600;font-size:${pt(9)}px;text-transform:uppercase;margin-bottom:${pt(8)}px;`,
   notes: `margin-top:${pt(16)}px;`,
   scheduleHeader: `display:flex;flex-direction:row;border-bottom:1px solid #000;padding-bottom:${pt(6)}px;margin-bottom:${pt(4)}px;font-size:${pt(9)}px;font-weight:600;`,
@@ -76,84 +73,6 @@ function esc(value: unknown): string {
     .replace(/'/g, "&#39;");
 }
 
-function numberToWords(num: number): string {
-  if (num === 0) return "Zero";
-  const ones = [
-    "",
-    "One",
-    "Two",
-    "Three",
-    "Four",
-    "Five",
-    "Six",
-    "Seven",
-    "Eight",
-    "Nine",
-    "Ten",
-    "Eleven",
-    "Twelve",
-    "Thirteen",
-    "Fourteen",
-    "Fifteen",
-    "Sixteen",
-    "Seventeen",
-    "Eighteen",
-    "Nineteen",
-  ];
-  const tens = [
-    "",
-    "",
-    "Twenty",
-    "Thirty",
-    "Forty",
-    "Fifty",
-    "Sixty",
-    "Seventy",
-    "Eighty",
-    "Ninety",
-  ];
-
-  function convertGroup(n: number): string {
-    if (n === 0) return "";
-    if (n < 20) return ones[n];
-    if (n < 100)
-      return tens[Math.floor(n / 10)] + (n % 10 ? " " + ones[n % 10] : "");
-    return (
-      ones[Math.floor(n / 100)] +
-      " Hundred" +
-      (n % 100 ? " and " + convertGroup(n % 100) : "")
-    );
-  }
-
-  const intPart = Math.floor(num);
-  const decPart = Math.round((num - intPart) * 100);
-
-  let result = "";
-  if (intPart >= 10000000) {
-    result += convertGroup(Math.floor(intPart / 10000000)) + " Crore ";
-  }
-  if (intPart >= 100000) {
-    result +=
-      convertGroup(Math.floor((intPart % 10000000) / 100000)) + " Lakh ";
-  }
-  if (intPart >= 1000) {
-    result +=
-      convertGroup(Math.floor((intPart % 100000) / 1000)) + " Thousand ";
-  }
-  if (intPart >= 100) {
-    result += convertGroup(Math.floor((intPart % 1000) / 100)) + " Hundred ";
-  }
-  if (intPart % 100 > 0) {
-    result += convertGroup(intPart % 100);
-  }
-
-  result = result.trim() + " Taka";
-  if (decPart > 0) {
-    result += " and " + convertGroup(decPart) + " Paisa";
-  }
-  result += " Only";
-  return result;
-}
 
 const ATOMIC = 'data-pgbreak="avoid"';
 const PG_HEADER = 'data-pgtype="table-header"';
@@ -367,7 +286,7 @@ export function invoiceHeaderChrome(
   </div>`;
 }
 
-export function invoiceFooterChrome(_companyName?: string, _signatureEnabled?: boolean, _invoiceId?: string): string {
+export function invoiceFooterChrome(_companyName?: string, _invoiceId?: string): string {
   return "";
 }
 
@@ -441,7 +360,6 @@ function bodyInnerContent(
   realTable = false,
 ): string {
   const symbol = CURRENCIES[data.currency]?.symbol ?? data.currency;
-  const total = computeTotals(data).total;
 
   return (
     productTable(data, symbol, realTable) +

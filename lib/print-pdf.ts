@@ -86,7 +86,7 @@ export function buildPrintExtras(
 ): RenderExtras {
   const tmpl = template;
   const headerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.headerChrome(data, company, printDate, timeZone, uploadedLogoDataUrl) : invoiceHeaderChrome(data, company, printDate, timeZone)}`;
-  const footerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.footerChrome(company, settings.signatureEnabled, data.id) : invoiceFooterChrome()}`;
+  const footerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.footerChrome(company, data.id) : invoiceFooterChrome()}`;
   const topBarHtml = tmpl ? tmpl.topBar() : invoiceTopBar();
   const pageMargin = tmpl ? tmpl.pageMargin : PAGE_MARGIN;
   return {
@@ -135,7 +135,7 @@ export async function downloadInstallmentPdf(
         company,
       });
   const headerHtml = `${fontFaceStyleTag()}${tmpl?.installmentHeaderChrome ? tmpl.installmentHeaderChrome(data, installment, company) : installmentHeaderChrome(data, installment, company)}`;
-  const footerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.footerChrome(company, settings.signatureEnabled, data.id) : invoiceFooterChrome()}`;
+  const footerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.footerChrome(company, data.id) : invoiceFooterChrome()}`;
   const topBarHtml = tmpl ? tmpl.topBar() : invoiceTopBar();
   const pageMargin = tmpl ? tmpl.pageMargin : PAGE_MARGIN;
   const extras: RenderExtras = {

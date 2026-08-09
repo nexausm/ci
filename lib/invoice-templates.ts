@@ -21,7 +21,7 @@ export interface InvoiceTemplate {
     timeZone?: string,
     uploadedLogoDataUrl?: string | null,
   ) => string;
-  footerChrome: (company?: CompanyInfo, signatureEnabled?: boolean, invoiceId?: string) => string;
+  footerChrome: (company?: CompanyInfo, invoiceId?: string) => string;
   topBar: () => string;
   pageMargin: { side: number; bottom: number; top: number };
   topBarHeight: number;
@@ -97,7 +97,7 @@ export const TEMPLATES: InvoiceTemplate[] = [
       }),
     headerChrome: (data, company, printDate, timeZone, uploadedLogoDataUrl) =>
       minimalHeaderChrome(data, company, printDate, timeZone, uploadedLogoDataUrl),
-    footerChrome: (company, signatureEnabled, invoiceId) => minimalFooterChrome(company?.companyName, signatureEnabled, invoiceId),
+    footerChrome: (company, invoiceId) => minimalFooterChrome(company?.companyName, invoiceId),
     topBar: minimalTopBar,
     pageMargin: MINIMAL_PAGE_MARGIN,
     topBarHeight: MINIMAL_TOP_BAR_HEIGHT,
