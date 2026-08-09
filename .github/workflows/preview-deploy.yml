@@ -75,11 +75,11 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         run: |
-          npx --yes netlify-cli build --json > netlify-build.json
-          npx --yes netlify-cli deploy --dir=.next --json \
+          npx --yes netlify-cli build
+          npx --yes netlify-cli deploy --dir=.next --no-build --json \
             --message="Preview PR #${{ github.event.pull_request.number }}" > netlify-deploy.json
           URL=$(jq -r '.deploy_url // empty' netlify-deploy.json)
-          test -n "$URL" || { echo "Netlify deploy failed"; cat netlify-build.json netlify-deploy.json; exit 1; }
+          test -n "$URL" || { echo "Netlify deploy failed"; cat netlify-deploy.json; exit 1; }
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           echo "$URL" > netlify.url
 
