@@ -86,14 +86,16 @@ export function buildPrintExtras(
 ): RenderExtras {
   const tmpl = template;
   const headerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.headerChrome(data, company, printDate, timeZone, uploadedLogoDataUrl) : invoiceHeaderChrome(data, company, printDate, timeZone)}`;
-  const footerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.footerChrome() : invoiceFooterChrome()}`;
+  const footerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.footerChrome(company, settings.signatureEnabled, data.id) : invoiceFooterChrome()}`;
   const topBarHtml = tmpl ? tmpl.topBar() : invoiceTopBar();
   const pageMargin = tmpl ? tmpl.pageMargin : PAGE_MARGIN;
   return {
-    header: () =>
+    header: (page) =>
       settings.headerMode === "every"
         ? headerHtml
-        : `${fontFaceStyleTag()}${topBarHtml}<div style="height:${pageMargin.top}px"></div>`,
+        : page === 1
+          ? ""
+          : `${fontFaceStyleTag()}${topBarHtml}<div style="height:${pageMargin.top}px"></div>`,
     footer: (page, totalPages) =>
       settings.footerMode === "every" || page === totalPages ? footerHtml : "",
   };
@@ -133,14 +135,16 @@ export async function downloadInstallmentPdf(
         company,
       });
   const headerHtml = `${fontFaceStyleTag()}${tmpl?.installmentHeaderChrome ? tmpl.installmentHeaderChrome(data, installment, company) : installmentHeaderChrome(data, installment, company)}`;
-  const footerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.footerChrome() : invoiceFooterChrome()}`;
+  const footerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.footerChrome(company, settings.signatureEnabled, data.id) : invoiceFooterChrome()}`;
   const topBarHtml = tmpl ? tmpl.topBar() : invoiceTopBar();
   const pageMargin = tmpl ? tmpl.pageMargin : PAGE_MARGIN;
   const extras: RenderExtras = {
-    header: () =>
+    header: (page) =>
       settings.headerMode === "every"
         ? headerHtml
-        : `${fontFaceStyleTag()}${topBarHtml}<div style="height:${pageMargin.top}px"></div>`,
+        : page === 1
+          ? ""
+          : `${fontFaceStyleTag()}${topBarHtml}<div style="height:${pageMargin.top}px"></div>`,
     footer: (page, totalPages) =>
       settings.footerMode === "every" || page === totalPages ? footerHtml : "",
   };
