@@ -31,6 +31,7 @@ export const config = {
     "/clients/:path*",
     "/products/:path*",
     "/invoices/:path*",
+    "/company/:path*",
     "/api/:path*",
   ],
 };

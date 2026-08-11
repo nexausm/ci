@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LogOut, Plus } from "lucide-react";
+import { LogOut, Plus, Building2 } from "lucide-react";
 import { FaUserFriends } from "react-icons/fa";
 import { BiSolidLayout } from "react-icons/bi";
 import { AiFillProduct } from "react-icons/ai";
@@ -26,6 +26,7 @@ const links = [
   { href: "/", label: "Dashboard", icon: BiSolidLayout, exact: true },
   { href: "/clients", label: "Clients", icon: FaUserFriends, exact: false },
   { href: "/products", label: "Products", icon: AiFillProduct, exact: false },
+  { href: "/company", label: "Company", icon: Building2, exact: false },
 ];
 
 export function AppSidebar() {
