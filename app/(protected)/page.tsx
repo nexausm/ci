@@ -52,13 +52,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/custom/shared/status-badge";
 import { useClients, useInvoices } from "@/lib/storage";
-import {
-  computeTotals,
-  formatDateLong,
-  formatMoney,
-  nextInstallmentDueDate,
-} from "@/lib/totals";
-import { invoiceMarkup } from "@/lib/invoice-markup";
+import { computeTotals, formatDateLong, formatMoney, nextInstallmentDueDate } from "@/lib/totals";
+import { getTemplate } from "@/lib/invoice-templates";
 import {
   downloadInstallmentPdf,
   downloadInvoicePdf,
@@ -70,6 +65,7 @@ import { computeStatus } from "@/lib/invoice-status";
 import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
 import { usePrintSettings } from "@/hooks/use-print-settings";
+import { useTemplateId } from "@/hooks/use-template-id";
 import type { InvoiceData, InvoiceStatus } from "@/lib/types";
 
 const STATUS_FILTERS: { value: InvoiceStatus | "all"; label: string }[] = [
@@ -94,6 +90,7 @@ function Dashboard() {
   const searchParams = useSearchParams();
   const company = useCompany();
   const { settings: printSettings } = usePrintSettings();
+  const { templateId } = useTemplateId();
   const { clients } = useClients();
   const { invoices, loaded, removeInvoice } = useInvoices();
 
@@ -177,16 +174,18 @@ function Dashboard() {
     try {
       const printDate = await fetchServerNow();
       const timeZone = getUserTimeZone();
+      const template = getTemplate(templateId);
       await downloadInvoicePdf(
-        invoiceMarkup(inv, {
+        template.markup(inv, {
           realTable: true,
           headerMode: printSettings.headerMode,
+          footerMode: printSettings.footerMode,
           company,
           printDate,
           timeZone,
         }),
         `${inv.invoiceNumber || "invoice"}.pdf`,
-        buildPrintExtras(printSettings, inv, company, printDate, timeZone),
+        buildPrintExtras(printSettings, inv, company, printDate, timeZone, template),
       );
     } catch {
       toast.error("Failed to generate PDF");
@@ -196,8 +195,9 @@ function Dashboard() {
   async function handleDownloadInstallments(inv: InvoiceData) {
     if (!inv.installmentsEnabled || inv.installments.length === 0) return;
     try {
+      const template = getTemplate(templateId);
       for (const installment of inv.installments) {
-        await downloadInstallmentPdf(inv, installment, company, printSettings);
+        await downloadInstallmentPdf(inv, installment, company, printSettings, template);
       }
     } catch {
       toast.error("Failed to generate installment PDFs");
