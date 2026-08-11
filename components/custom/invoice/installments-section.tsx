@@ -29,8 +29,10 @@ import { createDefaultInstallment, defaultInstallments } from "@/lib/defaults";
 import { withInstallmentAllocations } from "@/lib/totals";
 import { formatDateLong, formatMoney } from "@/lib/totals";
 import { downloadInstallmentPdf } from "@/lib/print-pdf";
+import { getTemplate } from "@/lib/invoice-templates";
 import { useCompany } from "@/app/providers/company-provider";
 import { usePrintSettings } from "@/hooks/use-print-settings";
+import { useTemplateId } from "@/hooks/use-template-id";
 import type { Installment, InvoiceData, Payment } from "@/lib/types";
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -81,6 +83,7 @@ export function InstallmentsSection({
 
   const company = useCompany();
   const { settings: printSettings } = usePrintSettings();
+  const { templateId } = useTemplateId();
 
   const scheduled = withInstallmentAllocations(installments, payments);
   const sumAmounts = installments.reduce(
@@ -128,7 +131,8 @@ export function InstallmentsSection({
   async function handleDownloadInstallment(inst: Installment) {
     setDownloadingId(inst.id);
     try {
-      await downloadInstallmentPdf(data, inst, company, printSettings);
+      const template = getTemplate(templateId);
+      await downloadInstallmentPdf(data, inst, company, printSettings, template);
     } catch {
       toast.error("Failed to generate installment PDF");
     } finally {
