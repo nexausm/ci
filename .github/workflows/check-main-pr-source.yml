@@ -1,0 +1,24 @@
+name: Check PR source
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify-source-branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assert source is nexausm/ci:staging
+        run: |
+          repo="${{ github.event.pull_request.head.repo.full_name }}"
+          ref="${{ github.event.pull_request.head.ref }}"
+          if [ "$repo" = "nexausm/ci" ] && [ "$ref" = "staging" ]; then
+            echo "OK: PR into main originates from nexausm/ci:staging"
+          else
+            echo "::error::PRs into main are only allowed from nexausm/ci:staging (got ${repo}:${ref})"
+            exit 1
+          fi
