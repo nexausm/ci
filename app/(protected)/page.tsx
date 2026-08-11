@@ -52,7 +52,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/custom/shared/status-badge";
 import { useClients, useInvoices } from "@/lib/storage";
-import { computeTotals, formatDateLong, formatMoney, nextInstallmentDueDate } from "@/lib/totals";
+import {
+  computeTotals,
+  formatDateLong,
+  formatMoney,
+  nextInstallmentDueDate,
+} from "@/lib/totals";
 import { getTemplate } from "@/lib/invoice-templates";
 import {
   downloadInstallmentPdf,
@@ -185,7 +190,14 @@ function Dashboard() {
           timeZone,
         }),
         `${inv.invoiceNumber || "invoice"}.pdf`,
-        buildPrintExtras(printSettings, inv, company, printDate, timeZone, template),
+        buildPrintExtras(
+          printSettings,
+          inv,
+          company,
+          printDate,
+          timeZone,
+          template,
+        ),
       );
     } catch {
       toast.error("Failed to generate PDF");
@@ -197,7 +209,13 @@ function Dashboard() {
     try {
       const template = getTemplate(templateId);
       for (const installment of inv.installments) {
-        await downloadInstallmentPdf(inv, installment, company, printSettings, template);
+        await downloadInstallmentPdf(
+          inv,
+          installment,
+          company,
+          printSettings,
+          template,
+        );
       }
     } catch {
       toast.error("Failed to generate installment PDFs");

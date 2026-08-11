@@ -23,7 +23,11 @@ function getServerSnapshot(): string {
 }
 
 export function useTemplateId() {
-  const templateId = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const templateId = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
 
   const setTemplateId = useCallback((id: string) => {
     writeTemplateId(id);
