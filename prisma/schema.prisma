@@ -5,6 +5,7 @@ generator client {
   moduleFormat           = "esm"
   generatedFileExtension = "ts"
   importFileExtension    = "ts"
+  compilerBuild          = "small"
 }
 
 generator scripts {
