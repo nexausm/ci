@@ -334,7 +334,15 @@ export function InvoicePreview({
       setPage((p) => Math.min(p, result.pageOffsets.length - 1));
     }, 0);
     return () => clearTimeout(timer);
-  }, [bodyMarkup, headerHtml, footerHtml, settings, PAGE_MARGIN, TOP_BAR_HEIGHT, template]);
+  }, [
+    bodyMarkup,
+    headerHtml,
+    footerHtml,
+    settings,
+    PAGE_MARGIN,
+    TOP_BAR_HEIGHT,
+    template,
+  ]);
 
   return (
     <div

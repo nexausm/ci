@@ -1,7 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { Client, InvoiceData, Payment, Product } from "./types";
+import type {
+  Client,
+  CompanyInfo,
+  InvoiceData,
+  Payment,
+  Product,
+} from "./types";
 
 async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -10,6 +16,21 @@ async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
   });
   if (!res.ok) throw new Error(`Request to ${url} failed: ${res.status}`);
   return res.json();
+}
+
+// --- company profile ---
+
+export async function fetchCompanyProfile(): Promise<CompanyInfo> {
+  return apiFetch("/api/company");
+}
+
+export async function updateCompanyProfile(
+  profile: CompanyInfo,
+): Promise<CompanyInfo> {
+  return apiFetch("/api/company", {
+    method: "PATCH",
+    body: JSON.stringify(profile),
+  });
 }
 
 // --- clients ---

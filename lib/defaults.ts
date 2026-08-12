@@ -1,5 +1,6 @@
 import type {
   Client,
+  CompanyProfile,
   CurrencyCode,
   Installment,
   InvoiceData,
@@ -103,6 +104,43 @@ export function createDefaultClient(): Client {
     notes: "",
     createdAt: now,
     updatedAt: now,
+  };
+}
+
+export function createDefaultCompanyProfile(): Omit<CompanyProfile, "id"> {
+  const now = new Date().toISOString();
+  return {
+    companyName: "",
+    numberLabel: "",
+    numberValue: "",
+    addressLines: [],
+    phone: "",
+    email: "",
+    logoDataUri: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export function sanitizeCompanyProfile(
+  raw: unknown,
+): Omit<CompanyProfile, "id"> {
+  const defaults = createDefaultCompanyProfile();
+  if (!raw || typeof raw !== "object") return defaults;
+  const stored = raw as Partial<CompanyProfile>;
+  const logo = stored.logoDataUri;
+  return {
+    ...defaults,
+    companyName: String(stored.companyName ?? defaults.companyName),
+    numberLabel: String(stored.numberLabel ?? defaults.numberLabel),
+    numberValue: String(stored.numberValue ?? defaults.numberValue),
+    addressLines: Array.isArray(stored.addressLines)
+      ? stored.addressLines
+      : defaults.addressLines,
+    phone: String(stored.phone ?? defaults.phone),
+    email: String(stored.email ?? defaults.email),
+    logoDataUri:
+      logo && typeof logo === "string" && logo.length > 0 ? logo : null,
   };
 }
 

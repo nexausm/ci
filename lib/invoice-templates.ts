@@ -96,8 +96,15 @@ export const TEMPLATES: InvoiceTemplate[] = [
         uploadedLogoDataUrl: opts?.uploadedLogoDataUrl,
       }),
     headerChrome: (data, company, printDate, timeZone, uploadedLogoDataUrl) =>
-      minimalHeaderChrome(data, company, printDate, timeZone, uploadedLogoDataUrl),
-    footerChrome: (company, invoiceId) => minimalFooterChrome(company?.companyName, invoiceId),
+      minimalHeaderChrome(
+        data,
+        company,
+        printDate,
+        timeZone,
+        uploadedLogoDataUrl,
+      ),
+    footerChrome: (company, invoiceId) =>
+      minimalFooterChrome(company?.companyName, invoiceId),
     topBar: minimalTopBar,
     pageMargin: MINIMAL_PAGE_MARGIN,
     topBarHeight: MINIMAL_TOP_BAR_HEIGHT,
