@@ -132,7 +132,13 @@ export function InstallmentsSection({
     setDownloadingId(inst.id);
     try {
       const template = getTemplate(templateId);
-      await downloadInstallmentPdf(data, inst, company, printSettings, template);
+      await downloadInstallmentPdf(
+        data,
+        inst,
+        company,
+        printSettings,
+        template,
+      );
     } catch {
       toast.error("Failed to generate installment PDF");
     } finally {

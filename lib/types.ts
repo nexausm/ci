@@ -128,6 +128,12 @@ export interface CompanyInfo {
   logoDataUri: string | null;
 }
 
+export interface CompanyProfile extends CompanyInfo {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface InvoiceTotals {
   subtotal: number;
   discount: number;

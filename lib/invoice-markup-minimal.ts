@@ -73,7 +73,6 @@ function esc(value: unknown): string {
     .replace(/'/g, "&#39;");
 }
 
-
 const ATOMIC = 'data-pgbreak="avoid"';
 const PG_HEADER = 'data-pgtype="table-header"';
 const PG_ROW = 'data-pgtype="item-row"';
@@ -209,11 +208,15 @@ function productTable(
           <td style="${S.td};font-weight:700;text-align:center;">Total</td>
           <td style="${S.tdRight};font-weight:700;">${formatMoney(computeTotals(data).total, symbol)}</td>
         </tr>
-        ${totals.amountPaid ? `<tr class="${S.totalRow}">
+        ${
+          totals.amountPaid
+            ? `<tr class="${S.totalRow}">
           <td colspan="3" style="border:1px solid #000;"></td>
           <td style="${S.td};font-weight:700;text-align:center;">Balance Due</td>
           <td style="${S.tdRight};font-weight:700;">${formatMoney(totals.balanceDue, symbol)}</td>
-        </tr>` : ""}
+        </tr>`
+            : ""
+        }
       </tbody>
     </table>`;
   }
@@ -258,12 +261,16 @@ function productTable(
       <div style="width:${pt(80)}px;padding:${pt(6)}px;border-right:1px solid #000;text-align:center;">Total</div>
       <div style="width:${pt(100)}px;padding:${pt(6)}px;text-align:right;">${formatMoney(computeTotals(data).total, symbol)}</div>
     </div>
-    ${totals.amountPaid ? `<div style="display:flex;border:1px solid #000;border-top:none;font-weight:700;">
+    ${
+      totals.amountPaid
+        ? `<div style="display:flex;border:1px solid #000;border-top:none;font-weight:700;">
       <div style="flex:1;border-right:1px solid #000;"></div>
       <div style="width:${pt(60)}px;border-right:1px solid #000;"></div>
       <div style="width:${pt(80)}px;padding:${pt(6)}px;border-right:1px solid #000;text-align:center;">Balance Due</div>
       <div style="width:${pt(100)}px;padding:${pt(6)}px;text-align:right;">${formatMoney(totals.balanceDue, symbol)}</div>
-    </div>` : ""}
+    </div>`
+        : ""
+    }
   </div>`;
 }
 
@@ -286,7 +293,10 @@ export function invoiceHeaderChrome(
   </div>`;
 }
 
-export function invoiceFooterChrome(_companyName?: string, _invoiceId?: string): string {
+export function invoiceFooterChrome(
+  _companyName?: string,
+  _invoiceId?: string,
+): string {
   return "";
 }
 
@@ -304,7 +314,10 @@ function paymentHistoryTable(data: InvoiceData, symbol: string): string {
     </div>`;
     })
     .join("");
-  const totalReceived = data.payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+  const totalReceived = data.payments.reduce(
+    (sum, p) => sum + (Number(p.amount) || 0),
+    0,
+  );
   return `<div style="${S.notes}" ${ATOMIC}>
     <div style="${S.sectionLabel}">Payment History</div>
     <div style="${S.paymentHeader}" ${PG_HEADER}>
@@ -321,7 +334,10 @@ function paymentHistoryTable(data: InvoiceData, symbol: string): string {
 }
 
 function scheduleTable(data: InvoiceData, symbol: string): string {
-  const scheduled = withInstallmentAllocations(data.installments, data.payments);
+  const scheduled = withInstallmentAllocations(
+    data.installments,
+    data.payments,
+  );
   if (scheduled.length === 0) return "";
   const rowCell = (style: string, content: string) =>
     `<div style="${style}">${content}</div>`;
@@ -355,10 +371,7 @@ function scheduleTable(data: InvoiceData, symbol: string): string {
   </div>`;
 }
 
-function bodyInnerContent(
-  data: InvoiceData,
-  realTable = false,
-): string {
+function bodyInnerContent(data: InvoiceData, realTable = false): string {
   const symbol = CURRENCIES[data.currency]?.symbol ?? data.currency;
 
   return (

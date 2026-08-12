@@ -1,11 +1,11 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { Download, Loader2, Plus, Settings2, Trash2, Upload } from "lucide-react";
+import { Download, Loader2, Plus, Settings2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,7 +68,7 @@ import { CURRENCIES } from "@/lib/currency";
 import { useCompany } from "@/app/providers/company-provider";
 import { usePrintSettings } from "@/hooks/use-print-settings";
 import { useTemplateId } from "@/hooks/use-template-id";
-import type { Client, CompanyInfo, CurrencyCode, InvoiceData, Product } from "@/lib/types";
+import type { Client, CurrencyCode, InvoiceData, Product } from "@/lib/types";
 
 const PDFViewer = dynamic(
   () =>
@@ -111,33 +111,6 @@ export function InvoiceEditor({ id }: { id?: string }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [uploadedLogo, setUploadedLogo] = useState<string | null>(null);
-  const logoInputRef = useRef<HTMLInputElement>(null);
-
-  const [companyOverrides, setCompanyOverrides] = useState<{
-    companyName: string;
-    addressLines: string;
-    phone: string;
-    email: string;
-  }>({
-    companyName: company.companyName,
-    addressLines: company.addressLines.join("\n"),
-    phone: company.phone,
-    email: company.email,
-  });
-
-  const effectiveCompany = useMemo<CompanyInfo>(
-    () => ({
-      ...company,
-      companyName: companyOverrides.companyName || company.companyName,
-      addressLines: companyOverrides.addressLines
-        ? companyOverrides.addressLines.split("\n").map((l) => l.trim()).filter(Boolean)
-        : company.addressLines,
-      phone: companyOverrides.phone || company.phone,
-      email: companyOverrides.email || company.email,
-    }),
-    [company, companyOverrides],
-  );
 
   useEffect(() => {
     if (!id) return;
@@ -182,20 +155,6 @@ export function InvoiceEditor({ id }: { id?: string }) {
 
   function addItem() {
     setData((d) => (d ? { ...d, items: [...d.items, newItem()] } : d));
-  }
-
-  function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Logo must be under 5MB");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setUploadedLogo(reader.result as string);
-    };
-    reader.readAsDataURL(file);
   }
 
   function removeItem(itemId: string) {
@@ -300,19 +259,17 @@ export function InvoiceEditor({ id }: { id?: string }) {
         realTable: true,
         headerMode: printSettings.headerMode,
         footerMode: printSettings.footerMode,
-        company: effectiveCompany,
+        company,
         printDate,
         timeZone,
-        uploadedLogoDataUrl: uploadedLogo,
       });
       const extras = buildPrintExtras(
         printSettings,
         effectiveData,
-        effectiveCompany,
+        company,
         printDate,
         timeZone,
         template,
-        uploadedLogo,
       );
       await downloadInvoicePdf(
         markup,
@@ -387,106 +344,6 @@ export function InvoiceEditor({ id }: { id?: string }) {
                     {t.label}
                   </button>
                 ))}
-              </div>
-              <div>
-                <Label>Logo (optional)</Label>
-                <p className="mb-2 text-xs text-muted-foreground">
-                  Upload a logo for this invoice. Not saved anywhere.
-                </p>
-                <input
-                  ref={logoInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleLogoUpload}
-                />
-                <div className="flex items-center gap-2">
-                  {uploadedLogo ? (
-                    <div className="relative h-16 w-16 overflow-hidden rounded border">
-                      <img
-                        src={uploadedLogo}
-                        alt="Uploaded logo"
-                        className="h-full w-full object-contain"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setUploadedLogo(null)}
-                        className="absolute right-0 top-0 rounded-bl bg-destructive p-0.5 text-destructive-foreground"
-                      >
-                        <Trash2 className="size-3" />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => logoInputRef.current?.click()}
-                      className="flex h-16 w-16 items-center justify-center rounded border-2 border-dashed text-muted-foreground hover:border-muted-foreground/50"
-                    >
-                      <Upload className="size-6" />
-                    </button>
-                  )}
-                  {uploadedLogo && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => logoInputRef.current?.click()}
-                    >
-                      Change
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Company</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Field label="Company name" htmlFor="companyName">
-                <Input
-                  id="companyName"
-                  value={companyOverrides.companyName}
-                  onChange={(e) =>
-                    setCompanyOverrides((o) => ({ ...o, companyName: e.target.value }))
-                  }
-                  placeholder="Company name"
-                />
-              </Field>
-              <Field label="Address (one line per row)" htmlFor="companyAddress">
-                <Textarea
-                  id="companyAddress"
-                  rows={3}
-                  value={companyOverrides.addressLines}
-                  onChange={(e) =>
-                    setCompanyOverrides((o) => ({ ...o, addressLines: e.target.value }))
-                  }
-                  placeholder="Line 1&#10;Line 2&#10;City, Country"
-                />
-              </Field>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Phone" htmlFor="companyPhone">
-                  <Input
-                    id="companyPhone"
-                    value={companyOverrides.phone}
-                    onChange={(e) =>
-                      setCompanyOverrides((o) => ({ ...o, phone: e.target.value }))
-                    }
-                    placeholder="+880..."
-                  />
-                </Field>
-                <Field label="Email" htmlFor="companyEmail">
-                  <Input
-                    id="companyEmail"
-                    value={companyOverrides.email}
-                    onChange={(e) =>
-                      setCompanyOverrides((o) => ({ ...o, email: e.target.value }))
-                    }
-                    placeholder="email@example.com"
-                  />
-                </Field>
               </div>
             </CardContent>
           </Card>
@@ -963,9 +820,8 @@ export function InvoiceEditor({ id }: { id?: string }) {
           <div className="mx-auto h-full aspect-210/297 overflow-hidden shadow-2xl shadow-black/10 ring-1 ring-black/5">
             <PDFViewer
               data={deferredData ?? effectiveData}
-              company={effectiveCompany}
+              company={company}
               templateId={templateId}
-              uploadedLogoDataUrl={uploadedLogo}
             />
           </div>
         </div>

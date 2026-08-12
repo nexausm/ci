@@ -1,6 +1,42 @@
+import { unstable_cache } from "next/cache";
+import { prisma } from "@/lib/prisma";
 import { COMPANY_INFO } from "@/generated/assets";
 import type { CompanyInfo } from "./types";
 
-export async function getCompanyInfo(): Promise<CompanyInfo> {
-  return COMPANY_INFO;
+export const COMPANY_PROFILE_TAG = "company-profile";
+export const COMPANY_PROFILE_ID = "default";
+
+type CompanyRow = {
+  companyName: string;
+  numberLabel: string;
+  numberValue: string;
+  addressLines: string[];
+  phone: string;
+  email: string;
+  logoDataUri: string | null;
+};
+
+function rowToCompanyInfo(row: CompanyRow): CompanyInfo {
+  return {
+    companyName: row.companyName,
+    numberLabel: row.numberLabel,
+    numberValue: row.numberValue,
+    addressLines: row.addressLines,
+    phone: row.phone,
+    email: row.email,
+    logoDataUri: row.logoDataUri,
+  };
 }
+
+async function loadCompanyInfo(): Promise<CompanyInfo> {
+  const row = await prisma.companyProfile.findUnique({
+    where: { id: COMPANY_PROFILE_ID },
+  });
+  return row ? rowToCompanyInfo(row) : COMPANY_INFO;
+}
+
+export const getCompanyInfo = unstable_cache(
+  loadCompanyInfo,
+  [COMPANY_PROFILE_ID],
+  { tags: [COMPANY_PROFILE_TAG] },
+);

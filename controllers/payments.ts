@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@/lib/prisma-client";
 import { prisma } from "@/lib/prisma";
 import { sanitizePayment } from "@/lib/defaults";
 import { paymentInstallmentAssignments } from "@/lib/totals";

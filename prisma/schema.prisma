@@ -5,6 +5,7 @@ generator client {
   moduleFormat           = "esm"
   generatedFileExtension = "ts"
   importFileExtension    = "ts"
+  compilerBuild          = "small"
 }
 
 generator scripts {
@@ -40,6 +41,19 @@ model User {
   email        String   @unique
   name         String   @default("")
   passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CompanyProfile {
+  id           String   @id @default("default")
+  companyName  String   @default("")
+  numberLabel  String   @default("")
+  numberValue  String   @default("")
+  addressLines String[] @default([])
+  phone        String   @default("")
+  email        String   @default("")
+  logoDataUri  String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
