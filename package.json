@@ -4,7 +4,7 @@
   "license": "AGPL-3.0",
   "scripts": {
     "dev": "prisma migrate deploy && prisma generate && next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "prisma migrate deploy && prisma generate && next start",
     "lint": "eslint",
     "seed": "tsx --env-file=.env scripts/seed-user.ts",
@@ -15,9 +15,9 @@
     "format:check": "prettier --check .",
     "gen:assets": "tsx scripts/gen-assets.ts",
     "postinstall": "prisma generate && npm run gen:assets",
-    "cf:build": "CF_PAGES=1 npm run gen:assets && opennextjs-cloudflare build",
-    "cf:preview": "CF_PAGES=1 npm run gen:assets && opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf:deploy": "CF_PAGES=1 npm run gen:assets && opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "cf:build": "CF_PAGES=1 npm run gen:assets && CF_PAGES=1 opennextjs-cloudflare build",
+    "cf:preview": "CF_PAGES=1 npm run gen:assets && CF_PAGES=1 opennextjs-cloudflare build && CF_PAGES=1 opennextjs-cloudflare preview",
+    "cf:deploy": "CF_PAGES=1 npm run gen:assets && CF_PAGES=1 opennextjs-cloudflare build && CF_PAGES=1 opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
