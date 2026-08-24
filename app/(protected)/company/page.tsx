@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Building2, ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Building2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,14 +18,13 @@ const EMPTY: CompanyInfo = {
   addressLines: [],
   phone: "",
   email: "",
-  logoDataUri: null,
+  logoUrl: null,
 };
 
 export default function Page() {
   const [form, setForm] = useState<CompanyInfo>(EMPTY);
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,17 +40,6 @@ export default function Page() {
 
   function update(patch: Partial<CompanyInfo>) {
     setForm((f) => ({ ...f, ...patch }));
-  }
-
-  function handleLogoFile(file: File | null) {
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please choose an image file");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => update({ logoDataUri: String(reader.result) });
-    reader.readAsDataURL(file);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -85,10 +73,10 @@ export default function Page() {
           <CardContent className="space-y-5">
             <div className="flex items-end gap-4">
               <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-accent">
-                {form.logoDataUri ? (
+                {form.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={form.logoDataUri}
+                    src={form.logoUrl}
                     alt="Company logo"
                     className="size-full object-contain"
                   />
@@ -96,35 +84,25 @@ export default function Page() {
                   <Building2 className="size-6 text-muted-foreground" />
                 )}
               </div>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileRef.current?.click()}
-                >
-                  <ImagePlus className="size-4" />
-                  Upload logo
-                </Button>
-                {form.logoDataUri && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => update({ logoDataUri: null })}
-                  >
-                    <Trash2 className="size-4" />
-                    Remove
-                  </Button>
-                )}
-              </div>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => handleLogoFile(e.target.files?.[0] ?? null)}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="company-logo-url">Logo URL</Label>
+              <Input
+                id="company-logo-url"
+                type="url"
+                inputMode="url"
+                value={form.logoUrl ?? ""}
+                onChange={(e) =>
+                  update({
+                    logoUrl: e.target.value.trim() ? e.target.value : null,
+                  })
+                }
+                placeholder="https://cdn.example.com/logo.png"
               />
+              <p className="text-xs text-muted-foreground">
+                Direct link to a hosted image (PNG, JPG, SVG, WebP, GIF).
+              </p>
             </div>
 
             <div className="space-y-1.5">

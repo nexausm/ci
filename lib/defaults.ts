@@ -116,7 +116,7 @@ export function createDefaultCompanyProfile(): Omit<CompanyProfile, "id"> {
     addressLines: [],
     phone: "",
     email: "",
-    logoDataUri: null,
+    logoUrl: null,
     createdAt: now,
     updatedAt: now,
   };
@@ -128,7 +128,8 @@ export function sanitizeCompanyProfile(
   const defaults = createDefaultCompanyProfile();
   if (!raw || typeof raw !== "object") return defaults;
   const stored = raw as Partial<CompanyProfile>;
-  const logo = stored.logoDataUri;
+  const logo = stored.logoUrl;
+  const trimmed = typeof logo === "string" ? logo.trim() : "";
   return {
     ...defaults,
     companyName: String(stored.companyName ?? defaults.companyName),
@@ -139,8 +140,7 @@ export function sanitizeCompanyProfile(
       : defaults.addressLines,
     phone: String(stored.phone ?? defaults.phone),
     email: String(stored.email ?? defaults.email),
-    logoDataUri:
-      logo && typeof logo === "string" && logo.length > 0 ? logo : null,
+    logoUrl: trimmed.length > 0 ? trimmed : null,
   };
 }
 

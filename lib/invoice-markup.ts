@@ -177,8 +177,8 @@ function headerContent(
   return `<div ${ATOMIC}>
     <div style="${S.header}">
       ${
-        company.logoDataUri
-          ? `<div style="${S.logoBox}"><img style="${S.logo}" src="${esc(company.logoDataUri)}" alt=""/></div>`
+        company.logoUrl
+          ? `<div style="${S.logoBox}"><img style="${S.logo}" src="${esc(company.logoUrl)}" alt=""/></div>`
           : ""
       }
       ${companyBlock(company)}
@@ -204,8 +204,8 @@ function installmentHeaderContent(
   return `<div ${ATOMIC}>
     <div style="${S.header}">
       ${
-        company.logoDataUri
-          ? `<div style="${S.logoBox}"><img style="${S.logo}" src="${esc(company.logoDataUri)}" alt=""/></div>`
+        company.logoUrl
+          ? `<div style="${S.logoBox}"><img style="${S.logo}" src="${esc(company.logoUrl)}" alt=""/></div>`
           : ""
       }
       ${companyBlock(company)}

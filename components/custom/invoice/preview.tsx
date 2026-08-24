@@ -243,12 +243,10 @@ export function InvoicePreview({
   data,
   company,
   templateId,
-  uploadedLogoDataUrl,
 }: {
   data: InvoiceData;
   company: CompanyInfo;
   templateId?: string;
-  uploadedLogoDataUrl?: string | null;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { settings } = usePrintSettings();
@@ -298,20 +296,12 @@ export function InvoicePreview({
       template.markup(data, {
         printDate,
         timeZone,
-        uploadedLogoDataUrl,
       }),
-    [data, printDate, timeZone, template, uploadedLogoDataUrl],
+    [data, printDate, timeZone, template],
   );
   const headerHtml = useMemo(
-    () =>
-      template.headerChrome(
-        data,
-        company,
-        printDate,
-        timeZone,
-        uploadedLogoDataUrl,
-      ),
-    [data, company, printDate, timeZone, template, uploadedLogoDataUrl],
+    () => template.headerChrome(data, company, printDate, timeZone),
+    [data, company, printDate, timeZone, template],
   );
   const footerHtml = useMemo(
     () => template.footerChrome(company, data.id),
