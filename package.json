@@ -13,11 +13,10 @@
     "db:deploy": "prisma migrate deploy",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "gen:assets": "tsx scripts/gen-assets.ts",
-    "postinstall": "prisma generate && npm run gen:assets",
-    "cf:build": "CF_PAGES=1 npm run gen:assets && CF_PAGES=1 opennextjs-cloudflare build",
-    "cf:preview": "CF_PAGES=1 npm run gen:assets && CF_PAGES=1 opennextjs-cloudflare build && CF_PAGES=1 opennextjs-cloudflare preview",
-    "cf:deploy": "CF_PAGES=1 npm run gen:assets && CF_PAGES=1 opennextjs-cloudflare build && CF_PAGES=1 opennextjs-cloudflare deploy"
+    "postinstall": "prisma generate",
+    "cf:build": "CF_PAGES=1 opennextjs-cloudflare build",
+    "cf:preview": "CF_PAGES=1 opennextjs-cloudflare build && CF_PAGES=1 opennextjs-cloudflare preview",
+    "cf:deploy": "CF_PAGES=1 opennextjs-cloudflare build && CF_PAGES=1 opennextjs-cloudflare deploy"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
