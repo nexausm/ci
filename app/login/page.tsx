@@ -4,16 +4,16 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
+  Button,
+  Input,
+  Label,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui";
 
 export default function LoginPage() {
   return (
@@ -37,7 +37,7 @@ function LoginForm() {
     fetch("/api/auth/session")
       .then((r) => r.json())
       .then((session) => {
-        if (session?.user) router.replace("/");
+        if (session?.user) router.replace("/dashboard");
       })
       .catch(() => {});
   }, [router]);
@@ -56,7 +56,7 @@ function LoginForm() {
         setError("Invalid email or password.");
         return;
       }
-      const next = searchParams.get("next") ?? "/";
+      const next = searchParams.get("next") ?? "/dashboard";
       router.push(next);
       router.refresh();
     } catch {
@@ -101,7 +101,7 @@ function LoginForm() {
             />
           </div>
           {error && (
-            <p className="text-sm text-destructive" role="alert">
+            <p className="text-destructive text-sm" role="alert">
               {error}
             </p>
           )}

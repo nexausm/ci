@@ -125,7 +125,7 @@ export interface CompanyInfo {
   addressLines: string[];
   phone: string;
   email: string;
-  logoDataUri: string | null;
+  logoUrl: string | null;
 }
 
 export interface CompanyProfile extends CompanyInfo {

@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
+  Button,
+  Input,
+  Label,
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui";
+
 import type { LineItem } from "@/lib/types";
 import { newExternalCostItem } from "@/lib/defaults";
 import { formatDateLong, formatMoney } from "@/lib/totals";
@@ -59,7 +60,7 @@ export function ReferencesSection({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold">External costs</h2>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Costs purchased for this client are added as line items, with the
             purchasing invoice referenced below.
           </p>
@@ -90,7 +91,7 @@ export function ReferencesSection({
                     {formatMoney(Number(item.rate) || 0, currencySymbol)}
                   </span>
                 </div>
-                <div className="mt-0.5 truncate text-xs text-muted-foreground">
+                <div className="text-muted-foreground mt-0.5 truncate text-xs">
                   {item.externalCost?.vendor}
                   {item.externalCost?.invoiceNumber
                     ? ` · ${item.externalCost.invoiceNumber}`
@@ -104,7 +105,7 @@ export function ReferencesSection({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+                className="text-muted-foreground hover:text-destructive size-8 shrink-0"
                 onClick={() => handleRemove(item.id)}
               >
                 <Trash2 className="size-4" />

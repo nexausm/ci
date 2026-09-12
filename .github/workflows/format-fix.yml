@@ -1,0 +1,77 @@
+name: Format staging after merge
+
+on:
+  push:
+    branches: [staging]
+
+concurrency:
+  group: format-staging
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    name: prettier
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+
+      - name: Skip if latest staging commit is already a bot formatting commit
+        id: skip
+        run: |
+          msg="$(git log -1 --format=%s)"
+          author="$(git log -1 --format=%an)"
+          if [ "$msg" = "style: apply prettier formatting [bot]" ] && [ "$author" = "opencode-format-bot" ]; then
+            echo "already=1" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.skip.outputs.already != '1'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Format and commit back to staging
+        if: steps.skip.outputs.already != '1'
+        run: |
+          set -euo pipefail
+          git config user.name "opencode-format-bot"
+          git config user.email "opencode-format-bot@users.noreply.github.com"
+          commit_msg="style: apply prettier formatting [bot]"
+
+          # Work against the newest staging head in case another merge landed
+          # while this run was starting; retry if the push is rejected.
+          for attempt in 1 2 3; do
+            git fetch origin staging
+            git checkout --detach "refs/remotes/origin/staging"
+            npm ci --ignore-scripts
+
+            if [ "$(git log -1 --format=%s)" = "$commit_msg" ] && \
+               [ "$(git log -1 --format=%an)" = "opencode-format-bot" ]; then
+              echo "Already formatted; skipping."
+              exit 0
+            fi
+
+            npm run format
+            git add -A
+            if git diff --cached --quiet; then
+              echo "No formatting changes needed."
+              exit 0
+            fi
+            git diff --stat --cached
+            git commit -m "$commit_msg"
+
+            if git push --porcelain origin "HEAD:refs/heads/staging"; then
+              echo "::notice::Pushed formatting commit to staging"
+              exit 0
+            fi
+            echo "Attempt ${attempt}: push rejected (another merge landed); retrying..."
+          done
+
+          echo "::error::Could not push formatting commit; will retry on the next push to staging."
+          exit 1

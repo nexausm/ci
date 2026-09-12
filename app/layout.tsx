@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "Billing | Nexaus",
@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full bg-muted/30">
+      <body className="bg-muted/30 min-h-full">
         {children}
         <Toaster richColors position="top-right" />
       </body>

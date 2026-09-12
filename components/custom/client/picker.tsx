@@ -2,20 +2,19 @@
 
 import { useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
+  Button,
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui";
+
 import { cn } from "@/lib/utils";
 import type { Client } from "@/lib/types";
 
@@ -71,7 +70,7 @@ export function ClientPicker({
                   <div className="flex flex-col overflow-hidden">
                     <span className="truncate">{client.name}</span>
                     {client.email && (
-                      <span className="truncate text-xs text-muted-foreground">
+                      <span className="text-muted-foreground truncate text-xs">
                         {client.email}
                       </span>
                     )}
