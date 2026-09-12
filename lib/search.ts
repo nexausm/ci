@@ -242,28 +242,36 @@ export async function searchRecords(
     pages: [],
   };
   if (!search) return EMPTY;
+  const client = search;
+
+  async function searchGroup<T>(type: string): Promise<T[]> {
+    try {
+      const res = await client.searchSingleIndex<T>({
+        indexName: INDEX_NAME!,
+        searchParams: { query: q, filters: `type:${type}`, hitsPerPage },
+      });
+      return res.hits;
+    } catch (err) {
+      if (err instanceof Error && err.message.includes("does not exist")) {
+        console.warn(
+          `[algolia] index "${INDEX_NAME}" not found yet; returning empty results`,
+        );
+        return [];
+      }
+      throw err;
+    }
+  }
+
   const [invoices, clients, products, pages] = await Promise.all([
-    search.searchSingleIndex<SearchHit>({
-      indexName: INDEX_NAME!,
-      searchParams: { query: q, filters: "type:invoice", hitsPerPage },
-    }),
-    search.searchSingleIndex<SearchHit>({
-      indexName: INDEX_NAME!,
-      searchParams: { query: q, filters: "type:client", hitsPerPage },
-    }),
-    search.searchSingleIndex<SearchHit>({
-      indexName: INDEX_NAME!,
-      searchParams: { query: q, filters: "type:product", hitsPerPage },
-    }),
-    search.searchSingleIndex<SearchHit>({
-      indexName: INDEX_NAME!,
-      searchParams: { query: q, filters: "type:page", hitsPerPage },
-    }),
+    searchGroup<SearchHit>("invoice"),
+    searchGroup<SearchHit>("client"),
+    searchGroup<SearchHit>("product"),
+    searchGroup<SearchHit>("page"),
   ]);
   return {
-    invoices: invoices.hits,
-    clients: clients.hits,
-    products: products.hits,
-    pages: pages.hits,
+    invoices,
+    clients,
+    products,
+    pages,
   };
 }
