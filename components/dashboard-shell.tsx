@@ -89,9 +89,11 @@ export function DashboardShell({
     <>
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-1030 flex h-full w-65 flex-col overflow-hidden border-r border-[#ddd] bg-[#212120] transition-transform duration-500",
+          "fixed inset-y-0 left-0 z-1030 flex h-full w-65 flex-col overflow-hidden border-r border-[#ddd] bg-[#212120] transition-[transform,visibility] duration-500",
           EASE,
-          sidebarOpen ? "translate-x-0" : "-translate-x-65 lg:translate-x-0",
+          sidebarOpen
+            ? "visible translate-x-0"
+            : "invisible -translate-x-65 lg:visible lg:translate-x-0",
         )}
       >
         <div className="relative z-4 flex shrink-0 items-center px-[0.7rem] py-1.75 after:absolute after:inset-x-3.75 after:bottom-0 after:h-px after:bg-white/50 after:content-['']">

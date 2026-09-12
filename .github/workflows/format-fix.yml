@@ -36,10 +36,6 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install dependencies
-        if: steps.skip.outputs.already != '1'
-        run: npm ci --ignore-scripts
-
       - name: Format and commit back to staging
         if: steps.skip.outputs.already != '1'
         run: |
@@ -53,6 +49,7 @@ jobs:
           for attempt in 1 2 3; do
             git fetch origin staging
             git checkout --detach "refs/remotes/origin/staging"
+            npm ci --ignore-scripts
 
             if [ "$(git log -1 --format=%s)" = "$commit_msg" ] && \
                [ "$(git log -1 --format=%an)" = "opencode-format-bot" ]; then
