@@ -2,8 +2,6 @@
 
 import { cn } from "@/lib/utils";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import type { TooltipValueType } from "recharts";
-import { TOOLTIP_STYLE } from "./chart-utils";
 
 export type DoughnutSegment = {
   label: string;
@@ -49,14 +47,14 @@ export function DoughnutChart({
             ))}
           </Pie>
           <Tooltip
-            contentStyle={TOOLTIP_STYLE}
-            formatter={(
-              value: TooltipValueType | undefined,
-              name: number | string | undefined,
-            ) => [
-              Number(value ?? 0).toLocaleString("en-US"),
-              String(name ?? ""),
-            ]}
+            content={({ active, payload }) => {
+              if (!active || !payload || payload.length === 0) return null;
+              return (
+                <div className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-card-foreground shadow-sm">
+                  {Number(payload[0].value ?? 0).toLocaleString("en-US")}
+                </div>
+              );
+            }}
           />
         </PieChart>
       </ResponsiveContainer>

@@ -63,7 +63,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/custom/shared/status-badge";
-import { AreaChart } from "@/components/custom/dashboard/area-chart";
 import { DoughnutChart } from "@/components/custom/dashboard/doughnut-chart";
 import { LineChart } from "@/components/custom/dashboard/line-chart";
 import { useClients, useInvoices } from "@/lib/storage";
@@ -153,7 +152,6 @@ function StatCard({
           </div>
         </div>
       </CardContent>
-      <div className="border-t border-border/60" />
       <CardFooter className="items-center gap-1.5 bg-transparent px-5 py-3 text-xs text-muted-foreground">
         {footer}
       </CardFooter>
@@ -273,10 +271,13 @@ function Dashboard() {
   }, [invoices, dominantCurrency]);
 
   const statusBreakdown = useMemo(() => {
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     const counts = new Map<InvoiceStatus, number>(
       STATUS_ORDER.map((key) => [key, 0]),
     );
     for (const inv of invoices) {
+      if (inv.createdAt.slice(0, 7) !== currentMonth) continue;
       const status = computeStatus(inv, computeTotals(inv));
       counts.set(status, (counts.get(status) ?? 0) + 1);
     }
@@ -325,22 +326,19 @@ function Dashboard() {
   }, [invoices, clients.length]);
 
   function renderByCurrency(map: Map<string, number>) {
-    const entries = [...map.entries()].filter(([, amount]) => amount !== 0);
-    if (entries.length === 0) {
-      return <span className="text-xl font-semibold">$0.00</span>;
-    }
+    const currencies: CurrencyCode[] = ["USD", "BDT"];
     return (
-      <div className="space-y-0.5">
-        {entries.map(([currency, amount]) => (
-          <div key={currency} className="text-xl font-semibold">
-            {formatMoney(
-              amount,
-              CURRENCIES[currency as keyof typeof CURRENCIES]?.symbol ??
-                currency,
-            )}
-          </div>
-        ))}
-      </div>
+      <span className="text-xl font-semibold">
+        {currencies
+          .map((currency) => {
+            const symbol = CURRENCIES[currency].symbol;
+            return formatMoney(map.get(currency) ?? 0, symbol).replace(
+              symbol,
+              `${symbol} `,
+            );
+          })
+          .join(", ")}
+      </span>
     );
   }
 
@@ -466,28 +464,11 @@ function Dashboard() {
         />
       </div>
 
-      <Card className="mt-6">
-        <CardHeader className="px-6 pt-6">
-          <CardTitle>Revenue</CardTitle>
-          <CardDescription>
-            Invoiced per month{" "}
-            {monthly.invoiced.some((m) => m.value > 0) ? `· ${symbol}` : ""}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-3 pb-2 pt-2">
-          <AreaChart data={monthly.invoiced} />
-        </CardContent>
-        <CardFooter className="items-center gap-1.5 bg-transparent px-6 py-3 text-xs text-muted-foreground">
-          <History className="size-3.5" />
-          Last 12 months of activity
-        </CardFooter>
-      </Card>
-
       <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-3">
         <Card>
           <CardHeader className="px-6 pt-6">
             <CardTitle>Invoice Status</CardTitle>
-            <CardDescription>All invoices breakdown</CardDescription>
+            <CardDescription>This month&apos;s breakdown</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center px-6 pt-3 pb-2">
             <DoughnutChart
@@ -498,12 +479,12 @@ function Dashboard() {
               }))}
             />
           </CardContent>
-          <CardFooter className="flex flex-wrap items-center gap-x-5 gap-y-1.5 bg-transparent px-6 py-3 text-xs text-muted-foreground">
+          <CardFooter className="grid grid-cols-2 items-center gap-x-5 gap-y-1.5 bg-transparent px-6 py-3 text-xs text-muted-foreground">
             {statusBreakdown.map((s) => (
               <LegendDot
                 key={s.key}
                 color={STATUS_CHART_COLOR[s.key]}
-                label={`${STATUS_LABEL[s.key]} (${s.count})`}
+                label={STATUS_LABEL[s.key]}
               />
             ))}
           </CardFooter>
@@ -513,7 +494,7 @@ function Dashboard() {
           <CardHeader className="px-6 pt-6">
             <CardTitle>Invoiced vs Received</CardTitle>
             <CardDescription>
-              Monthly comparison{" "}
+              Last 12 months{" "}
               {monthly.invoiced.some((m) => m.value > 0) ? `· ${symbol}` : ""}
             </CardDescription>
           </CardHeader>
