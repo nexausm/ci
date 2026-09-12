@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
+  Button,
+  Input,
+  Label,
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui";
+
 import type { LineItem } from "@/lib/types";
 import { newExternalCostItem } from "@/lib/defaults";
 import { formatDateLong, formatMoney } from "@/lib/totals";

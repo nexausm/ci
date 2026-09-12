@@ -4,24 +4,20 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Building2, MoreHorizontal, Plus, Search, User } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
+  Button,
+  Input,
+  Badge,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -30,8 +26,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Card, CardContent } from "@/components/ui/card";
+  Card,
+  CardContent,
+} from "@/components/ui";
+
 import { useClients, useInvoices } from "@/lib/storage";
 import { ClientFormDialog } from "@/components/custom/client/form-dialog";
 import type { Client } from "@/lib/types";

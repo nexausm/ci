@@ -3,23 +3,19 @@
 import { useMemo, useState } from "react";
 import { MoreHorizontal, Package, Plus, Search } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
+  Button,
+  Input,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -28,8 +24,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Card, CardContent } from "@/components/ui/card";
+  Card,
+  CardContent,
+} from "@/components/ui";
+
 import { useProducts } from "@/lib/storage";
 import { ProductFormDialog } from "@/components/custom/product/form-dialog";
 import type { Product } from "@/lib/types";
