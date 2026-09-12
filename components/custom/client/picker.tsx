@@ -71,7 +71,7 @@ export function ClientPicker({
                   <div className="flex flex-col overflow-hidden">
                     <span className="truncate">{client.name}</span>
                     {client.email && (
-                      <span className="truncate text-xs text-muted-foreground">
+                      <span className="text-muted-foreground truncate text-xs">
                         {client.email}
                       </span>
                     )}

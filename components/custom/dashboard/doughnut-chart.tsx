@@ -50,7 +50,7 @@ export function DoughnutChart({
             content={({ active, payload }) => {
               if (!active || !payload || payload.length === 0) return null;
               return (
-                <div className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-card-foreground shadow-sm">
+                <div className="border-border bg-card text-card-foreground rounded-lg border px-3 py-1.5 text-sm font-medium shadow-sm">
                   {Number(payload[0].value ?? 0).toLocaleString("en-US")}
                 </div>
               );
@@ -59,7 +59,7 @@ export function DoughnutChart({
         </PieChart>
       </ResponsiveContainer>
       {total > 0 && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-2xl font-semibold text-card-foreground">
+        <div className="text-card-foreground pointer-events-none absolute inset-0 flex items-center justify-center text-2xl font-semibold">
           {total}
         </div>
       )}

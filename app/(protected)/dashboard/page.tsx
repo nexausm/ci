@@ -145,14 +145,14 @@ function StatCard({
             strokeWidth={1.5}
           />
           <div className="min-w-0 flex-1 text-right">
-            <p className="text-sm font-medium text-muted-foreground">{label}</p>
-            <div className="truncate text-2xl font-semibold tracking-tight text-card-foreground">
+            <p className="text-muted-foreground text-sm font-medium">{label}</p>
+            <div className="text-card-foreground truncate text-2xl font-semibold tracking-tight">
               {value}
             </div>
           </div>
         </div>
       </CardContent>
-      <CardFooter className="items-center gap-1.5 bg-transparent px-5 py-3 text-xs text-muted-foreground">
+      <CardFooter className="text-muted-foreground items-center gap-1.5 bg-transparent px-5 py-3 text-xs">
         {footer}
       </CardFooter>
     </Card>
@@ -486,7 +486,7 @@ function Dashboard() {
                   }))}
                 />
               </CardContent>
-              <CardFooter className="grid grid-cols-2 items-center gap-x-5 gap-y-1.5 bg-transparent px-6 py-3 text-xs text-muted-foreground">
+              <CardFooter className="text-muted-foreground grid grid-cols-2 items-center gap-x-5 gap-y-1.5 bg-transparent px-6 py-3 text-xs">
                 {statusBreakdown.map((s) => (
                   <LegendDot
                     key={s.key}
@@ -508,7 +508,7 @@ function Dashboard() {
                     : ""}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="px-3 pb-2 pt-2">
+              <CardContent className="px-3 pt-2 pb-2">
                 <LineChart
                   series={[
                     {
@@ -524,7 +524,7 @@ function Dashboard() {
                   ]}
                 />
               </CardContent>
-              <CardFooter className="items-center gap-5 bg-transparent px-6 py-3 text-xs text-muted-foreground">
+              <CardFooter className="text-muted-foreground items-center gap-5 bg-transparent px-6 py-3 text-xs">
                 <LegendDot color={INVOICED_COLOR} label="Invoiced" />
                 <LegendDot color={RECEIVED_COLOR} label="Received" />
               </CardFooter>
@@ -537,20 +537,20 @@ function Dashboard() {
             {[0, 1, 2, 3].map((i) => (
               <Card key={i}>
                 <CardContent className="space-y-3 px-5 pt-5 pb-4">
-                  <div className="h-9 w-9 animate-pulse rounded-full bg-muted" />
-                  <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+                  <div className="bg-muted h-9 w-9 animate-pulse rounded-full" />
+                  <div className="bg-muted h-4 w-1/2 animate-pulse rounded" />
                 </CardContent>
               </Card>
             ))}
           </div>
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
             <Card className="h-64">
-              <CardContent className="flex items-center justify-center p-6 text-sm text-muted-foreground">
+              <CardContent className="text-muted-foreground flex items-center justify-center p-6 text-sm">
                 Loading…
               </CardContent>
             </Card>
             <Card className="h-64 md:col-span-2">
-              <CardContent className="flex items-center justify-center p-6 text-sm text-muted-foreground">
+              <CardContent className="text-muted-foreground flex items-center justify-center p-6 text-sm">
                 Loading…
               </CardContent>
             </Card>
@@ -560,7 +560,7 @@ function Dashboard() {
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative max-w-sm flex-1">
-          <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
           <Input
             placeholder="Search by invoice # or client…"
             value={query}
@@ -584,11 +584,11 @@ function Dashboard() {
           </SelectContent>
         </Select>
         {filterClient && (
-          <Badge variant="secondary" className="gap-1.5 py-1.5 pl-2.5 pr-1.5">
+          <Badge variant="secondary" className="gap-1.5 py-1.5 pr-1.5 pl-2.5">
             Client: {filterClient.name}
             <button
               type="button"
-              className="rounded-full p-0.5 hover:bg-foreground/10"
+              className="hover:bg-foreground/10 rounded-full p-0.5"
               onClick={() => router.push("/dashboard")}
             >
               <X className="size-3" />
@@ -622,7 +622,7 @@ function Dashboard() {
                 <TableRow>
                   <TableCell
                     colSpan={7}
-                    className="h-24 text-center text-muted-foreground"
+                    className="text-muted-foreground h-24 text-center"
                   >
                     Loading…
                   </TableCell>
@@ -630,7 +630,7 @@ function Dashboard() {
               ) : rows.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="h-32 text-center">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <div className="text-muted-foreground flex flex-col items-center gap-2">
                       <FileText className="size-8" />
                       <p>
                         {invoices.length === 0
@@ -661,7 +661,7 @@ function Dashboard() {
                     <TableCell className="truncate font-medium">
                       {inv.invoiceNumber || "(no number)"}
                     </TableCell>
-                    <TableCell className="truncate text-muted-foreground">
+                    <TableCell className="text-muted-foreground truncate">
                       {inv.billToName || clientName(inv.clientId)}
                     </TableCell>
                     <TableCell className="text-muted-foreground">

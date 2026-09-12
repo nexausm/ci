@@ -34,7 +34,7 @@ function PriceFields({
   const symbol = currency === "USD" ? "$" : "৳";
   return (
     <div className="rounded-lg border p-3">
-      <Label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <Label className="text-muted-foreground mb-2 block text-xs font-semibold tracking-wide uppercase">
         Price · {currency}
       </Label>
       <div className="grid grid-cols-2 gap-3">
@@ -71,7 +71,7 @@ function PriceFields({
         </div>
       </div>
       {invalid && (
-        <p className="mt-2 text-xs font-medium text-destructive">
+        <p className="text-destructive mt-2 text-xs font-medium">
           Discounted price should not exceed the {currency} base price.
         </p>
       )}
@@ -177,7 +177,7 @@ export function ProductFormDialog({
               onDiscountedChange={(v) => update({ discountedPriceBdt: v })}
             />
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               When this product is added to an invoice, the discounted price for
               the invoice&apos;s currency is used and the difference from the
               base price is shown as a discount on the invoice.

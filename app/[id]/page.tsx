@@ -108,7 +108,7 @@ export default async function PublicInvoicePage({
 
   return (
     <main className="flex min-h-svh items-center justify-center px-4">
-      <div className="w-full max-w-xl space-y-3 text-base leading-relaxed text-foreground sm:text-lg">
+      <div className="text-foreground w-full max-w-xl space-y-3 text-base leading-relaxed sm:text-lg">
         {sentences.map((sentence) => (
           <p key={sentence}>{sentence}</p>
         ))}
@@ -117,7 +117,7 @@ export default async function PublicInvoicePage({
           <div className="overflow-hidden rounded-md border text-sm">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b bg-muted/50 text-left text-muted-foreground">
+                <tr className="bg-muted/50 text-muted-foreground border-b text-left">
                   <th className="px-3 py-2 font-medium">Installment</th>
                   <th className="px-3 py-2 font-medium">Due date</th>
                   <th className="px-3 py-2 text-right font-medium">Amount</th>
@@ -137,23 +137,23 @@ export default async function PublicInvoicePage({
                       <td className="px-3 py-2">
                         <span className="font-medium">#{inst.seq + 1}</span>
                         {inst.label ? (
-                          <span className="ml-2 text-muted-foreground">
+                          <span className="text-muted-foreground ml-2">
                             {inst.label}
                           </span>
                         ) : null}
                       </td>
-                      <td className="px-3 py-2 text-muted-foreground">
+                      <td className="text-muted-foreground px-3 py-2">
                         {formatDateLong(inst.dueDate) || "—"}
                       </td>
                       <td className="px-3 py-2 text-right">
                         {money(inst.amount)}
                         {inst.paidAmount ? (
-                          <span className="block text-xs text-muted-foreground">
+                          <span className="text-muted-foreground block text-xs">
                             {money(inst.paidAmount)} paid
                           </span>
                         ) : null}
                       </td>
-                      <td className="px-3 py-2 text-right text-muted-foreground">
+                      <td className="text-muted-foreground px-3 py-2 text-right">
                         {status}
                       </td>
                     </tr>

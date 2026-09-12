@@ -91,7 +91,7 @@ export default function Page() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Clients</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Individuals and organizations you bill.
           </p>
         </div>
@@ -108,7 +108,7 @@ export default function Page() {
 
       <div className="mt-6 max-w-sm">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
           <Input
             placeholder="Search clients…"
             value={query}
@@ -136,7 +136,7 @@ export default function Page() {
                 <TableRow>
                   <TableCell
                     colSpan={6}
-                    className="h-24 text-center text-muted-foreground"
+                    className="text-muted-foreground h-24 text-center"
                   >
                     Loading…
                   </TableCell>
@@ -145,7 +145,7 @@ export default function Page() {
                 <TableRow>
                   <TableCell
                     colSpan={6}
-                    className="h-24 text-center text-muted-foreground"
+                    className="text-muted-foreground h-24 text-center"
                   >
                     {clients.length === 0
                       ? "No clients yet. Add your first client to get started."
@@ -163,7 +163,7 @@ export default function Page() {
                         {client.name}
                       </Link>
                       {client.type === "organization" && client.contactName && (
-                        <div className="text-xs font-normal text-muted-foreground">
+                        <div className="text-muted-foreground text-xs font-normal">
                           {client.contactName}
                         </div>
                       )}
@@ -180,10 +180,10 @@ export default function Page() {
                           : "Individual"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="truncate text-muted-foreground">
+                    <TableCell className="text-muted-foreground truncate">
                       {client.email || "—"}
                     </TableCell>
-                    <TableCell className="truncate text-muted-foreground">
+                    <TableCell className="text-muted-foreground truncate">
                       {client.phone || "—"}
                     </TableCell>
                     <TableCell className="text-right">

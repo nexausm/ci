@@ -82,12 +82,12 @@ export function ProductPicker({
                   <div className="flex flex-col overflow-hidden">
                     <span className="truncate">{product.name}</span>
                     {product.description && (
-                      <span className="truncate text-xs text-muted-foreground">
+                      <span className="text-muted-foreground truncate text-xs">
                         {product.description}
                       </span>
                     )}
                   </div>
-                  <span className="ml-auto shrink-0 text-xs tabular-nums text-muted-foreground">
+                  <span className="text-muted-foreground ml-auto shrink-0 text-xs tabular-nums">
                     {priceFor(product)}
                   </span>
                 </CommandItem>

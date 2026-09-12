@@ -298,7 +298,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
     return (
       <div className="mx-auto max-w-xl px-6 py-24 text-center">
         <h1 className="text-lg font-semibold">Invoice not found</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-sm">
           It may have been deleted, or the link is incorrect.
         </p>
         <Button
@@ -314,7 +314,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
 
   if (!data || !totals || !effectiveData) {
     return (
-      <div className="mx-auto max-w-7xl px-6 py-24 text-center text-sm text-muted-foreground">
+      <div className="text-muted-foreground mx-auto max-w-7xl px-6 py-24 text-center text-sm">
         Loading invoice…
       </div>
     );
@@ -370,7 +370,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
                   onChange={(e) => update({ dueDate: e.target.value })}
                 />
                 {data.installmentsEnabled && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     Set by installments
                   </p>
                 )}
@@ -444,7 +444,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
               </div>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="hidden grid-cols-[1fr_120px_64px_96px_32px] gap-2 px-1 text-xs font-medium text-muted-foreground sm:grid">
+              <div className="text-muted-foreground hidden grid-cols-[1fr_120px_64px_96px_32px] gap-2 px-1 text-xs font-medium sm:grid">
                 <span>Description</span>
                 <span className="text-right">Rate</span>
                 <span className="text-right">Qty</span>
@@ -501,7 +501,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8 justify-self-end text-muted-foreground hover:text-destructive"
+                        className="text-muted-foreground hover:text-destructive size-8 justify-self-end"
                         onClick={() => removeItem(item.id)}
                         disabled={
                           !data.items.some((it) => it.externalCost) &&
@@ -545,7 +545,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
                   />
                 )}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Product discounts are always applied and combined with any
                 manual discount above.
               </p>
@@ -612,7 +612,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
                   value={data.adjustmentValue ?? 0}
                   onValueChange={(v) => update({ adjustmentValue: v })}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Enter a negative value to subtract, positive to add.
                 </p>
               </div>
@@ -816,8 +816,8 @@ export function InvoiceEditor({ id }: { id?: string }) {
           </div>
         </div>
 
-        <div className="h-150 w-full bg-muted p-4 lg:h-full lg:w-auto lg:flex-none">
-          <div className="mx-auto h-full aspect-210/297 overflow-hidden shadow-2xl shadow-black/10 ring-1 ring-black/5">
+        <div className="bg-muted h-150 w-full p-4 lg:h-full lg:w-auto lg:flex-none">
+          <div className="mx-auto aspect-210/297 h-full overflow-hidden shadow-2xl ring-1 shadow-black/10 ring-black/5">
             <PDFViewer
               data={deferredData ?? effectiveData}
               company={company}

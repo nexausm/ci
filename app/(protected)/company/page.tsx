@@ -60,7 +60,7 @@ export default function Page() {
     <div className="w-full px-4 py-8 sm:px-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Company</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Your billing identity — appears on invoices, quotes and printouts.
         </p>
       </div>
@@ -72,7 +72,7 @@ export default function Page() {
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="flex items-end gap-4">
-              <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-accent">
+              <div className="bg-accent flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border">
                 {form.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -81,7 +81,7 @@ export default function Page() {
                     className="size-full object-contain"
                   />
                 ) : (
-                  <Building2 className="size-6 text-muted-foreground" />
+                  <Building2 className="text-muted-foreground size-6" />
                 )}
               </div>
             </div>
@@ -100,7 +100,7 @@ export default function Page() {
                 }
                 placeholder="https://cdn.example.com/logo.png"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 Direct link to a hosted image (PNG, JPG, SVG, WebP, GIF).
               </p>
             </div>

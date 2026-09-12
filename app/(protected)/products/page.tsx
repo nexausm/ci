@@ -52,7 +52,7 @@ function PriceCell({
     <div className="flex flex-col items-end">
       <span className="tabular-nums">{formatPrice(base)}</span>
       {discounted != null && (
-        <span className="text-xs tabular-nums text-muted-foreground">
+        <span className="text-muted-foreground text-xs tabular-nums">
           disc. {formatPrice(discounted)}
         </span>
       )}
@@ -104,7 +104,7 @@ export default function Page() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Products</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Reusable goods and services you bill for.
           </p>
         </div>
@@ -121,7 +121,7 @@ export default function Page() {
 
       <div className="mt-6 max-w-sm">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
           <Input
             placeholder="Search products…"
             value={query}
@@ -148,7 +148,7 @@ export default function Page() {
                 <TableRow>
                   <TableCell
                     colSpan={5}
-                    className="h-24 text-center text-muted-foreground"
+                    className="text-muted-foreground h-24 text-center"
                   >
                     Loading…
                   </TableCell>
@@ -156,7 +156,7 @@ export default function Page() {
               ) : filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-32 text-center">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <div className="text-muted-foreground flex flex-col items-center gap-2">
                       <Package className="size-8" />
                       <p>
                         {products.length === 0
@@ -182,7 +182,7 @@ export default function Page() {
                     <TableCell className="truncate font-medium">
                       {product.name}
                     </TableCell>
-                    <TableCell className="truncate text-muted-foreground">
+                    <TableCell className="text-muted-foreground truncate">
                       {product.description || "—"}
                     </TableCell>
                     <TableCell className="text-right">

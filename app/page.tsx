@@ -7,13 +7,13 @@ export default function PublicHomePage() {
     <main className="flex min-h-svh items-center justify-center px-4">
       <div className="w-full max-w-xl space-y-8 text-center">
         <div className="space-y-3">
-          <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="text-muted-foreground text-sm font-semibold tracking-widest uppercase">
             Nexaus
           </p>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Billing
           </h1>
-          <p className="mx-auto max-w-md text-base text-muted-foreground">
+          <p className="text-muted-foreground mx-auto max-w-md text-base">
             Create invoices, track payments, and get paid on time.
           </p>
         </div>
@@ -38,23 +38,23 @@ export default function PublicHomePage() {
 
         <div className="grid grid-cols-1 gap-3 pt-4 text-left sm:grid-cols-3">
           <div className="rounded-md border p-4">
-            <FileText className="mb-2 size-5 text-muted-foreground" />
+            <FileText className="text-muted-foreground mb-2 size-5" />
             <p className="text-sm font-medium">Invoicing</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-1 text-xs">
               Create and send professional invoices.
             </p>
           </div>
           <div className="rounded-md border p-4">
-            <Wallet className="mb-2 size-5 text-muted-foreground" />
+            <Wallet className="text-muted-foreground mb-2 size-5" />
             <p className="text-sm font-medium">Payments</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-1 text-xs">
               Track installments and received payments.
             </p>
           </div>
           <div className="rounded-md border p-4">
-            <ShieldCheck className="mb-2 size-5 text-muted-foreground" />
+            <ShieldCheck className="text-muted-foreground mb-2 size-5" />
             <p className="text-sm font-medium">Secure</p>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="text-muted-foreground mt-1 text-xs">
               Your billing data stays private.
             </p>
           </div>

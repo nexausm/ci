@@ -96,7 +96,7 @@ export function PaymentsSection({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold">Payments received</h2>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Record every deposit or partial payment for this invoice.
           </p>
         </div>
@@ -107,7 +107,7 @@ export function PaymentsSection({
       </div>
 
       {payments.length > 0 && (
-        <div className="overflow-hidden rounded-md border bg-card">
+        <div className="bg-card overflow-hidden rounded-md border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -132,7 +132,7 @@ export function PaymentsSection({
                     <TableCell className="text-muted-foreground">
                       {payment.method}
                     </TableCell>
-                    <TableCell className="max-w-48 truncate text-muted-foreground">
+                    <TableCell className="text-muted-foreground max-w-48 truncate">
                       {payment.note || "—"}
                     </TableCell>
                     {installments.length > 0 && (
@@ -148,7 +148,7 @@ export function PaymentsSection({
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8 text-muted-foreground hover:text-destructive"
+                        className="text-muted-foreground hover:text-destructive size-8"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRemove(payment.id);
@@ -161,7 +161,7 @@ export function PaymentsSection({
                 ))}
             </TableBody>
           </Table>
-          <div className="flex justify-end border-t bg-muted/40 px-4 py-2 text-sm">
+          <div className="bg-muted/40 flex justify-end border-t px-4 py-2 text-sm">
             <span className="text-muted-foreground">Total received:&nbsp;</span>
             <span className="font-semibold">
               {formatMoney(total, currencySymbol)}
