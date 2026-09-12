@@ -5,15 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useCompany } from "@/app/providers/company-provider";
-import {
-  Bell,
-  Building2,
-  LayoutGrid,
-  LogOut,
-  Plus,
-  Search,
-  Settings,
-} from "lucide-react";
+import { GlobalSearch } from "@/components/custom/global-search";
+import { Building2, LogOut, Plus, Settings } from "lucide-react";
 import { FaUserFriends } from "react-icons/fa";
 import { BiSolidLayout } from "react-icons/bi";
 import { AiFillProduct } from "react-icons/ai";
@@ -155,35 +148,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <span className="navbar-brand">{getBrand(pathname)}</span>
             </div>
             <div className="paper-topbar-right">
-              <form
-                className="paper-search"
-                onSubmit={(e) => e.preventDefault()}
-              >
-                <div className="paper-search-group">
-                  <Search className="paper-search-icon" size={16} />
-                  <input
-                    type="text"
-                    className="paper-search-input"
-                    placeholder="Search..."
-                    aria-label="Search"
-                  />
-                </div>
-              </form>
+              <GlobalSearch />
               <nav className="paper-topbar-nav">
-                <Link
-                  href="/invoices"
-                  className="paper-link-icon"
-                  aria-label="Invoices"
-                >
-                  <LayoutGrid size={16} />
-                </Link>
-                <button
-                  type="button"
-                  className="paper-link-icon paper-hide-mobile"
-                  aria-label="Notifications"
-                >
-                  <Bell size={16} />
-                </button>
                 <button
                   type="button"
                   className="paper-link-icon paper-hide-mobile"

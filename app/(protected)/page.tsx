@@ -174,9 +174,14 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 export default function Home() {
   return (
     <Suspense>
-      <Dashboard />
+      <DashboardWithQuery />
     </Suspense>
   );
+}
+
+function DashboardWithQuery() {
+  const searchParams = useSearchParams();
+  return <Dashboard key={searchParams.get("q") ?? ""} />;
 }
 
 function Dashboard() {
@@ -188,7 +193,7 @@ function Dashboard() {
   const { clients } = useClients();
   const { invoices, loaded, removeInvoice } = useInvoices();
 
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState<string>(() => searchParams.get("q") ?? "");
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">(
     "all",
   );

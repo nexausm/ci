@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@/lib/prisma-client";
 import { prisma } from "@/lib/prisma";
 import { sanitizeClient } from "@/lib/defaults";
+import { indexClient, unindexClient } from "@/lib/search";
 
 const PATCH_FIELDS = [
   "type",
@@ -32,6 +33,7 @@ export async function createClient(req: Request) {
     create: { id, ...data },
     update: data,
   });
+  await indexClient(client);
   return NextResponse.json(client);
 }
 
@@ -56,6 +58,7 @@ export async function updateClient(
       where: { id },
       data: set as Prisma.ClientUpdateInput,
     });
+    await indexClient(sanitizeClient(doc));
     return NextResponse.json(doc);
   } catch (err) {
     if (
@@ -74,5 +77,6 @@ export async function deleteClient(
 ) {
   const { id } = await params;
   await prisma.client.deleteMany({ where: { id } });
+  await unindexClient(id);
   return NextResponse.json({ ok: true });
 }
