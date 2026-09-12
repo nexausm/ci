@@ -1,0 +1,28 @@
+{
+  "name": "taetype",
+  "type": "module",
+  "description": "A font engine in Rust/WASM: decode, instance, subset, and shape TTF, OTF, TTC, and WOFF2",
+  "version": "0.1.3",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/silly-tae/taetype"
+  },
+  "files": [
+    "taetype_bg.wasm",
+    "taetype.js",
+    "taetype.d.ts"
+  ],
+  "main": "taetype.js",
+  "types": "taetype.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ],
+  "keywords": [
+    "font",
+    "opentype",
+    "woff2",
+    "variable-fonts",
+    "wasm"
+  ]
+}
