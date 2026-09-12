@@ -109,6 +109,10 @@ const STATUS_ORDER: InvoiceStatus[] = [
 const INVOICED_COLOR = "#3b82f6";
 const RECEIVED_COLOR = "#10b981";
 
+function monthKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
 const CARD_ICON_TONES = {
   amber: "text-amber-500",
   emerald: "text-emerald-500",
@@ -252,7 +256,7 @@ function Dashboard() {
 
     for (const inv of invoices) {
       if (inv.currency !== dominantCurrency) continue;
-      const issueKey = inv.createdAt.slice(0, 7);
+      const issueKey = monthKey(new Date(inv.createdAt));
       const issueBucket = invoiced.get(issueKey);
       if (issueBucket) issueBucket.value += computeTotals(inv).total;
       for (const payment of inv.payments) {
@@ -275,7 +279,7 @@ function Dashboard() {
       STATUS_ORDER.map((key) => [key, 0]),
     );
     for (const inv of invoices) {
-      if (inv.createdAt.slice(0, 7) !== currentMonth) continue;
+      if (monthKey(new Date(inv.createdAt)) !== currentMonth) continue;
       const status = computeStatus(inv, computeTotals(inv));
       counts.set(status, (counts.get(status) ?? 0) + 1);
     }
@@ -295,7 +299,7 @@ function Dashboard() {
     let invoiceCount = 0;
     for (const inv of invoices) {
       const totals = computeTotals(inv);
-      if (inv.createdAt.slice(0, 7) === currentMonth) {
+      if (monthKey(new Date(inv.createdAt)) === currentMonth) {
         invoiceCount += 1;
         if (inv.state === "sent") {
           outstandingByCurrency.set(
