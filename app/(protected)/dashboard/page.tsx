@@ -410,121 +410,153 @@ function Dashboard() {
 
   return (
     <div className="w-full px-4 py-6 sm:px-6">
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          icon={Wallet}
-          tone="sky"
-          label="Outstanding"
-          value={renderByCurrency(stats.outstandingByCurrency)}
-          footer={
-            <>
-              <History className="size-3.5" />
-              Outstanding from invoices issued this month
-            </>
-          }
-        />
-        <StatCard
-          icon={Banknote}
-          tone="emerald"
-          label="Received"
-          value={renderByCurrency(stats.paidByCurrency)}
-          footer={
-            <>
-              <RefreshCw className="size-3.5" />
-              Payments received this month
-            </>
-          }
-        />
-        <StatCard
-          icon={FileText}
-          tone="amber"
-          label="Invoices"
-          value={
-            <span className="text-2xl font-semibold tracking-tight">
-              {stats.invoiceCount}
-            </span>
-          }
-          footer={
-            <>
-              <TrendingUp className="size-3.5" />
-              Invoices issued this month
-            </>
-          }
-        />
-        <StatCard
-          icon={Users}
-          tone="rose"
-          label="Clients"
-          value={
-            <span className="text-2xl font-semibold tracking-tight">
-              {stats.clientCount}
-            </span>
-          }
-          footer={
-            <>
-              <UsersRound className="size-3.5" />
-              Clients on file, all time
-            </>
-          }
-        />
-      </div>
-
-      <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-3">
-        <Card>
-          <CardHeader className="px-6 pt-6">
-            <CardTitle>Invoice Status</CardTitle>
-            <CardDescription>This month&apos;s breakdown</CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center px-6 pt-3 pb-2">
-            <DoughnutChart
-              data={statusBreakdown.map((s) => ({
-                label: STATUS_LABEL[s.key],
-                value: s.count,
-                color: STATUS_CHART_COLOR[s.key],
-              }))}
+      {loaded ? (
+        <>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              icon={Wallet}
+              tone="sky"
+              label="Outstanding"
+              value={renderByCurrency(stats.outstandingByCurrency)}
+              footer={
+                <>
+                  <History className="size-3.5" />
+                  Outstanding from invoices issued this month
+                </>
+              }
             />
-          </CardContent>
-          <CardFooter className="grid grid-cols-2 items-center gap-x-5 gap-y-1.5 bg-transparent px-6 py-3 text-xs text-muted-foreground">
-            {statusBreakdown.map((s) => (
-              <LegendDot
-                key={s.key}
-                color={STATUS_CHART_COLOR[s.key]}
-                label={STATUS_LABEL[s.key]}
-              />
+            <StatCard
+              icon={Banknote}
+              tone="emerald"
+              label="Received"
+              value={renderByCurrency(stats.paidByCurrency)}
+              footer={
+                <>
+                  <RefreshCw className="size-3.5" />
+                  Payments received this month
+                </>
+              }
+            />
+            <StatCard
+              icon={FileText}
+              tone="amber"
+              label="Invoices"
+              value={
+                <span className="text-2xl font-semibold tracking-tight">
+                  {stats.invoiceCount}
+                </span>
+              }
+              footer={
+                <>
+                  <TrendingUp className="size-3.5" />
+                  Invoices issued this month
+                </>
+              }
+            />
+            <StatCard
+              icon={Users}
+              tone="rose"
+              label="Clients"
+              value={
+                <span className="text-2xl font-semibold tracking-tight">
+                  {stats.clientCount}
+                </span>
+              }
+              footer={
+                <>
+                  <UsersRound className="size-3.5" />
+                  Clients on file, all time
+                </>
+              }
+            />
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-3">
+            <Card>
+              <CardHeader className="px-6 pt-6">
+                <CardTitle>Invoice Status</CardTitle>
+                <CardDescription>This month&apos;s breakdown</CardDescription>
+              </CardHeader>
+              <CardContent className="flex justify-center px-6 pt-3 pb-2">
+                <DoughnutChart
+                  data={statusBreakdown.map((s) => ({
+                    label: STATUS_LABEL[s.key],
+                    value: s.count,
+                    color: STATUS_CHART_COLOR[s.key],
+                  }))}
+                />
+              </CardContent>
+              <CardFooter className="grid grid-cols-2 items-center gap-x-5 gap-y-1.5 bg-transparent px-6 py-3 text-xs text-muted-foreground">
+                {statusBreakdown.map((s) => (
+                  <LegendDot
+                    key={s.key}
+                    color={STATUS_CHART_COLOR[s.key]}
+                    label={STATUS_LABEL[s.key]}
+                  />
+                ))}
+              </CardFooter>
+            </Card>
+
+            <Card className="md:col-span-2">
+              <CardHeader className="px-6 pt-6">
+                <CardTitle>Invoiced vs Received</CardTitle>
+                <CardDescription>
+                  Last 12 months{" "}
+                  {monthly.invoiced.some((m) => m.value > 0) ||
+                  monthly.received.some((m) => m.value > 0)
+                    ? `· ${symbol}`
+                    : ""}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 pb-2 pt-2">
+                <LineChart
+                  series={[
+                    {
+                      name: "Invoiced",
+                      color: INVOICED_COLOR,
+                      points: monthly.invoiced,
+                    },
+                    {
+                      name: "Received",
+                      color: RECEIVED_COLOR,
+                      points: monthly.received,
+                    },
+                  ]}
+                />
+              </CardContent>
+              <CardFooter className="items-center gap-5 bg-transparent px-6 py-3 text-xs text-muted-foreground">
+                <LegendDot color={INVOICED_COLOR} label="Invoiced" />
+                <LegendDot color={RECEIVED_COLOR} label="Received" />
+              </CardFooter>
+            </Card>
+          </div>
+        </>
+      ) : (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {[0, 1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="space-y-3 px-5 pt-5 pb-4">
+                  <div className="h-9 w-9 animate-pulse rounded-full bg-muted" />
+                  <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+                </CardContent>
+              </Card>
             ))}
-          </CardFooter>
-        </Card>
-
-        <Card className="md:col-span-2">
-          <CardHeader className="px-6 pt-6">
-            <CardTitle>Invoiced vs Received</CardTitle>
-            <CardDescription>
-              Last 12 months{" "}
-              {monthly.invoiced.some((m) => m.value > 0) ? `· ${symbol}` : ""}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="px-3 pb-2 pt-2">
-            <LineChart
-              series={[
-                {
-                  name: "Invoiced",
-                  color: INVOICED_COLOR,
-                  points: monthly.invoiced,
-                },
-                {
-                  name: "Received",
-                  color: RECEIVED_COLOR,
-                  points: monthly.received,
-                },
-              ]}
-            />
-          </CardContent>
-          <CardFooter className="items-center gap-5 bg-transparent px-6 py-3 text-xs text-muted-foreground">
-            <LegendDot color={INVOICED_COLOR} label="Invoiced" />
-            <LegendDot color={RECEIVED_COLOR} label="Received" />
-          </CardFooter>
-        </Card>
-      </div>
+          </div>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            <Card className="h-64">
+              <CardContent className="flex items-center justify-center p-6 text-sm text-muted-foreground">
+                Loading…
+              </CardContent>
+            </Card>
+            <Card className="h-64 md:col-span-2">
+              <CardContent className="flex items-center justify-center p-6 text-sm text-muted-foreground">
+                Loading…
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative max-w-sm flex-1">

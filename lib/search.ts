@@ -52,16 +52,28 @@ export const APP_PAGES: PageRecord[] = [
 const MISSING_ENV =
   "ALGOLIA_APP_ID, ALGOLIA_ADMIN_API_KEY and ALGOLIA_INDEX_NAME must be set";
 
+const MISSING_SEARCH_ENV =
+  "ALGOLIA_APP_ID, ALGOLIA_SEARCH_API_KEY and ALGOLIA_INDEX_NAME must be set";
+
 const APP_ID = process.env.ALGOLIA_APP_ID;
 const ADMIN_API_KEY = process.env.ALGOLIA_ADMIN_API_KEY;
+const SEARCH_API_KEY = process.env.ALGOLIA_SEARCH_API_KEY;
 const INDEX_NAME = process.env.ALGOLIA_INDEX_NAME;
 
 function notConfigured(): boolean {
   return !APP_ID || !ADMIN_API_KEY || !INDEX_NAME;
 }
 
+function searchNotConfigured(): boolean {
+  return !APP_ID || !SEARCH_API_KEY || !INDEX_NAME;
+}
+
 function logMissingEnv(): void {
   console.error(`[algolia] not configured: ${MISSING_ENV}`);
+}
+
+function logMissingSearchEnv(): void {
+  console.error(`[algolia] not configured: ${MISSING_SEARCH_ENV}`);
 }
 
 function getClient() {
@@ -72,11 +84,20 @@ function getClient() {
   return algoliasearch(APP_ID!, ADMIN_API_KEY!);
 }
 
+function getSearchClient() {
+  if (searchNotConfigured()) {
+    logMissingSearchEnv();
+    return null;
+  }
+  return algoliasearch(APP_ID!, SEARCH_API_KEY!);
+}
+
 async function safe(fn: () => Promise<unknown>): Promise<void> {
   try {
     await fn();
   } catch (err) {
     console.error("[algolia] indexing failed:", err);
+    throw err;
   }
 }
 
@@ -184,17 +205,16 @@ export function unindexProduct(id: string): Promise<void> {
   );
 }
 
-export function replaceAll(records: SearchHit[]): Promise<number> {
+export async function replaceAll(records: SearchHit[]): Promise<number> {
   const search = getClient();
-  if (!search) return Promise.resolve(0);
-  let count = 0;
-  return safe(async () => {
+  if (!search) throw new Error("[algolia] replaceAll skipped: not configured");
+  await safe(async () => {
     await search.replaceAllObjects({
       indexName: INDEX_NAME!,
       objects: records as unknown as Record<string, unknown>[],
     });
-    count = records.length;
-  }).then(() => count);
+  });
+  return records.length;
 }
 
 export async function configureIndex(): Promise<void> {
@@ -234,7 +254,7 @@ export async function searchRecords(
   q: string,
   hitsPerPage = 5,
 ): Promise<SearchResults> {
-  const search = getClient();
+  const search = getSearchClient();
   const EMPTY: SearchResults = {
     invoices: [],
     clients: [],

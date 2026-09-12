@@ -409,6 +409,12 @@ body {
   box-shadow: none;
 }
 
+.paper-search .aa-DetachedSearchButton:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
 .paper-search .aa-DetachedSearchButton .aa-DetachedSearchButtonIcon {
   width: 28px;
   color: #66615b;

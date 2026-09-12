@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { autocomplete, getAlgoliaResults } from "@algolia/autocomplete-js";
 import { createLocalStorageRecentSearchesPlugin } from "@algolia/autocomplete-plugin-recent-searches";
 import { liteClient as algoliasearch } from "algoliasearch/lite";
@@ -69,6 +70,7 @@ export function AlgoliaSearch({
   const pathnameRef = useRef("");
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session } = useSession();
 
   useEffect(() => {
     pathnameRef.current = pathname;
@@ -83,7 +85,7 @@ export function AlgoliaSearch({
     const searchClient = algoliasearch(appId, searchKey);
 
     const recentSearchesPlugin = createLocalStorageRecentSearchesPlugin({
-      key: "topbar",
+      key: `topbar:${session?.user?.id ?? "anon"}`,
       limit: 5,
     });
 
@@ -396,7 +398,7 @@ export function AlgoliaSearch({
       instance.destroy();
       instanceRef.current = null;
     };
-  }, [appId, searchKey, indexName, router]);
+  }, [appId, searchKey, indexName, router, session?.user?.id]);
 
   useEffect(() => {
     instanceRef.current?.setIsOpen(false);
