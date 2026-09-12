@@ -404,5 +404,5 @@ export function AlgoliaSearch({
     instanceRef.current?.setIsOpen(false);
   }, [pathname]);
 
-  return <div ref={containerRef} className="paper-search" />;
+  return <div ref={containerRef} className="topbar-search" />;
 }
