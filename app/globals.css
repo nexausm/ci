@@ -388,6 +388,77 @@ body {
   margin: 0 5px 0 -3px;
 }
 
+.paper-search .aa-Autocomplete {
+  width: 240px;
+}
+
+.paper-search .aa-DetachedSearchButton {
+  height: 32px;
+  width: 240px;
+  border-radius: 30px;
+  background: rgba(222, 222, 222, 0.3);
+  border: 0;
+  color: #66615b;
+  font-size: 13px;
+  padding: 0 0 0 4px;
+}
+
+.paper-search .aa-DetachedSearchButton:focus {
+  border: 0;
+  outline: none;
+  box-shadow: none;
+}
+
+.paper-search .aa-DetachedSearchButton .aa-DetachedSearchButtonIcon {
+  width: 28px;
+  color: #66615b;
+}
+
+.paper-search .aa-DetachedSearchButton .aa-DetachedSearchButtonIcon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.paper-search .aa-DetachedSearchButtonPlaceholder,
+.paper-search .aa-DetachedSearchButtonQuery {
+  color: #66615b;
+  font-size: 13px;
+}
+
+[data-autocomplete-source-id="brand"] .aa-SourceNoResults {
+  display: none;
+}
+
+.aa-NoResults {
+  color: #66615b;
+}
+
+.aa-PoweredBy {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 4px 2px;
+  border-top: 1px solid rgba(128, 126, 163, 0.2);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #66615b;
+  text-decoration: none;
+}
+
+.aa-PoweredBy img,
+.aa-PoweredBy .aa-PoweredByLogo {
+  display: block;
+  height: 15px;
+  width: auto;
+}
+
+.aa-PoweredBy:hover {
+  color: #66615b;
+}
+
 .paper-search-group {
   position: relative;
   display: flex;
@@ -473,7 +544,6 @@ body {
     margin-right: 0;
   }
 
-  .paper-topbar .paper-search,
   .paper-topbar-nav .paper-hide-mobile {
     display: none;
   }

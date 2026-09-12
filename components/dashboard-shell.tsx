@@ -5,11 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useCompany } from "@/app/providers/company-provider";
-import { GlobalSearch } from "@/components/custom/global-search";
 import { Building2, LogOut, Plus, Settings } from "lucide-react";
 import { FaUserFriends } from "react-icons/fa";
 import { BiSolidLayout } from "react-icons/bi";
 import { AiFillProduct } from "react-icons/ai";
+import { AlgoliaSearch } from "@/components/custom/algolia-search";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: BiSolidLayout, exact: true },
@@ -38,7 +38,13 @@ function getBrand(pathname: string) {
   return match ? match.name : "Dashboard";
 }
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({
+  children,
+  algolia,
+}: {
+  children: React.ReactNode;
+  algolia?: { appId: string; searchKey: string; indexName: string };
+}) {
   const pathname = usePathname();
   const { logoUrl } = useCompany();
 
@@ -148,7 +154,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <span className="navbar-brand">{getBrand(pathname)}</span>
             </div>
             <div className="paper-topbar-right">
-              <GlobalSearch />
+              {algolia ? (
+                <AlgoliaSearch
+                  appId={algolia.appId}
+                  searchKey={algolia.searchKey}
+                  indexName={algolia.indexName}
+                />
+              ) : null}
               <nav className="paper-topbar-nav">
                 <button
                   type="button"
