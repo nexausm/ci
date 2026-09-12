@@ -29,7 +29,7 @@ interface SearchItem extends Record<string, unknown> {
 const APP_PAGES: SearchItem[] = [
   {
     label: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     keywords: ["home", "overview", "stats", "invoices"],
   },
   {

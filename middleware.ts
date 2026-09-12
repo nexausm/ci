@@ -27,7 +27,7 @@ export default async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/",
+    "/dashboard",
     "/clients/:path*",
     "/products/:path*",
     "/invoices/:path*",

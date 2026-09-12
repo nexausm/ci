@@ -36,7 +36,7 @@ export interface SearchResults {
 export const APP_PAGES: PageRecord[] = [
   {
     label: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     keywords: ["home", "overview", "stats", "invoices"],
   },
   {

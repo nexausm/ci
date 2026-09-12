@@ -557,7 +557,7 @@ function Dashboard() {
             <button
               type="button"
               className="rounded-full p-0.5 hover:bg-foreground/10"
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/dashboard")}
             >
               <X className="size-3" />
             </button>

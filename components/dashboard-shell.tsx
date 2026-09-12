@@ -12,7 +12,7 @@ import { AiFillProduct } from "react-icons/ai";
 import { AlgoliaSearch } from "@/components/custom/algolia-search";
 
 const navItems = [
-  { href: "/", label: "Dashboard", icon: BiSolidLayout, exact: true },
+  { href: "/dashboard", label: "Dashboard", icon: BiSolidLayout, exact: true },
   { href: "/clients", label: "Clients", icon: FaUserFriends, exact: false },
   { href: "/products", label: "Products", icon: AiFillProduct, exact: false },
   { href: "/company", label: "Company", icon: Building2, exact: false },
@@ -28,12 +28,14 @@ const pageNames: { prefix: string; name: string }[] = [
   { prefix: "/clients", name: "Clients" },
   { prefix: "/products", name: "Products" },
   { prefix: "/company", name: "Company" },
-  { prefix: "/", name: "Dashboard" },
+  { prefix: "/dashboard", name: "Dashboard" },
 ];
 
 function getBrand(pathname: string) {
   const match = pageNames.find((p) =>
-    p.prefix === "/" ? pathname === "/" : pathname.startsWith(p.prefix),
+    p.prefix === "/dashboard"
+      ? pathname === p.prefix
+      : pathname.startsWith(p.prefix),
   );
   return match ? match.name : "Dashboard";
 }
@@ -80,7 +82,10 @@ export function DashboardShell({
               />
             ) : null}
           </span>
-          <Link href="/" className="paper-logo-normal paper-simple-text">
+          <Link
+            href="/dashboard"
+            className="paper-logo-normal paper-simple-text"
+          >
             Billing
           </Link>
         </div>

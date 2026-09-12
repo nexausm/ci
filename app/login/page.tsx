@@ -37,7 +37,7 @@ function LoginForm() {
     fetch("/api/auth/session")
       .then((r) => r.json())
       .then((session) => {
-        if (session?.user) router.replace("/");
+        if (session?.user) router.replace("/dashboard");
       })
       .catch(() => {});
   }, [router]);
@@ -56,7 +56,7 @@ function LoginForm() {
         setError("Invalid email or password.");
         return;
       }
-      const next = searchParams.get("next") ?? "/";
+      const next = searchParams.get("next") ?? "/dashboard";
       router.push(next);
       router.refresh();
     } catch {

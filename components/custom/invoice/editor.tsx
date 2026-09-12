@@ -288,7 +288,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
     try {
       await removeInvoice(effectiveData.id);
       toast.success("Invoice deleted");
-      router.push("/");
+      router.push("/dashboard");
     } catch {
       toast.error("Failed to delete invoice");
     }
@@ -304,7 +304,7 @@ export function InvoiceEditor({ id }: { id?: string }) {
         <Button
           className="mt-6"
           nativeButton={false}
-          render={<Link href="/" />}
+          render={<Link href="/dashboard" />}
         >
           Back to dashboard
         </Button>
