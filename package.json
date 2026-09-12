@@ -60,6 +60,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
     "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.5",
     "typescript": "^5",
