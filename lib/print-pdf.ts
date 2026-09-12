@@ -82,10 +82,9 @@ export function buildPrintExtras(
   printDate?: string,
   timeZone?: string,
   template?: InvoiceTemplate,
-  uploadedLogoDataUrl?: string | null,
 ): RenderExtras {
   const tmpl = template;
-  const headerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.headerChrome(data, company, printDate, timeZone, uploadedLogoDataUrl) : invoiceHeaderChrome(data, company, printDate, timeZone)}`;
+  const headerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.headerChrome(data, company, printDate, timeZone) : invoiceHeaderChrome(data, company, printDate, timeZone)}`;
   const footerHtml = `${fontFaceStyleTag()}${tmpl ? tmpl.footerChrome(company, data.id) : invoiceFooterChrome()}`;
   const topBarHtml = tmpl ? tmpl.topBar() : invoiceTopBar();
   const pageMargin = tmpl ? tmpl.pageMargin : PAGE_MARGIN;

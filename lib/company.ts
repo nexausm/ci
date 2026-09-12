@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { COMPANY_INFO } from "@/generated/assets";
+import { createDefaultCompanyProfile } from "./defaults";
 import type { CompanyInfo } from "./types";
 
 export const COMPANY_PROFILE_TAG = "company-profile";
@@ -13,7 +13,7 @@ type CompanyRow = {
   addressLines: string[];
   phone: string;
   email: string;
-  logoDataUri: string | null;
+  logoUrl: string | null;
 };
 
 function rowToCompanyInfo(row: CompanyRow): CompanyInfo {
@@ -24,7 +24,7 @@ function rowToCompanyInfo(row: CompanyRow): CompanyInfo {
     addressLines: row.addressLines,
     phone: row.phone,
     email: row.email,
-    logoDataUri: row.logoDataUri,
+    logoUrl: row.logoUrl,
   };
 }
 
@@ -32,7 +32,8 @@ async function loadCompanyInfo(): Promise<CompanyInfo> {
   const row = await prisma.companyProfile.findUnique({
     where: { id: COMPANY_PROFILE_ID },
   });
-  return row ? rowToCompanyInfo(row) : COMPANY_INFO;
+  if (!row) return createDefaultCompanyProfile();
+  return rowToCompanyInfo(row);
 }
 
 export const getCompanyInfo = unstable_cache(

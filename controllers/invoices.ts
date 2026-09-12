@@ -7,6 +7,7 @@ import {
   sanitizeInstallment,
 } from "@/lib/defaults";
 import { paymentInstallmentAssignments } from "@/lib/totals";
+import { indexInvoice, unindexInvoice } from "@/lib/search";
 import type {
   ExternalCostInfo,
   Installment,
@@ -251,22 +252,25 @@ export async function createInvoice(req: Request) {
     where: { id },
     include: { payments: true, externalCosts: true, installments: true },
   });
-  if (!doc) return NextResponse.json(invoice);
+  if (!doc) {
+    await indexInvoice(invoice);
+    return NextResponse.json(invoice);
+  }
   const {
     payments: storedPayments,
     externalCosts,
     installments: installmentDocs,
     ...stored
   } = doc;
-  return NextResponse.json(
-    sanitizeInvoice({
-      ...stored,
-      id: stored.id,
-      items: inflateExternalCosts(itemsFromJson(stored.items), externalCosts),
-      payments: storedPayments.map(toPayment),
-      installments: installmentDocs.map(toInstallment),
-    }),
-  );
+  const result = sanitizeInvoice({
+    ...stored,
+    id: stored.id,
+    items: inflateExternalCosts(itemsFromJson(stored.items), externalCosts),
+    payments: storedPayments.map(toPayment),
+    installments: installmentDocs.map(toInstallment),
+  });
+  await indexInvoice(result);
+  return NextResponse.json(result);
 }
 
 export async function updateInvoice(
@@ -320,15 +324,15 @@ export async function updateInvoice(
   });
   if (!doc) return NextResponse.json(null, { status: 404 });
   const { payments, externalCosts, installments, ...stored } = doc;
-  return NextResponse.json(
-    sanitizeInvoice({
-      ...stored,
-      id: stored.id,
-      items: inflateExternalCosts(itemsFromJson(stored.items), externalCosts),
-      payments: payments.map(toPayment),
-      installments: installments.map(toInstallment),
-    }),
-  );
+  const result = sanitizeInvoice({
+    ...stored,
+    id: stored.id,
+    items: inflateExternalCosts(itemsFromJson(stored.items), externalCosts),
+    payments: payments.map(toPayment),
+    installments: installments.map(toInstallment),
+  });
+  await indexInvoice(result);
+  return NextResponse.json(result);
 }
 
 export async function getInvoice(
@@ -359,5 +363,6 @@ export async function deleteInvoice(
 ) {
   const { id } = await params;
   await prisma.invoice.deleteMany({ where: { id } });
+  await unindexInvoice(id);
   return NextResponse.json({ ok: true });
 }

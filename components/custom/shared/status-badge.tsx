@@ -1,4 +1,5 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui";
+
 import { cn } from "@/lib/utils";
 import { STATUS_DOT, STATUS_LABEL, STATUS_VARIANT } from "@/lib/invoice-status";
 import type { InvoiceStatus } from "@/lib/types";

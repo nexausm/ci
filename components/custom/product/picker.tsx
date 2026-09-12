@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Package } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
+  Button,
   Command,
   CommandEmpty,
   CommandGroup,
@@ -12,12 +12,11 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@/components/ui/command";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/ui";
+
 import type { Product } from "@/lib/types";
 
 export function ProductPicker({
@@ -82,12 +81,12 @@ export function ProductPicker({
                   <div className="flex flex-col overflow-hidden">
                     <span className="truncate">{product.name}</span>
                     {product.description && (
-                      <span className="truncate text-xs text-muted-foreground">
+                      <span className="text-muted-foreground truncate text-xs">
                         {product.description}
                       </span>
                     )}
                   </div>
-                  <span className="ml-auto shrink-0 text-xs tabular-nums text-muted-foreground">
+                  <span className="text-muted-foreground ml-auto shrink-0 text-xs tabular-nums">
                     {priceFor(product)}
                   </span>
                 </CommandItem>

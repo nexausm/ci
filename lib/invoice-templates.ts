@@ -7,7 +7,6 @@ export interface TemplateMarkupOptions {
   company?: CompanyInfo;
   printDate?: string;
   timeZone?: string;
-  uploadedLogoDataUrl?: string | null;
 }
 
 export interface InvoiceTemplate {
@@ -19,7 +18,6 @@ export interface InvoiceTemplate {
     company: CompanyInfo,
     printDate?: string,
     timeZone?: string,
-    uploadedLogoDataUrl?: string | null,
   ) => string;
   footerChrome: (company?: CompanyInfo, invoiceId?: string) => string;
   topBar: () => string;
@@ -93,16 +91,9 @@ export const TEMPLATES: InvoiceTemplate[] = [
         company: opts?.company,
         printDate: opts?.printDate,
         timeZone: opts?.timeZone,
-        uploadedLogoDataUrl: opts?.uploadedLogoDataUrl,
       }),
-    headerChrome: (data, company, printDate, timeZone, uploadedLogoDataUrl) =>
-      minimalHeaderChrome(
-        data,
-        company,
-        printDate,
-        timeZone,
-        uploadedLogoDataUrl,
-      ),
+    headerChrome: (data, company, printDate, timeZone) =>
+      minimalHeaderChrome(data, company, printDate, timeZone),
     footerChrome: (company, invoiceId) =>
       minimalFooterChrome(company?.companyName, invoiceId),
     topBar: minimalTopBar,

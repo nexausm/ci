@@ -53,7 +53,7 @@ model CompanyProfile {
   addressLines String[] @default([])
   phone        String   @default("")
   email        String   @default("")
-  logoDataUri  String?
+  logoUrl      String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

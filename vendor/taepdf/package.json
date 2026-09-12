@@ -1,0 +1,65 @@
+{
+  "name": "taepdf",
+  "version": "2.4.5",
+  "description": "Browser-based HTML-to-PDF engine that captures your page's exact rendered layout and turns it into a real, pixel-perfect PDF – no server, no headless browser.",
+  "type": "module",
+  "license": "MIT",
+  "author": "silly-tae",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/silly-tae/taepdf.git"
+  },
+  "homepage": "https://github.com/silly-tae/taepdf#readme",
+  "bugs": {
+    "url": "https://github.com/silly-tae/taepdf/issues"
+  },
+  "keywords": [
+    "pdf",
+    "html-to-pdf",
+    "html2pdf",
+    "dom-to-pdf",
+    "pdf-generator",
+    "pdf-generation",
+    "pdf-export",
+    "print-to-pdf",
+    "browser-pdf",
+    "client-side",
+    "invoice-pdf",
+    "webassembly",
+    "wasm"
+  ],
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "taepdf-init": "dist/cli/init.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "prepublishOnly": "npm run build",
+    "pretest": "playwright install chromium",
+    "test": "node tests/run.mjs",
+    "pregen-preview": "playwright install chromium",
+    "gen-preview": "node scripts/gen-preview-demo.mjs"
+  },
+  "dependencies": {
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "@jsquash/avif": "^2.1.1",
+    "@types/node": "^26.1.1",
+    "esbuild": "^0.28.1",
+    "pdfjs-dist": "^6.1.200",
+    "playwright": "^1.61.1",
+    "typescript": "^7.0.2"
+  }
+}

@@ -3,27 +3,26 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Download, Loader2, Plus, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
+  Badge,
+  Button,
+  Input,
+  Label,
+  Switch,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui";
+
 import { genId } from "@/lib/id";
 import { createDefaultInstallment, defaultInstallments } from "@/lib/defaults";
 import { withInstallmentAllocations } from "@/lib/totals";
@@ -151,7 +150,7 @@ export function InstallmentsSection({
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold">Installments</h2>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Split this invoice into a payment schedule. Payments are applied to
             the oldest unpaid installment first.
           </p>
@@ -199,7 +198,7 @@ export function InstallmentsSection({
           </div>
 
           {scheduled.length > 0 && (
-            <div className="overflow-hidden rounded-md border bg-card">
+            <div className="bg-card overflow-hidden rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -260,7 +259,7 @@ export function InstallmentsSection({
                             }
                           />
                         </TableCell>
-                        <TableCell className="text-right text-muted-foreground">
+                        <TableCell className="text-muted-foreground text-right">
                           {paidAmount > 0
                             ? formatMoney(paidAmount, currencySymbol)
                             : "—"}
@@ -276,7 +275,7 @@ export function InstallmentsSection({
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="size-8 text-muted-foreground hover:text-foreground"
+                              className="text-muted-foreground hover:text-foreground size-8"
                               title="Download installment PDF"
                               disabled={downloadingId !== null}
                               onClick={() => handleDownloadInstallment(inst)}
@@ -291,7 +290,7 @@ export function InstallmentsSection({
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="size-8 text-muted-foreground hover:text-destructive"
+                              className="text-muted-foreground hover:text-destructive size-8"
                               title={
                                 paidAmount > 0.005
                                   ? "Cannot delete an installment that has payments"
@@ -309,10 +308,10 @@ export function InstallmentsSection({
                   })}
                 </TableBody>
               </Table>
-              <div className="flex items-center justify-between gap-2 border-t bg-muted/40 px-4 py-2 text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="bg-muted/40 flex items-center justify-between gap-2 border-t px-4 py-2 text-sm">
+                <div className="text-muted-foreground flex items-center gap-2">
                   <span>Scheduled:&nbsp;</span>
-                  <span className="font-semibold text-foreground">
+                  <span className="text-foreground font-semibold">
                     {formatMoney(sumAmounts, currencySymbol)}
                   </span>
                   {mismatch && (
@@ -321,7 +320,7 @@ export function InstallmentsSection({
                     </span>
                   )}
                 </div>
-                <span className="hidden text-xs text-muted-foreground sm:inline">
+                <span className="text-muted-foreground hidden text-xs sm:inline">
                   {formatDateLong(
                     scheduled.find((s) => s.status !== "paid")?.dueDate ?? "",
                   )
@@ -407,7 +406,7 @@ function SplitEvenlyDialog({
                 required
               />
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {count > 0
                 ? `≈ ${formatMoney(each, "¤")} each, first due ${formatDateLong(dueDate) || "—"}.`
                 : "Enter a number of installments."}
@@ -527,7 +526,7 @@ function PercentDialog({
           <div className="max-h-72 space-y-2 overflow-y-auto py-4">
             {rows.map((row, i) => (
               <div key={row.key} className="flex items-center gap-2">
-                <span className="w-5 text-xs text-muted-foreground">
+                <span className="text-muted-foreground w-5 text-xs">
                   {i + 1}
                 </span>
                 <Input
@@ -558,12 +557,12 @@ function PercentDialog({
                     updateRow(row.key, { pct: Number(e.target.value) })
                   }
                 />
-                <span className="w-6 text-xs text-muted-foreground">%</span>
+                <span className="text-muted-foreground w-6 text-xs">%</span>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="size-8 text-muted-foreground hover:text-destructive"
+                  className="text-muted-foreground hover:text-destructive size-8"
                   disabled={rows.length === 1}
                   onClick={() => removeRow(row.key)}
                 >

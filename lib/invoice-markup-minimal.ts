@@ -93,12 +93,8 @@ function qrSvg(value: string, size: number): string {
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${count} ${count}" style="display:block;background:#FFFFFF">${cells}</svg>`;
 }
 
-function companyHeader(
-  company: CompanyInfo,
-  uploadedLogoDataUrl?: string | null,
-  invoiceId?: string,
-): string {
-  const logoSrc = uploadedLogoDataUrl || company.logoDataUri;
+function companyHeader(company: CompanyInfo, invoiceId?: string): string {
+  const logoSrc = company.logoUrl;
   return `<div style="${S.header}" ${ATOMIC}>
     <div style="${S.logoBox}">
       ${
@@ -283,11 +279,10 @@ export function invoiceHeaderChrome(
   company: CompanyInfo,
   printDate?: string,
   timeZone?: string,
-  uploadedLogoDataUrl?: string | null,
 ): string {
   return `${invoiceTopBar()}
   <div style="padding:${PAGE_MARGIN.top}px ${PAGE_MARGIN.side}px 0;">
-    ${companyHeader(company, uploadedLogoDataUrl, data.id)}
+    ${companyHeader(company, data.id)}
     ${metaRow(data, printDate, timeZone)}
     ${billToFields(data)}
   </div>`;
@@ -397,14 +392,13 @@ export function invoiceMarkup(
     company?: CompanyInfo;
     printDate?: string;
     timeZone?: string;
-    uploadedLogoDataUrl?: string | null;
   },
 ): string {
   if (opts?.realTable) {
     const headerBlock =
       opts?.headerMode === "first" && opts.company
         ? `<div style="padding:0 ${PAGE_MARGIN.side}px 0;">
-            ${companyHeader(opts.company, opts.uploadedLogoDataUrl, data.id)}
+            ${companyHeader(opts.company, data.id)}
             ${metaRow(data, opts.printDate, opts.timeZone)}
             ${billToFields(data)}
           </div>`
