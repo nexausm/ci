@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useCompany } from "@/app/providers/company-provider";
 import {
   Bell,
   Building2,
@@ -46,6 +47,7 @@ function getBrand(pathname: string) {
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { logoUrl } = useCompany();
 
   useEffect(() => {
     document.documentElement.classList.remove("paper-nav-open");
@@ -68,14 +70,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <aside className="paper-sidebar">
         <div className="paper-logo">
           <span className="paper-logo-mini">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo/main.png"
-              alt="Billing"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-            />
+            {logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logoUrl}
+                alt="Logo"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            ) : null}
           </span>
           <Link href="/" className="paper-logo-normal paper-simple-text">
             Billing

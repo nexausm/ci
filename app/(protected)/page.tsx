@@ -5,19 +5,31 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
+  Banknote,
   Download,
   FileText,
+  History,
   MoreHorizontal,
   Plus,
+  RefreshCw,
   Search,
   Trash2,
+  TrendingUp,
   Users,
+  UsersRound,
   Wallet,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -51,6 +63,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/custom/shared/status-badge";
+import { AreaChart } from "@/components/custom/dashboard/area-chart";
+import { DoughnutChart } from "@/components/custom/dashboard/doughnut-chart";
+import { LineChart } from "@/components/custom/dashboard/line-chart";
 import { useClients, useInvoices } from "@/lib/storage";
 import {
   computeTotals,
@@ -66,12 +81,13 @@ import {
   fetchServerNow,
   getUserTimeZone,
 } from "@/lib/print-pdf";
-import { computeStatus } from "@/lib/invoice-status";
+import { computeStatus, STATUS_LABEL } from "@/lib/invoice-status";
 import { CURRENCIES } from "@/lib/currency";
+import { cn } from "@/lib/utils";
 import { useCompany } from "@/app/providers/company-provider";
 import { usePrintSettings } from "@/hooks/use-print-settings";
 import { useTemplateId } from "@/hooks/use-template-id";
-import type { InvoiceData, InvoiceStatus } from "@/lib/types";
+import type { InvoiceData, InvoiceStatus, CurrencyCode } from "@/lib/types";
 
 const STATUS_FILTERS: { value: InvoiceStatus | "all"; label: string }[] = [
   { value: "all", label: "All statuses" },
@@ -81,6 +97,81 @@ const STATUS_FILTERS: { value: InvoiceStatus | "all"; label: string }[] = [
   { value: "paid", label: "Paid" },
   { value: "overdue", label: "Overdue" },
 ];
+
+const STATUS_CHART_COLOR: Record<InvoiceStatus, string> = {
+  draft: "#94a3b8",
+  sent: "#3b82f6",
+  partial: "#f59e0b",
+  paid: "#10b981",
+  overdue: "#ef4444",
+};
+
+const STATUS_ORDER: InvoiceStatus[] = [
+  "paid",
+  "partial",
+  "sent",
+  "overdue",
+  "draft",
+];
+
+const INVOICED_COLOR = "#3b82f6";
+const RECEIVED_COLOR = "#10b981";
+
+const CARD_ICON_TONES = {
+  amber: "text-amber-500",
+  emerald: "text-emerald-500",
+  rose: "text-rose-500",
+  sky: "text-sky-500",
+} as const;
+
+function StatCard({
+  icon: Icon,
+  tone,
+  label,
+  value,
+  footer,
+}: {
+  icon: React.ElementType;
+  tone: keyof typeof CARD_ICON_TONES;
+  label: string;
+  value: React.ReactNode;
+  footer: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardContent className="space-y-3 px-5 pt-5 pb-4">
+        <div className="flex items-start justify-between gap-3">
+          <Icon
+            className={cn("size-9 shrink-0", CARD_ICON_TONES[tone])}
+            strokeWidth={1.5}
+          />
+          <div className="min-w-0 flex-1 text-right">
+            <p className="text-sm font-medium text-muted-foreground">{label}</p>
+            <div className="truncate text-2xl font-semibold tracking-tight text-card-foreground">
+              {value}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+      <div className="border-t border-border/60" />
+      <CardFooter className="items-center gap-1.5 bg-transparent px-5 py-3 text-xs text-muted-foreground">
+        {footer}
+      </CardFooter>
+    </Card>
+  );
+}
+
+function LegendDot({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span
+        className="size-2.5 rounded-full"
+        style={{ backgroundColor: color }}
+      />
+      {label}
+    </span>
+  );
+}
 
 export default function Home() {
   return (
@@ -130,27 +221,105 @@ function Dashboard() {
       .sort((a, b) => b.inv.updatedAt.localeCompare(a.inv.updatedAt));
   }, [invoices, clientId, statusFilter, query]);
 
+  const dominantCurrency = useMemo<CurrencyCode>(() => {
+    let best: CurrencyCode = "USD";
+    let bestAmount = -1;
+    for (const currency of ["USD", "BDT"] as const) {
+      const total = invoices
+        .filter((inv) => inv.currency === currency)
+        .reduce((sum, inv) => sum + computeTotals(inv).total, 0);
+      if (total > bestAmount) {
+        best = currency;
+        bestAmount = total;
+      }
+    }
+    return best;
+  }, [invoices]);
+
+  const monthly = useMemo(() => {
+    const months: { key: string; label: string }[] = [];
+    const now = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({
+        key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+        label: d.toLocaleDateString("en-US", { month: "short" }),
+      });
+    }
+
+    const invoiced = new Map(
+      months.map((m) => [m.key, { label: m.label, value: 0 }]),
+    );
+    const received = new Map(
+      months.map((m) => [m.key, { label: m.label, value: 0 }]),
+    );
+
+    for (const inv of invoices) {
+      if (inv.currency !== dominantCurrency) continue;
+      const issueKey = inv.createdAt.slice(0, 7);
+      const issueBucket = invoiced.get(issueKey);
+      if (issueBucket) issueBucket.value += computeTotals(inv).total;
+      for (const payment of inv.payments) {
+        const payKey = (payment.date || "").slice(0, 7);
+        const payBucket = received.get(payKey);
+        if (payBucket) payBucket.value += Number(payment.amount) || 0;
+      }
+    }
+
+    return {
+      invoiced: [...invoiced.values()],
+      received: [...received.values()],
+    };
+  }, [invoices, dominantCurrency]);
+
+  const statusBreakdown = useMemo(() => {
+    const counts = new Map<InvoiceStatus, number>(
+      STATUS_ORDER.map((key) => [key, 0]),
+    );
+    for (const inv of invoices) {
+      const status = computeStatus(inv, computeTotals(inv));
+      counts.set(status, (counts.get(status) ?? 0) + 1);
+    }
+    return STATUS_ORDER.map((key) => ({
+      key,
+      count: counts.get(key) ?? 0,
+    }));
+  }, [invoices]);
+
+  const symbol = CURRENCIES[dominantCurrency]?.symbol ?? "$";
+
   const stats = useMemo(() => {
-    const all = invoices.map((inv) => ({ inv, totals: computeTotals(inv) }));
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     const outstandingByCurrency = new Map<string, number>();
     const paidByCurrency = new Map<string, number>();
-    for (const { inv, totals } of all) {
-      if (inv.state === "sent") {
-        outstandingByCurrency.set(
-          inv.currency,
-          (outstandingByCurrency.get(inv.currency) ?? 0) +
-            Math.max(totals.balanceDue, 0),
-        );
+    let invoiceCount = 0;
+    for (const inv of invoices) {
+      const totals = computeTotals(inv);
+      if (inv.createdAt.slice(0, 7) === currentMonth) {
+        invoiceCount += 1;
+        if (inv.state === "sent") {
+          outstandingByCurrency.set(
+            inv.currency,
+            (outstandingByCurrency.get(inv.currency) ?? 0) +
+              Math.max(totals.balanceDue, 0),
+          );
+        }
       }
-      paidByCurrency.set(
-        inv.currency,
-        (paidByCurrency.get(inv.currency) ?? 0) + totals.amountPaid,
-      );
+      for (const payment of inv.payments) {
+        if ((payment.date || "").slice(0, 7) === currentMonth) {
+          paidByCurrency.set(
+            inv.currency,
+            (paidByCurrency.get(inv.currency) ?? 0) +
+              (Number(payment.amount) || 0),
+          );
+        }
+      }
     }
     return {
       outstandingByCurrency,
       paidByCurrency,
-      invoiceCount: invoices.length,
+      invoiceCount,
       clientCount: clients.length,
     };
   }, [invoices, clients.length]);
@@ -237,66 +406,141 @@ function Dashboard() {
     CURRENCIES[currency]?.symbol ?? "$";
 
   return (
-    <div className="w-full px-4 py-8 sm:px-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">
-            All invoices for {company.companyName}.
-          </p>
-        </div>
-        <Button nativeButton={false} render={<Link href="/invoices/new" />}>
-          <Plus className="size-4" />
-          New invoice
-        </Button>
+    <div className="w-full px-4 py-6 sm:px-6">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          icon={Wallet}
+          tone="sky"
+          label="Outstanding"
+          value={renderByCurrency(stats.outstandingByCurrency)}
+          footer={
+            <>
+              <History className="size-3.5" />
+              Outstanding from invoices issued this month
+            </>
+          }
+        />
+        <StatCard
+          icon={Banknote}
+          tone="emerald"
+          label="Received"
+          value={renderByCurrency(stats.paidByCurrency)}
+          footer={
+            <>
+              <RefreshCw className="size-3.5" />
+              Payments received this month
+            </>
+          }
+        />
+        <StatCard
+          icon={FileText}
+          tone="amber"
+          label="Invoices"
+          value={
+            <span className="text-2xl font-semibold tracking-tight">
+              {stats.invoiceCount}
+            </span>
+          }
+          footer={
+            <>
+              <TrendingUp className="size-3.5" />
+              Invoices issued this month
+            </>
+          }
+        />
+        <StatCard
+          icon={Users}
+          tone="rose"
+          label="Clients"
+          value={
+            <span className="text-2xl font-semibold tracking-tight">
+              {stats.clientCount}
+            </span>
+          }
+          footer={
+            <>
+              <UsersRound className="size-3.5" />
+              Clients on file, all time
+            </>
+          }
+        />
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <Card className="mt-6">
+        <CardHeader className="px-6 pt-6">
+          <CardTitle>Revenue</CardTitle>
+          <CardDescription>
+            Invoiced per month{" "}
+            {monthly.invoiced.some((m) => m.value > 0) ? `· ${symbol}` : ""}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="px-3 pb-2 pt-2">
+          <AreaChart data={monthly.invoiced} />
+        </CardContent>
+        <CardFooter className="items-center gap-1.5 bg-transparent px-6 py-3 text-xs text-muted-foreground">
+          <History className="size-3.5" />
+          Last 12 months of activity
+        </CardFooter>
+      </Card>
+
+      <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-3">
         <Card>
-          <CardHeader className="pb-0">
-            <CardTitle className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-              <Wallet className="size-3.5" />
-              Outstanding
-            </CardTitle>
+          <CardHeader className="px-6 pt-6">
+            <CardTitle>Invoice Status</CardTitle>
+            <CardDescription>All invoices breakdown</CardDescription>
           </CardHeader>
-          <CardContent>
-            {renderByCurrency(stats.outstandingByCurrency)}
+          <CardContent className="flex justify-center px-6 pt-3 pb-2">
+            <DoughnutChart
+              data={statusBreakdown.map((s) => ({
+                label: STATUS_LABEL[s.key],
+                value: s.count,
+                color: STATUS_CHART_COLOR[s.key],
+              }))}
+            />
           </CardContent>
+          <CardFooter className="flex flex-wrap items-center gap-x-5 gap-y-1.5 bg-transparent px-6 py-3 text-xs text-muted-foreground">
+            {statusBreakdown.map((s) => (
+              <LegendDot
+                key={s.key}
+                color={STATUS_CHART_COLOR[s.key]}
+                label={`${STATUS_LABEL[s.key]} (${s.count})`}
+              />
+            ))}
+          </CardFooter>
         </Card>
-        <Card>
-          <CardHeader className="pb-0">
-            <CardTitle className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-              <Wallet className="size-3.5" />
-              Received (all time)
-            </CardTitle>
+
+        <Card className="md:col-span-2">
+          <CardHeader className="px-6 pt-6">
+            <CardTitle>Invoiced vs Received</CardTitle>
+            <CardDescription>
+              Monthly comparison{" "}
+              {monthly.invoiced.some((m) => m.value > 0) ? `· ${symbol}` : ""}
+            </CardDescription>
           </CardHeader>
-          <CardContent>{renderByCurrency(stats.paidByCurrency)}</CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-0">
-            <CardTitle className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-              <FileText className="size-3.5" />
-              Invoices
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xl font-semibold">
-            {stats.invoiceCount}
+          <CardContent className="px-3 pb-2 pt-2">
+            <LineChart
+              series={[
+                {
+                  name: "Invoiced",
+                  color: INVOICED_COLOR,
+                  points: monthly.invoiced,
+                },
+                {
+                  name: "Received",
+                  color: RECEIVED_COLOR,
+                  points: monthly.received,
+                },
+              ]}
+            />
           </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-0">
-            <CardTitle className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-              <Users className="size-3.5" />
-              Clients
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xl font-semibold">
-            {stats.clientCount}
-          </CardContent>
+          <CardFooter className="items-center gap-5 bg-transparent px-6 py-3 text-xs text-muted-foreground">
+            <LegendDot color={INVOICED_COLOR} label="Invoiced" />
+            <LegendDot color={RECEIVED_COLOR} label="Received" />
+          </CardFooter>
         </Card>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative max-w-sm flex-1">
           <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -333,6 +577,12 @@ function Dashboard() {
             </button>
           </Badge>
         )}
+        <div className="sm:ml-auto">
+          <Button nativeButton={false} render={<Link href="/invoices/new" />}>
+            <Plus className="size-4" />
+            New invoice
+          </Button>
+        </div>
       </div>
 
       <Card className="mt-4 py-0">
