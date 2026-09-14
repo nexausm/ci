@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sanitizeClient, sanitizeProduct } from "@/lib/defaults";
-import { auth } from "@/middlewares/auth";
+import { auth } from "@/auth";
 import {
   clientRecord,
   configureIndex,

@@ -2,6 +2,7 @@ node_modules
 vendor
 .next
 out
+dist
 build
 coverage
 generated

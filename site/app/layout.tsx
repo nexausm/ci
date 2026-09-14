@@ -1,0 +1,34 @@
+import type { Metadata } from "next";
+import localFont from "next/font/local";
+import { RootProvider } from "fumadocs-ui/provider/next";
+
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Cloud Invoice by Nexaus",
+  description:
+    "Open-source, self-hostable cloud invoice manager. Create invoices, manage clients and products, and track payments on time.",
+};
+
+const inter = localFont({
+  src: "../assets/fonts/InterVariable.woff2",
+  weight: "100 900",
+  variable: "--font-inter",
+  display: "swap",
+});
+
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html
+      lang="en"
+      className={`h-full antialiased ${inter.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="bg-background text-foreground min-h-full">
+        <RootProvider search={{ enabled: false }}>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}

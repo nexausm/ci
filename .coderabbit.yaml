@@ -3,3 +3,5 @@ reviews:
     enabled: true
     base_branches:
       - staging
+    labels:
+      - "!do-not-review"

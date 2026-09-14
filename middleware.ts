@@ -2,6 +2,28 @@ import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+const GUEST_ROUTES = ["/login"];
+const PRIVATE_ROUTES = [
+  "/dashboard",
+  "/clients",
+  "/products",
+  "/invoices",
+  "/company",
+  "/api",
+];
+
+function isPrivateRoute(pathname: string) {
+  return PRIVATE_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + "/"),
+  );
+}
+
+function isGuestRoute(pathname: string) {
+  return GUEST_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route + "/"),
+  );
+}
+
 export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
@@ -12,11 +34,17 @@ export default async function middleware(req: NextRequest) {
   );
   const token = await getToken({
     req,
-    secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+    secret: process.env.AUTH_SECRET,
     secureCookie,
   });
 
-  if (!token) {
+  const isLoggedIn = !!token;
+
+  if (isGuestRoute(pathname) && isLoggedIn) {
+    return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
+  }
+
+  if (isPrivateRoute(pathname) && !isLoggedIn) {
     const url = new URL("/login", req.nextUrl.origin);
     url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
@@ -27,6 +55,7 @@ export default async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
+    "/login",
     "/dashboard",
     "/clients/:path*",
     "/products/:path*",

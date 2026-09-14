@@ -17,6 +17,11 @@ const eslintConfig = defineConfig([
     "generated/**",
     "tools/**",
     "vendor/**",
+    "site/dist/**",
+    "site/.next/**",
+    "site/out/**",
+    "site/node_modules/**",
+    "release/**",
   ]),
 ]);
 
