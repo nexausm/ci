@@ -15,7 +15,6 @@
     "db:deploy": "prisma migrate deploy",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "ci:check": "bash scripts/ci-check.sh",
     "release": "bash scripts/release.sh",
     "postinstall": "prisma generate",
     "cf:build": "CF_PAGES=1 opennextjs-cloudflare build",
