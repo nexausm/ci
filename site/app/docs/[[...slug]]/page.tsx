@@ -6,9 +6,9 @@ import {
   DocsTitle,
   PageLastUpdate,
 } from "fumadocs-ui/layouts/docs/page";
-import { CopyMarkdownButton } from "@/components/docs/copy-markdown";
-import { ViewOptions } from "@/components/docs/view-options";
-import { editUrl, getDoc, getDocManifest, renderDoc } from "@/lib/docs";
+import { CopyMarkdownButton } from "@site/components/docs/copy-markdown";
+import { ViewOptions } from "@site/components/docs/view-options";
+import { editUrl, getDoc, getDocManifest, renderDoc } from "@site/lib/docs";
 
 interface Props {
   params: Promise<{ slug?: string[] }>;

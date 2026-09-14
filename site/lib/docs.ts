@@ -33,7 +33,7 @@ import type {
   Node as PageTreeNode,
   Root as PageTreeRoot,
 } from "fumadocs-core/page-tree";
-import { GITHUB_REPO_URL } from "@/lib/markdown";
+import { GITHUB_REPO_URL } from "@site/lib/site";
 
 export interface DocMeta {
   slug: string[];
@@ -203,7 +203,7 @@ export function getDoc(url: string): PageRecord | undefined {
 }
 
 export function editUrl(filePath: string) {
-  return `${GITHUB_REPO_URL}/blob/main/content/docs/${filePath}`;
+  return `${GITHUB_REPO_URL}/blob/main/site/content/docs/${filePath}`;
 }
 
 const mdxComponents = {
