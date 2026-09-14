@@ -5,4 +5,3 @@ reviews:
       - staging
     labels:
       - "!do-not-review"
-      

@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: site
-        run: npm install
+        run: npm ci
 
       - name: Build static site
         working-directory: site
@@ -54,7 +54,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: site
-        run: npm install
+        run: npm ci
 
       - name: Build static site
         working-directory: site
@@ -71,5 +71,5 @@ jobs:
           cat > .vercel/project.json <<EOF
           {"orgId":"${VERCEL_ORG_ID}","projectId":"${VERCEL_PROJECT_ID}"}
           EOF
-          npx --yes vercel@latest deploy --prod --yes dist \
+          npx --yes vercel@59.16.0 deploy --prod --yes dist \
             --token="${VERCEL_TOKEN}" --scope="${VERCEL_ORG_ID}"

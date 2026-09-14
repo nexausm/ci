@@ -5,7 +5,7 @@ export default function DocsNotFound() {
     <main className="flex flex-1 flex-col items-center justify-center px-4 py-16 text-center">
       <h1 className="text-6xl font-semibold tracking-tight">404</h1>
       <p className="text-fd-muted-foreground mt-3 text-lg">
-        This page maybe has been moved.
+        This page may have been moved.
       </p>
       <Link
         href="/docs"

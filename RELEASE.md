@@ -16,6 +16,8 @@ is inside this archive. No build step required. Bring a PostgreSQL database and 
 - **Node.js >= 20.9** (required by Next.js 16)
 - **npm** 10+
 - **PostgreSQL** 15+ (managed or self-hosted, reachable from this machine)
+- **npm registry access** (`npm ci` must reach the registry; no vendored
+  dependencies are included except `vendor/taepdf`)
 
 ## Quick start
 
