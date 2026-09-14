@@ -1,7 +1,14 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import { FaGithub } from "react-icons/fa";
 
 import { Logo } from "@site/components/landing/logo";
 import { GITHUB_REPO_URL } from "@site/lib/site";
+
+const APP_VERSION = JSON.parse(
+  readFileSync(join(process.cwd(), "..", "package.json"), "utf8"),
+).version as string;
 
 export function SiteFooter() {
   return (
@@ -19,7 +26,7 @@ export function SiteFooter() {
             Source
           </a>
           <span className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} NCI | AGPL-3.0
+            © {new Date().getFullYear()} NCI | AGPL-3.0 | v{APP_VERSION}
           </span>
         </div>
       </div>
