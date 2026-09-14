@@ -1,0 +1,75 @@
+name: Web build & deploy
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, closed]
+    paths:
+      - "site/**"
+      - ".github/workflows/web.yml"
+
+concurrency:
+  group: web-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Build test
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        working-directory: site
+        run: npm install
+
+      - name: Build static site
+        working-directory: site
+        run: npm run build
+
+      - name: Typecheck
+        working-directory: site
+        run: npx tsc --noEmit
+
+  deploy:
+    name: Deploy to Vercel (production)
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        working-directory: site
+        run: npm install
+
+      - name: Build static site
+        working-directory: site
+        run: npm run build
+
+      - name: Deploy dist/ to Vercel
+        working-directory: site
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.WEB_VERCEL_PROJECT_ID }}
+        run: |
+          mkdir -p .vercel
+          cat > .vercel/project.json <<EOF
+          {"orgId":"${VERCEL_ORG_ID}","projectId":"${VERCEL_PROJECT_ID}"}
+          EOF
+          npx --yes vercel@latest deploy --prod --yes dist \
+            --token="${VERCEL_TOKEN}" --scope="${VERCEL_ORG_ID}"
