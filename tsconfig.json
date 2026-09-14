@@ -32,12 +32,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": [
-    "node_modules",
-    "vendor",
-    "site/dist",
-    "site/.next",
-    "site/out",
-    "release"
-  ]
+  "exclude": ["node_modules", "vendor", "site", "release"]
 }
