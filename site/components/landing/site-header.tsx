@@ -2,7 +2,6 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { Logo } from "@site/components/landing/logo";
-import { Badge } from "@site/components/ui/badge";
 
 export function SiteHeader() {
   return (

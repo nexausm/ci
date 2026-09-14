@@ -1,7 +1,4 @@
-import { ArrowRight, KeyRound, Plane, Rocket } from "lucide-react";
-import Link from "next/link";
-
-import { Badge } from "@site/components/ui/badge";
+import { KeyRound, Plane, Rocket } from "lucide-react";
 
 const steps = [
   {
