@@ -4,7 +4,9 @@ import matter from "gray-matter";
 import { compile, run } from "@mdx-js/mdx";
 import * as JsxRuntime from "react/jsx-runtime";
 import remarkGfm from "remark-gfm";
+import { rehypeCode } from "fumadocs-core/mdx-plugins";
 import { remarkHeading } from "fumadocs-core/mdx-plugins/remark-heading";
+import { remarkNpm } from "fumadocs-core/mdx-plugins/remark-npm";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import { Accordion, Accordions } from "fumadocs-ui/components/accordion";
 import { File, Files, Folder } from "fumadocs-ui/components/files";
@@ -22,6 +24,8 @@ import {
   TbSparkles,
   TbUsers,
 } from "react-icons/tb";
+import { IoPeople } from "react-icons/io5";
+import { MdRocketLaunch } from "react-icons/md";
 import type { IconType } from "react-icons";
 import { HiSparkles } from "react-icons/hi2";
 import React, { type ReactNode } from "react";
@@ -102,9 +106,9 @@ const PAGE_ICONS: Record<string, IconType> = {
   TbCompass,
   TbFileText,
   TbGitFork,
-  TbRocket,
+  MdRocketLaunch,
   TbSparkles,
-  TbUsers,
+  IoPeople,
 };
 
 function pageIcon(name?: string): ReactNode {
@@ -227,7 +231,12 @@ export async function renderDoc(
   const compiled = await compile(doc.content, {
     outputFormat: "function-body",
     providerImportSource: "#",
-    remarkPlugins: [remarkGfm, [remarkHeading, { generateToc: true }]],
+    remarkPlugins: [
+      remarkGfm,
+      [remarkNpm, { persist: true }],
+      [remarkHeading, { generateToc: true }],
+    ],
+    rehypePlugins: [rehypeCode],
   });
 
   const toc = (compiled.data.toc ?? []) as TOCItemType[];
