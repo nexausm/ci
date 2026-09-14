@@ -54,6 +54,20 @@ next-env.d.ts
 # prisma generated client
 /generated/
 
+# site
+/site/node_modules/
+/site/.next/
+/site/out/
+/site/dist/
+/site/.env*
+!/site/.env.example
+/site/package-lock.json
+
+# release artifacts
+/release/
+*.zip
+/dist/
+
 # ide
 .puku
 .puku-cli

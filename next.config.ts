@@ -8,6 +8,9 @@ import type { NextConfig } from "next";
 const isCf = process.env.CF_PAGES === "1";
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [{ source: "/", destination: "/dashboard", permanent: true }];
+  },
   // `pg-cloudflare` ships a `workerd`-specific build (real Cloudflare socket).
   // Listing it here makes the Cloudflare adapter copy the full package using
   // the `workerd` export conditions instead of the default (no-op) build.
