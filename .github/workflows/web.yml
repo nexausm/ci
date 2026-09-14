@@ -69,7 +69,7 @@ jobs:
           EOF
           npx --yes vercel@59.16.0 pull --yes --environment=production \
             --token="${VERCEL_TOKEN}" --scope="$VERCEL_ORG_ID"
-          npx --yes vercel@59.16.0 build --yes \
+          npx --yes vercel@59.16.0 build --prod --yes \
             --token="${VERCEL_TOKEN}" --scope="$VERCEL_ORG_ID"
           npx --yes vercel@59.16.0 deploy --prebuilt --prod --yes \
             --token="${VERCEL_TOKEN}" --scope="$VERCEL_ORG_ID"
