@@ -13,16 +13,17 @@ import { Steps, Step } from "fumadocs-ui/components/steps";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 import { TypeTable } from "fumadocs-ui/components/type-table";
 import {
-  Braces,
-  Cable,
-  Compass,
-  FileText,
-  GitFork,
-  Rocket,
-  Sparkles,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
+  TbApi,
+  TbBraces,
+  TbCompass,
+  TbFileText,
+  TbGitFork,
+  TbRocket,
+  TbSparkles,
+  TbUsers,
+} from "react-icons/tb";
+import type { IconType } from "react-icons";
+import { HiSparkles } from "react-icons/hi2";
 import React, { type ReactNode } from "react";
 import type { TOCItemType } from "fumadocs-core/toc";
 import type { ComponentType } from "react";
@@ -39,6 +40,7 @@ export interface DocMeta {
   url: string;
   title: string;
   description?: string;
+  icon?: string;
   filePath: string;
   lastModified: string;
 }
@@ -84,6 +86,7 @@ function loadPages(): PageRecord[] {
           (data.title as string | undefined) ??
           humanize(segments.at(-1) ?? "docs"),
         description: data.description as string | undefined,
+        icon: data.icon as string | undefined,
         filePath: rel.replaceAll("\\", "/"),
         lastModified: stat.mtime.toISOString(),
         content,
@@ -92,21 +95,21 @@ function loadPages(): PageRecord[] {
     .sort((a, b) => (a.url < b.url ? -1 : a.url > b.url ? 1 : 0));
 }
 
-const FOLDER_ICONS: Array<[string, LucideIcon]> = [
-  ["api/endpoints", Cable],
-  ["api", Braces],
-  ["guides/invoices", FileText],
-  ["guides/clients", Users],
-  ["guides", Compass],
-  ["getting-started", Rocket],
-  ["advanced", Sparkles],
-  ["contributing", GitFork],
-];
+const PAGE_ICONS: Record<string, IconType> = {
+  HiSparkles,
+  TbApi,
+  TbBraces,
+  TbCompass,
+  TbFileText,
+  TbGitFork,
+  TbRocket,
+  TbSparkles,
+  TbUsers,
+};
 
-function folderIcon(slug: string[]): ReactNode {
-  const path = slug.join("/");
-  const icon = FOLDER_ICONS.find(([prefix]) => path.startsWith(prefix))?.[1];
-  return icon ? React.createElement(icon, { className: "size-4" }) : undefined;
+function pageIcon(name?: string): ReactNode {
+  const Icon = name ? PAGE_ICONS[name] : undefined;
+  return Icon ? React.createElement(Icon, { className: "size-4" }) : undefined;
 }
 
 function buildChildren(prefix: string[], pages: PageRecord[]): PageTreeNode[] {
@@ -128,7 +131,7 @@ function buildChildren(prefix: string[], pages: PageRecord[]): PageTreeNode[] {
     const deepPages = group
       .filter((page) => page.slug.length > 1)
       .map((page) => ({ ...page, slug: page.slug.slice(1) }));
-    const icon = folderIcon([...prefix, name]);
+    const icon = pageIcon(index?.icon);
 
     if (deepPages.length === 0 && index) {
       nodes.push({ type: "page", name: index.title, url: index.url, icon });
@@ -159,7 +162,7 @@ function buildTree(pages: PageRecord[]): PageTreeRoot {
       type: "page",
       name: page.title,
       url: page.url,
-      icon: React.createElement(Sparkles, { className: "size-4" }),
+      icon: pageIcon(page.icon),
     }));
 
   return {
