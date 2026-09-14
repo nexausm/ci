@@ -1,0 +1,78 @@
+---
+title: Contributing
+icon: IoPeople
+description: Set up a development environment and open your first pull request to Cloud Invoice.
+---
+
+# Contributing
+
+Thanks for your interest in contributing! The project is licensed under the
+[AGPL-3.0](https://github.com/nexausm/ci/blob/main/LICENSE).
+
+## Ways to contribute
+
+- Report bugs and request features by [opening an issue](https://github.com/nexausm/ci/issues)
+- Improve documentation
+- Review open pull requests
+- Submit code fixes or features
+
+## Development environment
+
+See the [Quick Start](/docs/quickstart) to get a local instance running.
+
+```npm
+npm run dev
+npm run lint
+npm run build
+npm run typecheck
+```
+
+## Code style
+
+- TypeScript is required for all source files; strict typing is enforced.
+- Run `npm run lint` before submitting.
+- Follow the project layout: app routes in `app/`, server logic in
+  `controllers/`, domain types in `lib/types.ts`, shared UI in `components/`.
+
+### Commit messages
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/),
+written in lowercase as-
+
+```
+feat: add support for recurring invoices
+fix: recalculate totals when a line item is removed
+refactor: extract PDF rendering into a reusable component
+chore: update dependencies
+```
+
+## Pull request workflow
+
+1. Fork the repository and create a feature branch
+   `git checkout -b feat/your-feature-name`.
+2. Make your changes and commit with a Conventional Commit message.
+3. Push and open a pull request against `main`.
+4. Describe what the change does and how it was tested.
+5. Keep pull requests focused on a single concern.
+
+## Docs site
+
+The docs at [Cloud Invoice Docs](/docs) live in `site/content/docs/` and are
+built with **FumaDocs** (MDX). To work on them-
+
+```bash
+cd site
+```
+
+```npm
+npm install
+npm run dev
+```
+
+Pages are `.mdx` files; the navigation tree is generated automatically from
+the file layout.
+
+## License
+
+All contributions are licensed under [AGPL-3.0](https://github.com/nexausm/ci/blob/main/LICENSE).
+By contributing, you agree to this license.

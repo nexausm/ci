@@ -1,9 +1,57 @@
 ---
-title: Documentation
+title: Overview
 icon: HiSparkles
-description: Welcome to the Cloud Invoice documentation.
+description: A brief.
 ---
 
-Welcome to the Cloud Invoice documentation.
+# Cloud Invoice by Nexaus
 
-More coming soon.
+Open-source, self-hostable invoice manager. Create invoices, manage clients, products and track every payment from one clean dashboard with your
+data fully under your control.
+
+## Why Cloud Invoice?
+
+- **No subscriptions, no tracking.** The project is AGPL-3.0 licensed, free to
+  self-host and never phones home.
+- **Your data, your hardware.** The whole codebase is open, so you can inspect
+  it, audit it and deploy it anywhere you already run services like Docker, a
+  VPS or your own laptop.
+- **Completely private.** Cloud Invoice will never
+  advertise inside your invoices.
+
+## Features
+
+<Accordions type="single">
+  <Accordion title="Invoices">
+    Generate clean, numbered invoices in seconds, mark them paid and keep a
+    permanent record of every document. Support for discounts, credits, tax,
+    line-item adjustments, installments and external costs.
+  </Accordion>
+  <Accordion title="Track payments">
+    See the full lifecycle of each invoice. Draft, sent, paid, overdue; with
+    monthly totals at a glance.
+  </Accordion>
+  <Accordion title="Clients">
+    Maintain your client list and their contact details so billing stays
+    consistent and repeatable.
+  </Accordion>
+  <Accordion title="Products & services">
+    Catalogue the items and services you sell and reuse them across invoices.
+  </Accordion>
+  <Accordion title="Company profile">
+    Configure your company name, number format, contact details and logo;
+    rendered on every invoice.
+  </Accordion>
+</Accordions>
+
+## Stack
+
+Built with **Next.js 16**, **React 19**, **Prisma 7** and **PostgreSQL**.
+Auth is handled by **Auth.js (NextAuth v5)**. The docs site runs on
+**FumaDocs**. Optional full-text search is powered by **Algolia**.
+
+## Where to next?
+
+- **[Quick Start](/docs/quickstart)** -> run the app locally in minutes.
+- **[Contributing](/docs/contributing)** -> set up a dev environment and open
+  your first pull request.
