@@ -1,6 +1,6 @@
 {
   "name": "nexausci",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "license": "AGPL-3.0",
   "scripts": {
     "dev": "prisma migrate deploy && prisma generate && next dev --webpack",
