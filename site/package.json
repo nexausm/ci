@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev -p 4000",
     "build": "next build && rm -rf dist && mv out dist",
+    "vercel-build": "next build",
     "start": "next start -p 4000",
     "lint": "eslint",
     "postinstall": "patch-package"
