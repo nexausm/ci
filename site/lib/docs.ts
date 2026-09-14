@@ -20,9 +20,7 @@ import {
   TbCompass,
   TbFileText,
   TbGitFork,
-  TbRocket,
   TbSparkles,
-  TbUsers,
 } from "react-icons/tb";
 import { IoPeople } from "react-icons/io5";
 import { MdRocketLaunch } from "react-icons/md";
