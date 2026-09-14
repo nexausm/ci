@@ -1,9 +1,7 @@
-import { redirect } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
-import { auth } from "@/middlewares/auth";
+import { auth } from "@/auth";
 import { getCompanyInfo } from "@/lib/company";
 import { CompanyProvider } from "@/app/providers/company-provider";
-import { AuthGuard } from "./auth-guard";
 import { DashboardShell } from "@/components/dashboard-shell";
 
 export default async function ProtectedLayout({
@@ -12,9 +10,6 @@ export default async function ProtectedLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
-  if (!session?.user) {
-    redirect("/login");
-  }
 
   const company = await getCompanyInfo();
 
@@ -28,10 +23,8 @@ export default async function ProtectedLayout({
 
   return (
     <CompanyProvider company={company}>
-      <SessionProvider>
-        <AuthGuard>
-          <DashboardShell algolia={algolia}>{children}</DashboardShell>
-        </AuthGuard>
+      <SessionProvider session={session}>
+        <DashboardShell algolia={algolia}>{children}</DashboardShell>
       </SessionProvider>
     </CompanyProvider>
   );

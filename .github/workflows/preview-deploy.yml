@@ -60,9 +60,9 @@ jobs:
           cat > .vercel/project.json <<EOF
           {"orgId":"${VERCEL_ORG_ID}","projectId":"${VERCEL_PROJECT_ID}"}
           EOF
-          npx --yes vercel@latest pull --yes --environment=preview --scope="$VERCEL_ORG_ID"
-          npx --yes vercel@latest build --yes --scope="$VERCEL_ORG_ID"
-          URL=$(npx --yes vercel@latest deploy --prebuilt --yes --scope="$VERCEL_ORG_ID" \
+          npx --yes vercel@59.16.0 pull --yes --environment=preview --scope="$VERCEL_ORG_ID"
+          npx --yes vercel@59.16.0 build --yes --scope="$VERCEL_ORG_ID"
+          URL=$(npx --yes vercel@59.16.0 deploy --prebuilt --yes --scope="$VERCEL_ORG_ID" \
             | grep -oE 'https://[^[:space:]]+' | tail -1)
           test -n "$URL" || exit 1
           echo "url=$URL" >> "$GITHUB_OUTPUT"

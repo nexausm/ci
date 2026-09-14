@@ -1,6 +1,6 @@
 <div align="center">
 
-# Nexaus Cloud Invoice
+# Cloud Invoice by Nexaus
 
 [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/nexausm/ci?utm_source=oss&utm_medium=github&utm_campaign=nexausm%2Fci&labelColor=171717&color=FF570A&label=CodeRabbit+Reviews)](https://coderabbit.ai)
 

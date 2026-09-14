@@ -292,6 +292,8 @@ export function invoiceFooterChrome(
   _companyName?: string,
   _invoiceId?: string,
 ): string {
+  void _companyName;
+  void _invoiceId;
   return "";
 }
 

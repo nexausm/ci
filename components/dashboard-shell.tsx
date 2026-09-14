@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useCompany } from "@/app/providers/company-provider";
@@ -108,14 +109,23 @@ export function DashboardShell({
                   e.currentTarget.style.display = "none";
                 }}
               />
-            ) : null}
+            ) : (
+              <Image
+                src="/images/logo/nci-logo.png"
+                alt="nci"
+                width={115}
+                height={127}
+                unoptimized
+                className="inline-block max-h-9 max-w-8.5 align-middle"
+              />
+            )}
           </span>
           <Link
             href="/dashboard"
             className="block overflow-hidden py-2 text-base leading-7.5 font-normal whitespace-nowrap text-white uppercase no-underline"
             onClick={() => setSidebarOpen(false)}
           >
-            Billing
+            Cloud Invoice
           </Link>
         </div>
 

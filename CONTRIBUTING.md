@@ -1,4 +1,4 @@
-# Contributing to Nexaus Cloud Invoice
+# Contributing to Cloud Invoice by Nexaus
 
 Thanks for your interest in contributing! This project is a self-hostable,
 cloud-ready invoice generator built with Next.js. It is licensed under the

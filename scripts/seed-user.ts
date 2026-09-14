@@ -8,31 +8,35 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
-  const email = (process.env.SEED_USER_EMAIL ?? "admin@nexaus.cloud")
-    .trim()
-    .toLowerCase();
-  const password = process.env.SEED_USER_PASSWORD ?? "admin123";
-  const name = process.env.SEED_USER_NAME ?? "Admin";
+  const email = process.env.SEED_USER_EMAIL?.trim().toLowerCase();
+  const password = process.env.SEED_USER_PASSWORD;
+  const name = process.env.SEED_USER_NAME?.trim() || "Admin";
 
   if (!email || !password) {
-    console.error(
-      "SEED_USER_EMAIL and SEED_USER_PASSWORD must be set in .env (or fallbacks will be used).",
-    );
+    console.error("SEED_USER_EMAIL and SEED_USER_PASSWORD must be set in .env");
     process.exit(1);
   }
 
-  const existing = await prisma.user.findUnique({ where: { email } });
-  const id = existing?.id ?? genId();
-  const passwordHash = await hashPassword(password);
+  try {
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      console.log(`User already exists (password left unchanged): ${email}`);
+      return;
+    }
 
-  await prisma.user.upsert({
-    where: { email },
-    create: { id, email, name, passwordHash },
-    update: { name, passwordHash },
-  });
+    await prisma.user.create({
+      data: {
+        id: genId(),
+        email,
+        name,
+        passwordHash: await hashPassword(password),
+      },
+    });
 
-  await prisma.$disconnect();
-  console.log(`Seeded user: ${email}`);
+    console.log(`Seeded user: ${email}`);
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
 main().catch((err) => {
