@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui";
 import { DevConsoleFilter } from "@/components/docs/dev-console-filter";
-import { RootProvider } from "fumadocs-ui/provider/next";
 
 export const metadata: Metadata = {
   title: "Cloud Invoice by Nexaus",
@@ -26,7 +25,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-muted/30 min-h-full">
-        <RootProvider search={{ enabled: false }}>{children}</RootProvider>
+        {children}
         <Toaster richColors position="top-right" />
         <DevConsoleFilter />
       </body>

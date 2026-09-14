@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { RootProvider } from "fumadocs-ui/provider/next";
 
 import "./globals.css";
 
@@ -22,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`h-full antialiased ${inter.variable}`}>
       <body className="bg-background text-foreground min-h-full">
-        {children}
+        <RootProvider search={{ enabled: false }}>{children}</RootProvider>
       </body>
     </html>
   );

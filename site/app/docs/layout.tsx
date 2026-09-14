@@ -1,7 +1,7 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
-import { getDocManifest } from "@/lib/docs";
-import { GITHUB_REPO_URL } from "@/lib/markdown";
-import { Logo } from "@/components/landing/logo";
+import { getDocManifest } from "@site/lib/docs";
+import { GITHUB_REPO_URL } from "@site/lib/site";
+import { Logo } from "@site/components/landing/logo";
 
 export default function DocsPageLayout({
   children,

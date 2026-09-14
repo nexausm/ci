@@ -1,9 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "fumadocs-ui/style.css";
-
-@source "../../node_modules/fumadocs-ui/dist";
 
 @font-face {
   font-family: "Inter";
@@ -111,27 +108,6 @@ body {
   --sidebar-accent-foreground: oklch(0.776 0.107 197.4);
   --sidebar-border: oklch(0.916 0 0);
   --sidebar-ring: oklch(0.776 0.107 197.4);
-}
-
-:root {
-  --color-fd-background: var(--background);
-  --color-fd-foreground: var(--foreground);
-  --color-fd-card: var(--card);
-  --color-fd-card-foreground: var(--card-foreground);
-  --color-fd-popover: var(--popover);
-  --color-fd-popover-foreground: var(--popover-foreground);
-  --color-fd-primary: var(--primary);
-  --color-fd-primary-foreground: var(--primary-foreground);
-  --color-fd-secondary: var(--secondary);
-  --color-fd-secondary-foreground: var(--secondary-foreground);
-  --color-fd-muted: var(--muted);
-  --color-fd-muted-foreground: var(--muted-foreground);
-  --color-fd-accent: var(--accent);
-  --color-fd-accent-foreground: var(--accent-foreground);
-  --color-fd-destructive: var(--destructive);
-  --color-fd-border: var(--border);
-  --color-fd-input: var(--input);
-  --color-fd-ring: var(--ring);
 }
 
 .dark {
@@ -277,32 +253,4 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-600;
-}
-
-article[data-layout-content] {
-  padding-inline: 1rem;
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-}
-
-@media (width >= 48rem) {
-  article[data-layout-content] {
-    padding-inline: 1.5rem;
-    padding-top: 2rem;
-  }
-}
-
-@media (width >= 80rem) {
-  article[data-layout-content] {
-    padding-inline: 2rem;
-    padding-top: 3.5rem;
-  }
-}
-
-#nd-toc a:first-of-type {
-  padding-top: 0 !important;
-}
-
-#nd-toc a:last-of-type {
-  padding-bottom: 0 !important;
 }
