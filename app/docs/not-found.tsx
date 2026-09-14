@@ -9,7 +9,7 @@ export default function DocsNotFound() {
       </p>
       <Link
         href="/docs"
-        className="bg-fd-primary text-black mt-6 rounded-md px-4 py-2 text-sm font-medium"
+        className="bg-fd-primary mt-6 rounded-md px-4 py-2 text-sm font-medium text-black"
       >
         Back to the docs
       </Link>
