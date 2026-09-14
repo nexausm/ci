@@ -26,12 +26,17 @@ zip -r "${release_dir}/${name}.zip" \
   .next \
   public \
   prisma \
+  vendor \
   auth.ts \
+  auth.config.ts \
   middleware.ts \
   next.config.ts \
+  prisma.config.ts \
+  postcss.config.mjs \
   package.json \
   package-lock.json \
   tsconfig.json \
+  .npmrc \
   .env.example \
   scripts \
   -x "*/.git/*" -x "node_modules/*" \
