@@ -1,0 +1,96 @@
+---
+title: Quick Start
+icon: MdRocketLaunch
+description: Run Cloud Invoice locally in minutes. Clone the repo, configure the environment, apply migrations, and start the dev server.
+---
+
+# Quick Start
+
+Get a local instance running in a few minutes.
+
+## Prerequisites
+
+- **Node.js** 20.9+ (required by Next.js 16)
+- **npm** 10+
+- **PostgreSQL** 15+ (local or hosted)
+- Git
+
+## 1. Clone and install
+
+```bash
+git clone https://github.com/nexausm/ci.git
+cd ci
+```
+
+```npm
+npm install
+```
+
+Installation runs a `postinstall` step (`prisma generate`) that reads
+`DATABASE_URL`, so create `.env` before installing if the variable is not
+already exported.
+
+## 2. Configure the environment
+
+```bash
+cp .env.example .env
+```
+
+Fill in at least the required variables:
+
+| Variable               | Description                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------- |
+| `DATABASE_URL`         | PostgreSQL connection string, e.g. `postgresql://user:pass@localhost:5432/invoice` |
+| `AUTH_SECRET`          | Session signing secret. Generate: `openssl rand -base64 32`                        |
+| `AUTH_TRUST_HOST`      | Set `true` when not running behind a reverse proxy                                 |
+| `AUTH_SESSION_MAX_AGE` | Session lifetime in seconds (default 30 days)                                      |
+
+Optional features:
+
+| Variable                 | Description                                 |
+| ------------------------ | ------------------------------------------- |
+| `SEED_USER_NAME`         | Name of the seeded admin user               |
+| `SEED_USER_EMAIL`        | Email of the seeded admin user              |
+| `SEED_USER_PASSWORD`     | Password of the seeded admin user           |
+| `ALGOLIA_APP_ID`         | Enable full-text search (empty disables it) |
+| `ALGOLIA_ADMIN_API_KEY`  | Algolia admin API key                       |
+| `ALGOLIA_SEARCH_API_KEY` | Algolia search-only key                     |
+| `ALGOLIA_INDEX_NAME`     | Algolia index name                          |
+
+## 3. Apply migrations
+
+```npm
+npm run db:migrate
+```
+
+## 4. Start the dev server
+
+```npm
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+## 5. Create your first user
+
+```npm
+npm run seed
+```
+
+This creates a user from `SEED_USER_NAME`, `SEED_USER_EMAIL`, and
+`SEED_USER_PASSWORD`. Sign in and you're ready to invoice.
+
+## Common scripts
+
+| Command                 | Purpose                                               |
+| ----------------------- | ----------------------------------------------------- |
+| `npm run dev`           | Start the dev server                                  |
+| `npm run build`         | Production build                                      |
+| `npm run start`         | Production start (migrations → Prisma → `next start`) |
+| `npm run lint`          | Run ESLint                                            |
+| `npm run typecheck`     | Type-check root + docs site                           |
+| `npm run db:deploy`     | Apply pending migrations                              |
+| `npm run db:generate`   | Regenerate the Prisma client                          |
+| `npm run seed`          | Create the first user                                 |
+| `npm run index:algolia` | Re-index records to Algolia (optional)                |
+| `npm run format`        | Format the codebase with Prettier                     |

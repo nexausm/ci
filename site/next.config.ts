@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  output: "export",
-  images: { unoptimized: true },
-  turbopack: { root: __dirname },
-};
-
-export default nextConfig;
+export default function nextConfig(phase: string): NextConfig {
+  return {
+    ...(phase === "phase-production-build"
+      ? { output: "export" as const }
+      : {}),
+    images: { unoptimized: true },
+    turbopack: { root: __dirname },
+  };
+}
