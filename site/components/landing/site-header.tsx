@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { Logo } from "@site/components/landing/logo";
+import { ThemeToggle } from "@site/components/landing/theme-toggle";
 
 export function SiteHeader() {
   return (
@@ -32,6 +33,7 @@ export function SiteHeader() {
               Getting started <ArrowRight className="size-3.5" />
             </Link>
           </div>
+          <ThemeToggle />
         </div>
       </nav>
     </header>
