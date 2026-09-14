@@ -21,7 +21,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`h-full antialiased ${inter.variable}`}>
+    <html
+      lang="en"
+      className={`h-full antialiased ${inter.variable}`}
+      suppressHydrationWarning
+    >
       <body className="bg-background text-foreground min-h-full">
         <RootProvider search={{ enabled: false }}>{children}</RootProvider>
       </body>
