@@ -25,6 +25,24 @@ export default function DocsPageLayout({
           url: "/",
           active: "nested-url",
         },
+        {
+          type: "main",
+          text: "Features",
+          url: "/features",
+          active: "nested-url",
+        },
+        {
+          type: "main",
+          text: "Download",
+          url: "/download",
+          active: "nested-url",
+        },
+        {
+          type: "main",
+          text: "Community",
+          url: "/community",
+          active: "nested-url",
+        },
       ]}
       themeSwitch={{ enabled: true }}
     >

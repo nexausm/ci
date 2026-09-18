@@ -24,7 +24,7 @@ export function Hero() {
       </div>
 
       <div className="relative mx-auto mt-14 max-w-3xl">
-        <div className="bg-primary/10 absolute -inset-x-8 -top-10 -bottom-10 rounded-[2.5rem] blur-3xl" />
+        <div className="bg-primary/10 absolute -inset-x-4 -top-10 -bottom-10 rounded-[2.5rem] blur-3xl sm:-inset-x-8" />
         <div className="border-border bg-card relative rounded-2xl border p-4 shadow-xl sm:p-6">
           <div className="mb-4 flex items-center justify-between">
             <p className="text-muted-foreground text-sm font-semibold tracking-wide">
