@@ -9,8 +9,9 @@ import { Logo } from "@site/components/landing/logo";
 import { ThemeToggle } from "@site/components/landing/theme-toggle";
 
 const NAV_ITEMS = [
-  { href: "#features", label: "Features" },
-  { href: "#self-host", label: "Self-host" },
+  { href: "/features", label: "Features" },
+  { href: "/download", label: "Download" },
+  { href: "/community", label: "Community" },
   { href: "/docs", label: "Docs" },
 ];
 
@@ -29,7 +30,7 @@ export function SiteHeader() {
         </Link>
 
         <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="site-header-nav items-center gap-3">
             {NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
@@ -40,7 +41,7 @@ export function SiteHeader() {
               </Link>
             ))}
             <Link
-              href="#getting-started"
+              href="/#getting-started"
               className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm font-medium transition-colors"
             >
               Getting started <ArrowRight className="size-3.5" />
@@ -52,7 +53,7 @@ export function SiteHeader() {
             aria-label="Toggle menu"
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            className="text-muted-foreground hover:text-foreground inline-flex size-8 items-center justify-center rounded-md transition-colors md:hidden"
+            className="site-header-toggle text-muted-foreground hover:text-foreground size-8 items-center justify-center rounded-md transition-colors"
           >
             {open ? <X className="size-4" /> : <Menu className="size-4" />}
           </button>
@@ -66,7 +67,7 @@ export function SiteHeader() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="bg-background absolute inset-x-0 top-full z-100 overflow-hidden shadow-lg md:hidden"
+            className="site-header-mobile bg-background absolute inset-x-0 top-full z-100 overflow-hidden shadow-lg"
           >
             <div className="border-border flex flex-col gap-1 border-t px-4 py-3">
               {NAV_ITEMS.map((item) => (
@@ -80,7 +81,7 @@ export function SiteHeader() {
                 </Link>
               ))}
               <Link
-                href="#getting-started"
+                href="/#getting-started"
                 onClick={() => setOpen(false)}
                 className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 rounded-md px-2 py-2 text-sm font-medium transition-colors"
               >

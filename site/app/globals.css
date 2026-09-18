@@ -140,3 +140,29 @@ article[data-layout-content] {
 #nd-toc a:last-of-type {
   padding-bottom: 0 !important;
 }
+
+.site-header-nav {
+  display: none;
+}
+
+.site-header-toggle {
+  display: inline-flex;
+}
+
+.site-header-mobile {
+  display: block;
+}
+
+@media (min-width: 48rem) {
+  .site-header-nav {
+    display: flex;
+  }
+
+  .site-header-toggle {
+    display: none;
+  }
+
+  .site-header-mobile {
+    display: none;
+  }
+}
