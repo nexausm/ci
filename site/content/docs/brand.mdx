@@ -72,27 +72,32 @@ does the heavy lifting; black and white are the neutrals.
 
 ### Brand palette
 
-| Token | Usage                        | Value     |
-| ----- | ---------------------------- | --------- |
-| Teal  | Primary accent, links, brand | `#0bb7ba` |
-| Black | Text, dark surfaces          | `#040404` |
-| White | Light surfaces, inverted     | `#ffffff` |
+| Token     | Usage                            | Value     |
+| --------- | -------------------------------- | --------- |
+| Teal      | Primary accent, brand            | `#0bb7ba` |
+| Dark teal | Text links, CTA and badge labels | `#087786` |
+| Black     | Text, dark surfaces              | `#040404` |
+| White     | Light surfaces, inverted         | `#ffffff` |
 
 The teal is the same across the app's primary color and the logo. It reads calm
-and technical; use it for interactive accents (buttons, selected states, links)
-rather than large background fills.
+and technical; use it for interactive accents (buttons, selected states) rather
+than large background fills, and reach for the dark teal for text.
 
 ### Color on color
 
-| Pairing        | Usage                                        |
-| -------------- | -------------------------------------------- |
-| Teal on white  | Default for links, badges and CTAs on light. |
-| White on teal  | Inverted CTAs and the brand mark on teal.    |
-| Black on white | The default for body content and the docs.   |
-| White on black | Inverted surfaces, dark mode, dark footer.   |
+| Pairing            | Usage                                               |
+| ------------------ | --------------------------------------------------- |
+| Dark teal on white | Text links, badge and CTA labels on light surfaces. |
+| White on dark teal | Inverted CTA labels on a contrast-compliant teal.   |
+| Black on white     | The default for body content and the docs.          |
+| White on black     | Inverted surfaces, dark mode, dark footer.          |
+| Teal on white      | Non-text accents only (icons, selected states).     |
+| White on teal      | Non-text only: the brand mark on a teal tile.       |
 
 Ensure text meets a **4.5:1** contrast ratio against its background on web;
-large display text can drop to **3:1**.
+large display text can drop to **3:1**. The primary teal (`#0bb7ba`) reaches only
+about **2.5:1** on white, so never use it for text labels; use `#087786` for
+text on light, and white on `#087786` for inverted labels.
 
 ## Typography
 
