@@ -44,7 +44,7 @@ export function SiteHeader() {
               href="/#getting-started"
               className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm font-medium transition-colors"
             >
-              Getting started <ArrowRight className="size-3.5" />
+              Getting started
             </Link>
           </div>
           <ThemeToggle />
@@ -85,7 +85,7 @@ export function SiteHeader() {
                 onClick={() => setOpen(false)}
                 className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 rounded-md px-2 py-2 text-sm font-medium transition-colors"
               >
-                Getting started <ArrowRight className="size-3.5" />
+                Getting started
               </Link>
             </div>
           </motion.div>
