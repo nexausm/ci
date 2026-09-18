@@ -4,6 +4,18 @@ on:
   pull_request:
     branches: [staging]
     types: [opened, synchronize, reopened, closed]
+    paths-ignore:
+      - "site/**"
+      - ".github/**"
+      - "*.md"
+      - "LICENSE"
+      - ".claude/**"
+      - ".agents/**"
+      - ".coderabbit.yaml"
+      - ".editorconfig"
+      - ".prettierrc.json"
+      - ".prettierignore"
+      - ".env.example"
 
 concurrency:
   group: preview-deploy-${{ github.event.pull_request.number }}
