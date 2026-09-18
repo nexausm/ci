@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/assets/logo/svg/shape/teal.svg" alt="Cloud Invoice logo" width="128" />
+<img src="public/images/logo/nci.svg" alt="Cloud Invoice logo" width="128" />
 
 # Cloud Invoice
 
