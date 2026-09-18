@@ -111,7 +111,7 @@ export function DashboardShell({
               />
             ) : (
               <Image
-                src="/images/logo/nci-logo.png"
+                src="/assets/logo/svg/shape/teal.svg"
                 alt="nci"
                 width={115}
                 height={127}
