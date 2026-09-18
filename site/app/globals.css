@@ -158,10 +158,7 @@ article[data-layout-content] {
     display: flex;
   }
 
-  .site-header-toggle {
-    display: none;
-  }
-
+  .site-header-toggle,
   .site-header-mobile {
     display: none;
   }
