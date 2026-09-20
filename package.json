@@ -16,6 +16,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "release": "bash scripts/release.sh",
+    "deploy": "npm run cf:build && npx wrangler deploy",
     "postinstall": "prisma generate",
     "cf:build": "CF_PAGES=1 opennextjs-cloudflare build",
     "cf:preview": "CF_PAGES=1 opennextjs-cloudflare build && CF_PAGES=1 opennextjs-cloudflare preview",

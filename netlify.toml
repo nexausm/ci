@@ -1,11 +1,25 @@
-# Build command, publish directory, headers, and redirects stay UI-managed
-# (see the Netlify site's Build & deploy settings). The build runs
-# `npm run build` and `@netlify/plugin-nextjs` bundles the server handler.
+# Netlify auto-configures the Next.js/OpenNext adapter the rest of the way
+# (publish directory and server handler are handled by the adapter). The
+# `[build]` section only pins the build command so one-click clones are
+# configured; the main site's headers, redirects, and site-specific settings
+# stay UI-managed (see the Netlify site's Build & deploy settings).
 #
 # PDF generation is fully client-side (see lib/print-pdf.ts), so the server
-# function no longer carries Chromium/Playwright, which keeps the
-# `___netlify-server-handler` bundle well under Netlify's per-function limit.
+# handler no longer carries Chromium/Playwright, which keeps the bundle well
+# under Netlify's per-function size limit.
 #
 # NOTE: `[functions] included_files` is NOT a way to shrink the handler — the
-# plugin treats it as an additive file list only (`!` exclusion globs are
-# ignored for the traced handler bundle), so it's intentionally not used here.
+# Next.js plugin treats it as an additive file list only (`!` exclusion globs
+# are ignored for the traced handler bundle), so it's intentionally not used
+# here.
+
+[build]
+  command = "npm run build"
+
+# Prompts one-click deployers for required environment variables. The values
+# entered are stored as site-env vars, never committed. Users supply their own
+# Postgres URL and secret; AUTH_TRUST_HOST is safe to leave as "true".
+[template.environment]
+  DATABASE_URL = "your PostgreSQL connection string"
+  AUTH_SECRET = "random secret, e.g. openssl rand -base64 32"
+  AUTH_TRUST_HOST = "true"
