@@ -25,10 +25,39 @@
 
 </div>
 
+<div align="center">
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/nexausm/ci)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnexausm%2Fci&project-name=cloud-invoice&repository-name=cloud-invoice&env=AUTH_SECRET,AUTH_TRUST_HOST,DATABASE_URL&envDefaults=%7B%22AUTH_TRUST_HOST%22%3A%22true%22%7D&envDescription=DATABASE_URL%3A%20PostgreSQL%20connection%20string%20%28Neon%2C%20Supabase%2C%20RDS...%29.%20AUTH_SECRET%3A%20random%20secret%2C%20generate%20with%3A%20openssl%20rand%20-base64%2032.%20AUTH_TRUST_HOST%3A%20set%20to%20true)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nexausm/ci)
+
+</div>
+
 ---
 
 To learn about features, setup, contribution and more, visit
 **[docs](https://invoice.nexaus.cloud/docs)**.
+
+## Deploy your own instance
+
+The buttons above clone the latest default branch into your own Git account
+and wire it up for continuous deploys on Cloudflare, Vercel, or Netlify. The
+repository must be public. No secrets are embedded in the repo or the link —
+you are prompted for the environment variables below at deploy time.
+
+Required:
+
+- `DATABASE_URL` - a PostgreSQL connection string (Neon, Supabase, RDS, ...)
+- `AUTH_SECRET` - a random secret: `openssl rand -base64 32`
+- `AUTH_TRUST_HOST` - `true`
+
+Optional:
+
+- `ALGOLIA_APP_ID`, `ALGOLIA_SEARCH_API_KEY`, `ALGOLIA_ADMIN_API_KEY`,
+  `ALGOLIA_INDEX_NAME` - global search. Search gracefully degrades when
+  unset; indexing runs via `npm run index:algolia`.
+- `SEED_USER_NAME`, `SEED_USER_EMAIL`, `SEED_USER_PASSWORD` - pre-provisions
+  an admin user via `npm run seed`.
 
 ## License
 
