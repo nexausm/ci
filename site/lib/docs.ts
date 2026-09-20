@@ -17,6 +17,7 @@ import { TypeTable } from "fumadocs-ui/components/type-table";
 import {
   TbApi,
   TbBraces,
+  TbCloudUpload,
   TbCompass,
   TbFileText,
   TbGitFork,
@@ -101,6 +102,7 @@ const PAGE_ICONS: Record<string, IconType> = {
   HiSparkles,
   TbApi,
   TbBraces,
+  TbCloudUpload,
   TbCompass,
   TbFileText,
   TbGitFork,

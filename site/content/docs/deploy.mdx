@@ -1,0 +1,137 @@
+---
+title: Deploy
+icon: TbCloudUpload
+description: Put Cloud Invoice online in a few clicks without coding or any required terminal.
+---
+
+# Put Cloud Invoice online
+
+You can run your very own Cloud Invoice on **Cloudflare**, **Vercel** or
+**Netlify**; just click a button. No coding, no manual forking and no
+command line required.
+
+<div align="center">
+
+<a href="https://deploy.workers.cloudflare.com/?url=https://github.com/nexausm/ci">
+  <img
+    src="https://deploy.workers.cloudflare.com/button"
+    alt="Deploy to Cloudflare"
+    width={184}
+    height={39}
+  />
+</a>
+
+<a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnexausm%2Fci&project-name=cloud-invoice&repository-name=cloud-invoice&env=AUTH_SECRET,AUTH_TRUST_HOST,DATABASE_URL&envDefaults=%7B%22AUTH_TRUST_HOST%22%3A%22true%22%7D&envDescription=DATABASE_URL%3A%20PostgreSQL%20connection%20string%20%28Neon%2C%20Supabase%2C%20RDS...%29.%20AUTH_SECRET%3A%20random%20secret%2C%20generate%20with%3A%20openssl%20rand%20-base64%2032.%20AUTH_TRUST_HOST%3A%20set%20to%20true">
+  <img
+    src="https://vercel.com/button"
+    alt="Deploy with Vercel"
+    width={103}
+    height={32}
+  />
+</a>
+
+<a href="https://app.netlify.com/start/deploy?repository=https://github.com/nexausm/ci">
+  <img
+    src="https://www.netlify.com/img/deploy/button.svg"
+    alt="Deploy to Netlify"
+    width={179}
+    height={32}
+  />
+</a>
+
+</div>
+
+## What happens when you click
+
+It's easier than it looks. A button does the whole job for you:
+
+1. You sign in with your GitHub account.
+2. It makes a **copy of the app's code inside your own account**.
+3. It connects that copy to the platform and builds the app.
+4. You type in a few small settings (see below).
+5. Your own Cloud Invoice is live, usually in a few minutes.
+
+You own the copy, so nothing about your data or your copy is shared with
+anyone else. And whenever you change your copy, the platform updates your
+site automatically.
+
+## What you need before you click
+
+Only two things:
+
+1. **A GitHub account**. Create one free in a minute if you do not have it.
+2. **A free database**. We recommend [Neon](https://neon.tech) or
+   [Supabase](https://supabase.com). Create a database and copy its connection
+   string. It looks like
+   `postgresql://user:password@host:5432/database`.
+
+Every other setting is a nice-to-have. You can always add more later.
+
+## The 3 settings
+
+While deploying, you will be asked for these-
+
+| Setting           | What it is                      | Where to find it                                                                                                                              |
+| ----------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`    | Your database connection string | From your database provider                                                                                                                   |
+| `AUTH_SECRET`     | A random password for the app   | you can either generate one by this command `openssl rand -base64 32` or from [here](https://www.convertsimple.com/random-base64-generator/). |
+| `AUTH_TRUST_HOST` | Just type `true`                | Nothing else                                                                                                                                  |
+
+<Callout type="info">
+  `AUTH_SECRET` is a secret. Never share it and never paste it into an online
+  tool. The deploy button only asks you to type it in. It is never stored in the
+  code.
+</Callout>
+
+## Pick a platform
+
+All three work the same way afterwards; you just choose whichever you like.
+
+<Tabs items={["Cloudflare", "Vercel", "Netlify"]}>
+  <Tab value="Cloudflare">
+    1. Click **Deploy to Cloudflare** and sign in when asked.
+    2. Keep the suggested Worker name the button gives you.
+    3. Accept the build settings and let it deploy.
+
+    After the first deploy, open your Worker in the Cloudflare dashboard,
+    find **Settings**, paste in the 3 settings above and redeploy once.
+
+  </Tab>
+  <Tab value="Vercel">
+    1. Click **Deploy with Vercel** and sign in when asked.
+    2. Vercel asks you for the 3 settings right away. Type them in.
+    3. Click **Deploy** and wait a few minutes.
+
+    Your site is ready. That's it.
+
+  </Tab>
+  <Tab value="Netlify">
+    1. Click **Deploy to Netlify** and sign in when asked.
+    2. Netlify shows you the 3 settings as part of the setup. Fill them in.
+    3. Click **Deploy site** and wait a few minutes.
+
+    Your site is ready. That's it.
+
+  </Tab>
+</Tabs>
+
+## After your first deploy
+
+1. Open your new site's link. It takes you straight to the dashboard.
+2. Create your first login. The app has no sign-up page, so create a user by
+   running this once on your computer (paste your own database URL and a
+   strong password)-
+
+   ```bash
+   DATABASE_URL="postgresql://user:password@host:5432/database" \
+   SEED_USER_NAME="Admin" SEED_USER_EMAIL="you@example.com" \
+   SEED_USER_PASSWORD="choose-a-strong-password" npm run seed
+   ```
+
+   (Copy your GitHub copy to your computer first with
+   `git clone` if you do not have the code there yet.)
+
+3. Sign in with that email and password and start invoicing.
+
+Stuck? Open an [issue](https://github.com/nexausm/ci/issues) and we will
+be happy to help.
