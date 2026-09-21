@@ -21,7 +21,7 @@ command line required.
   />
 </a>
 
-<a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnexausm%2Fci&project-name=cloud-invoice&repository-name=cloud-invoice&env=AUTH_SECRET,AUTH_TRUST_HOST,DATABASE_URL&envDefaults=%7B%22AUTH_TRUST_HOST%22%3A%22true%22%7D&envDescription=DATABASE_URL%3A%20PostgreSQL%20connection%20string%20%28Neon%2C%20Supabase%2C%20RDS...%29.%20AUTH_SECRET%3A%20random%20secret%2C%20generate%20with%3A%20openssl%20rand%20-base64%2032.%20AUTH_TRUST_HOST%3A%20set%20to%20true">
+<a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnexausm%2Fci&project-name=cloud-invoice&repository-name=cloud-invoice&env=AUTH_SECRET,DATABASE_URL&envDescription=DATABASE_URL%3A%20PostgreSQL%20connection%20string%20%28Neon%2C%20Supabase%2C%20RDS...%29.%20AUTH_SECRET%3A%20random%20secret%2C%20generate%20with%3A%20openssl%20rand%20-base64%2032">
   <img
     src="https://vercel.com/button"
     alt="Deploy with Vercel"
@@ -71,11 +71,10 @@ Every other setting is a nice-to-have. You can always add more later.
 
 While deploying, you will be asked for these-
 
-| Setting           | What it is                      | Where to find it                                                                                                                              |
-| ----------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`    | Your database connection string | From your database provider                                                                                                                   |
-| `AUTH_SECRET`     | A random password for the app   | you can either generate one by this command `openssl rand -base64 32` or from [here](https://www.convertsimple.com/random-base64-generator/). |
-| `AUTH_TRUST_HOST` | Just type `true`                | Nothing else                                                                                                                                  |
+| Setting        | What it is                      | Where to find it                                                                                                                              |
+| -------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL` | Your database connection string | From your database provider                                                                                                                   |
+| `AUTH_SECRET`  | A random password for the app   | you can either generate one by this command `openssl rand -base64 32` or from [here](https://www.convertsimple.com/random-base64-generator/). |
 
 <Callout type="info">
   `AUTH_SECRET` is a secret. Never share it and never paste it into an online

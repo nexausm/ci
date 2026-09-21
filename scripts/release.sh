@@ -45,6 +45,8 @@ zip -r "${release_dir}/${name}.zip" \
   "${release_readme}" \
   LICENSE \
   scripts/seed-user.ts \
+  scripts/seed-helpers.ts \
+  scripts/setup-db.ts \
   scripts/index-algolia.ts \
   -x "*/.git/*" -x "node_modules/*" \
   -x ".next/cache/*" -x ".next/dev/*" -x ".next/types/*" \
