@@ -21,7 +21,7 @@ command line required.
   />
 </a>
 
-<a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnexausm%2Fci&project-name=cloud-invoice&repository-name=cloud-invoice&env=AUTH_SECRET,DATABASE_URL&envDescription=DATABASE_URL%3A%20PostgreSQL%20connection%20string%20%28Neon%2C%20Supabase%2C%20RDS...%29.%20AUTH_SECRET%3A%20random%20secret%2C%20generate%20with%3A%20openssl%20rand%20-base64%2032">
+<a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnexausm%2Fci&project-name=cloud-invoice&repository-name=cloud-invoice&env=AUTH_SECRET,DATABASE_URL,AUTH_SESSION_MAX_AGE,SEED_USER_EMAIL,SEED_USER_PASSWORD,SEED_USER_NAME&envDefaults=%7B%22AUTH_SESSION_MAX_AGE%22%3A%2286400%22%2C%22SEED_USER_NAME%22%3A%22Admin%22%7D&envDescription=DATABASE_URL%3A%20PostgreSQL%20connection%20string%20%28Neon%2C%20Supabase%2C%20RDS...%29.%20Migrations%20and%20the%20admin%20seed%20run%20automatically%20on%20build.%20AUTH_SECRET%3A%20random%20secret%2C%20generate%20with%3A%20openssl%20rand%20-base64%2032.%20AUTH_SESSION_MAX_AGE%3A%20session%20lifetime%20in%20seconds%20%28default%2086400%29.%20SEED_USER_EMAIL%20%2F%20SEED_USER_PASSWORD%20%2F%20SEED_USER_NAME%3A%20pre-provisions%20the%20admin%20user%20%28needed%20to%20log%20in%29.">
   <img
     src="https://vercel.com/button"
     alt="Deploy with Vercel"
