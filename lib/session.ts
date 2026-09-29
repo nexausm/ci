@@ -7,7 +7,7 @@ const SESSION_MAX_AGE_SECONDS =
     ? parsed
     : DEFAULT_SESSION_MAX_AGE_SECONDS;
 
-if (!Number.isFinite(parsed)) {
+if (!Number.isFinite(parsed) || parsed <= 0) {
   console.warn(
     `[session] AUTH_SESSION_MAX_AGE is missing or invalid (got ${
       raw === undefined ? "unset" : `"${raw}"`
