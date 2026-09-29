@@ -67,19 +67,31 @@ Only two things:
 
 Every other setting is a nice-to-have. You can always add more later.
 
-## The 3 settings
+## The settings to fill in
 
 While deploying, you will be asked for these-
 
-| Setting        | What it is                      | Where to find it                                                                                                                              |
-| -------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL` | Your database connection string | From your database provider                                                                                                                   |
-| `AUTH_SECRET`  | A random password for the app   | you can either generate one by this command `openssl rand -base64 32` or from [here](https://www.convertsimple.com/random-base64-generator/). |
+| Setting              | What it is                        | Where to find it                                                                                                                              |
+| -------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`       | Your database connection string   | From your database provider                                                                                                                   |
+| `AUTH_SECRET`        | A random password for the app     | you can either generate one by this command `openssl rand -base64 32` or from [here](https://www.convertsimple.com/random-base64-generator/). |
+| `SEED_USER_EMAIL`    | Email for your first login        | Any address you like, e.g. `admin@example.com`                                                                                                |
+| `SEED_USER_PASSWORD` | Password for that first login     | Choose a strong one                                                                                                                           |
+| `SEED_USER_NAME`     | Display name for that first login | Optional, defaults to `Admin`                                                                                                                 |
+
+The three `SEED_USER_*` settings create your first login. Every build runs
+`db:setup`, which applies the database migrations and seeds that admin user, so
+you can sign in as soon as the deploy finishes. If you leave them empty the
+deploy still succeeds, but nobody can sign in until you create a user yourself
+(see **After your first deploy** below).
+
+You may also be asked for `AUTH_SESSION_MAX_AGE`. It is optional and already
+defaults to `86400` seconds (24 hours).
 
 <Callout type="info">
   `AUTH_SECRET` is a secret. Never share it and never paste it into an online
   tool. The deploy button only asks you to type it in. It is never stored in the
-  code.
+  code. Treat `SEED_USER_PASSWORD` the same way, and use a different one.
 </Callout>
 
 ## Pick a platform
@@ -93,12 +105,12 @@ All three work the same way afterwards; you just choose whichever you like.
     3. Accept the build settings and let it deploy.
 
     After the first deploy, open your Worker in the Cloudflare dashboard,
-    find **Settings**, paste in the 3 settings above and redeploy once.
+    find **Settings**, paste in the settings above and redeploy once.
 
   </Tab>
   <Tab value="Vercel">
     1. Click **Deploy with Vercel** and sign in when asked.
-    2. Vercel asks you for the 3 settings right away. Type them in.
+    2. Vercel asks you for the settings right away. Type them in.
     3. Click **Deploy** and wait a few minutes.
 
     Your site is ready. That's it.
@@ -106,7 +118,7 @@ All three work the same way afterwards; you just choose whichever you like.
   </Tab>
   <Tab value="Netlify">
     1. Click **Deploy to Netlify** and sign in when asked.
-    2. Netlify shows you the 3 settings as part of the setup. Fill them in.
+    2. Netlify shows you the settings as part of the setup. Fill them in.
     3. Click **Deploy site** and wait a few minutes.
 
     Your site is ready. That's it.
@@ -117,9 +129,12 @@ All three work the same way afterwards; you just choose whichever you like.
 ## After your first deploy
 
 1. Open your new site's link. It takes you straight to the dashboard.
-2. Create your first login. The app has no sign-up page, so create a user by
-   running this once on your computer (paste your own database URL and a
-   strong password)-
+2. Sign in. If you filled in the `SEED_USER_*` settings, your login is already
+   waiting - just use that email and password.
+
+   If you skipped them, the app has no sign-up page, so create a user by running
+   this once on your computer (paste your own database URL and a strong
+   password)-
 
    ```bash
    DATABASE_URL="postgresql://user:password@host:5432/database" \
@@ -130,7 +145,7 @@ All three work the same way afterwards; you just choose whichever you like.
    (Copy your GitHub copy to your computer first with
    `git clone` if you do not have the code there yet.)
 
-3. Sign in with that email and password and start invoicing.
+3. Start invoicing.
 
 Stuck? Open an [issue](https://github.com/nexausm/ci/issues) and we will
 be happy to help.
