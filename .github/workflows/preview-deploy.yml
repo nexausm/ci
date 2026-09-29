@@ -31,7 +31,7 @@ env:
 jobs:
   preflight:
     name: DB Preflight
-    if: github.event.action != 'closed'
+    if: github.event.action != 'closed' && github.event.pull_request.head.ref != 'chore/prettier-autofix'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -48,7 +48,7 @@ jobs:
 
   deploy:
     name: Deploy at ${{ matrix.platform }}
-    if: github.event.action != 'closed'
+    if: github.event.action != 'closed' && github.event.pull_request.head.ref != 'chore/prettier-autofix'
     needs: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -147,7 +147,7 @@ jobs:
 
   report:
     name: Report preview URLs
-    if: always() && github.event.action != 'closed'
+    if: always() && github.event.action != 'closed' && github.event.pull_request.head.ref != 'chore/prettier-autofix'
     needs: [preflight, deploy]
     runs-on: ubuntu-latest
     permissions:
@@ -263,7 +263,7 @@ jobs:
 
   cleanup:
     name: Cleanup Cloudflare preview worker
-    if: github.event.action == 'closed'
+    if: github.event.action == 'closed' && github.event.pull_request.head.ref != 'chore/prettier-autofix'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
