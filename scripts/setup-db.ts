@@ -1,8 +1,16 @@
-import "dotenv/config";
 import { spawnSync } from "node:child_process";
+import { config as loadEnvFile } from "dotenv";
 import { PrismaClient } from "../generated/prisma-node/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { seedAdminUser } from "./seed-helpers";
+
+// `.env` is gitignored and is written only by the deploy pipeline, so it is
+// never present in a checkout and cannot affect a real user deploy. It is
+// loaded with `override` because Netlify resolves the build environment from
+// the *site's* stored variables, which outrank the CI job's own environment;
+// without this the pipeline's value would silently lose to a stale or
+// placeholder value set in the Netlify dashboard.
+loadEnvFile({ path: ".env", override: true, quiet: true });
 
 const DATABASE_URL = process.env.DATABASE_URL?.trim();
 
@@ -28,6 +36,34 @@ async function run() {
     fail(
       "DATABASE_URL is not set. Add a PostgreSQL connection string as a " +
         "build-time environment variable and redeploy.",
+    );
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(DATABASE_URL);
+  } catch {
+    fail(
+      "DATABASE_URL is not a valid URL. It must be a full connection string " +
+        'such as "postgresql://user:password@host:5432/database".',
+    );
+  }
+
+  if (parsed.protocol !== "postgresql:" && parsed.protocol !== "postgres:") {
+    fail(
+      `DATABASE_URL must use the postgresql:// scheme (found ` +
+        `${parsed.protocol.replace(":", "")}://).`,
+    );
+  }
+
+  if (!parsed.hostname) {
+    fail("DATABASE_URL has no host. Check the connection string.");
+  }
+
+  if (/\s/.test(DATABASE_URL)) {
+    fail(
+      "DATABASE_URL contains whitespace, so it looks like a placeholder " +
+        "rather than a connection string. Set the real value in your " +
+        "platform's environment variables.",
     );
   }
 
