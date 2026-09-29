@@ -1,4 +1,4 @@
-name: Preview deploy (Vercel · Netlify · Cloudflare)
+name: Preview deploy (Vercel, Netlify, Cloudflare Pages)
 
 on:
   pull_request:
@@ -29,9 +29,27 @@ env:
   AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
 
 jobs:
-  deploy:
-    name: Deploy · ${{ matrix.platform }}
+  preflight:
+    name: DB Preflight
     if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check the database is reachable
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run db:preflight
+
+  deploy:
+    name: Deploy at ${{ matrix.platform }}
+    if: github.event.action != 'closed'
+    needs: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -130,7 +148,7 @@ jobs:
   report:
     name: Report preview URLs
     if: always() && github.event.action != 'closed'
-    needs: deploy
+    needs: [preflight, deploy]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -145,7 +163,13 @@ jobs:
 
       - name: Collect & smoke test preview URLs
         id: collect
+        env:
+          PREFLIGHT_RESULT: ${{ needs.preflight.result }}
         run: |
+          if [ "$PREFLIGHT_RESULT" != "success" ]; then
+            echo "database preflight did not pass ($PREFLIGHT_RESULT); no platform build was attempted"
+            exit 1
+          fi
           for p in vercel netlify cloudflare; do
             f="artifacts/$p.url"
             if [ ! -f "$f" ]; then
@@ -249,8 +273,6 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          # Direct API delete: `wrangler delete` also lists KV namespaces, which
-          # fails with a Workers-Scripts-Edit-only token (auth error 10000).
           curl -fsS -X DELETE \
             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/nci-pr-${{ github.event.pull_request.number }}" \
             -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
