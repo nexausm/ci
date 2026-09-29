@@ -87,7 +87,7 @@ jobs:
           for _ in $(seq 1 12); do
             state="$(gh pr view "$pr" --json mergeStateStatus --jq .mergeStateStatus)"
             echo "mergeStateStatus=$state"
-            [ "$state" = clean ] && break
+            [ "$state" = CLEAN ] && break
             sleep 5
           done
 
