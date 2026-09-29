@@ -150,7 +150,13 @@ function probe(address, port, user, database, host) {
           return;
         }
 
-        if (answer === "E") return finish(false, errorFields(data));
+        if (answer === "E") {
+          const { C: code, M: message } = errorFields(data);
+          return finish(
+            false,
+            [code, message].filter(Boolean).join(" ") || "server error",
+          );
+        }
         if (answer !== "N") {
           return finish(false, `unexpected SSLRequest reply '${answer}'`);
         }
