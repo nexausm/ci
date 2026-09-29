@@ -31,14 +31,24 @@ export async function seedAdminUser(
     return "exists";
   }
 
-  await prisma.user.create({
-    data: {
-      id: genId(),
-      email,
-      name,
-      passwordHash: await hashPassword(password),
-    },
-  });
+  try {
+    await prisma.user.create({
+      data: {
+        id: genId(),
+        email,
+        name,
+        passwordHash: await hashPassword(password),
+      },
+    });
+  } catch (err) {
+    if ((err as { code?: string }).code === "P2002") {
+      console.log(
+        `[seed] User already exists. Password left unchanged for ${email}`,
+      );
+      return "exists";
+    }
+    throw err;
+  }
   console.log(`[seed] Seeded admin user ${email}`);
   return "created";
 }
