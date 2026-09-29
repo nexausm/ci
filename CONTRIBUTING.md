@@ -4,8 +4,6 @@ Thanks for your interest in contributing! This project is a self-hostable,
 cloud-ready invoice generator built with Next.js. It is licensed under the
 [GNU Affero General Public License v3.0](LICENSE).
 
-
-
 ## Ways to contribute
 
 - Report bugs and request features by [opening an issue](https://github.com/nexausm/ci/issues)
