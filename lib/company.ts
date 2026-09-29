@@ -41,3 +41,18 @@ export const getCompanyInfo = unstable_cache(
   [COMPANY_PROFILE_ID],
   { tags: [COMPANY_PROFILE_TAG] },
 );
+
+// Renders the default profile instead of crashing the page transiently when
+// the database is briefly unavailable. A database is mandatory for
+// deployment (setup fails the build otherwise), so this is only a safety net.
+export async function getCompanyInfoSafe(): Promise<CompanyInfo> {
+  try {
+    return await getCompanyInfo();
+  } catch (err) {
+    console.error(
+      "[setup] Could not load the company profile. Is the database reachable and migrated?",
+      err,
+    );
+    return createDefaultCompanyProfile();
+  }
+}
