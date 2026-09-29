@@ -20,6 +20,9 @@ npm run typecheck
 echo "==> production build"
 npm run build
 
+echo "==> prisma generate"
+npm run db:generate
+
 echo "==> packaging ${name}.zip"
 rm -f "${release_dir}/${name}.zip"
 
@@ -31,6 +34,16 @@ zip -r "${release_dir}/${name}.zip" \
   public \
   prisma \
   vendor \
+  generated/prisma-node \
+  lib/currency.ts \
+  lib/defaults.ts \
+  lib/id.ts \
+  lib/password.ts \
+  lib/prisma-client.ts \
+  lib/prisma.ts \
+  lib/search.ts \
+  lib/session.ts \
+  lib/types.ts \
   auth.ts \
   auth.config.ts \
   middleware.ts \
