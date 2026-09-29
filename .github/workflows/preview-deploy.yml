@@ -11,6 +11,7 @@ on:
       - "LICENSE"
       - ".claude/**"
       - ".agents/**"
+      - "skills-lock.json"
       - ".coderabbit.yaml"
       - ".editorconfig"
       - ".prettierrc.json"
