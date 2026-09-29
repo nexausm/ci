@@ -58,8 +58,7 @@ Open http://localhost:3000 and sign in. See **First user** to create a login.
 | -------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------- |
 | `DATABASE_URL`                                                                               | yes      | PostgreSQL connection string, e.g. `postgresql://user:pass@localhost:5432/invoice` |
 | `AUTH_SECRET`                                                                                | yes      | Session signing secret. Generate: `openssl rand -base64 32`                        |
-| `AUTH_TRUST_HOST`                                                                            | no       | Set `true` when not running behind a reverse proxy (default in `.env.example`)     |
-| `AUTH_SESSION_MAX_AGE`                                                                       | no       | Session lifetime in seconds (default 30 days)                                      |
+| `AUTH_SESSION_MAX_AGE`                                                                       | no       | Session lifetime in seconds (default 86400)                                        |
 | `SEED_USER_NAME` / `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`                                  | no       | Used by `npm run seed` to create the first user                                    |
 | `ALGOLIA_APP_ID` / `ALGOLIA_ADMIN_API_KEY` / `ALGOLIA_SEARCH_API_KEY` / `ALGOLIA_INDEX_NAME` | no       | Optional full-text search; leave empty to disable                                  |
 

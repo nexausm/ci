@@ -1,6 +1,6 @@
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
-import { getCompanyInfo } from "@/lib/company";
+import { getCompanyInfoSafe } from "@/lib/company";
 import { CompanyProvider } from "@/app/providers/company-provider";
 import { DashboardShell } from "@/components/dashboard-shell";
 
@@ -11,7 +11,7 @@ export default async function ProtectedLayout({
 }>) {
   const session = await auth();
 
-  const company = await getCompanyInfo();
+  const company = await getCompanyInfoSafe();
 
   const appId = process.env.ALGOLIA_APP_ID;
   const searchKey = process.env.ALGOLIA_SEARCH_API_KEY;

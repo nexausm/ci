@@ -2,6 +2,7 @@ import type { NextAuthConfig } from "next-auth";
 import { SESSION_MAX_AGE_SECONDS } from "@/lib/session";
 
 export const authConfig = {
+  trustHost: true,
   providers: [],
   pages: { signIn: "/login" },
   session: {

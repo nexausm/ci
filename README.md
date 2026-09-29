@@ -28,7 +28,7 @@
 <div align="center">
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/nexausm/ci)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnexausm%2Fci&project-name=cloud-invoice&repository-name=cloud-invoice&env=AUTH_SECRET,AUTH_TRUST_HOST,DATABASE_URL&envDefaults=%7B%22AUTH_TRUST_HOST%22%3A%22true%22%7D&envDescription=DATABASE_URL%3A%20PostgreSQL%20connection%20string%20%28Neon%2C%20Supabase%2C%20RDS...%29.%20AUTH_SECRET%3A%20random%20secret%2C%20generate%20with%3A%20openssl%20rand%20-base64%2032.%20AUTH_TRUST_HOST%3A%20set%20to%20true)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnexausm%2Fci&project-name=cloud-invoice&repository-name=cloud-invoice&env=AUTH_SECRET,DATABASE_URL,AUTH_SESSION_MAX_AGE,SEED_USER_EMAIL,SEED_USER_PASSWORD,SEED_USER_NAME&envDefaults=%7B%22AUTH_SESSION_MAX_AGE%22%3A%2286400%22%2C%22SEED_USER_NAME%22%3A%22Admin%22%7D&envDescription=DATABASE_URL%3A%20PostgreSQL%20connection%20string%20%28Neon%2C%20Supabase%2C%20RDS...%29.%20Migrations%20and%20the%20admin%20seed%20run%20automatically%20on%20build.%20AUTH_SECRET%3A%20random%20secret%2C%20generate%20with%3A%20openssl%20rand%20-base64%2032.%20AUTH_SESSION_MAX_AGE%3A%20session%20lifetime%20in%20seconds%20%28default%2086400%29.%20SEED_USER_EMAIL%20%2F%20SEED_USER_PASSWORD%20%2F%20SEED_USER_NAME%3A%20pre-provisions%20the%20admin%20user%20%28needed%20to%20log%20in%29.)
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nexausm/ci)
 
 </div>
@@ -45,19 +45,34 @@ and wire it up for continuous deploys on Cloudflare, Vercel, or Netlify. The
 repository must be public. No secrets are embedded in the repo or the link —
 you are prompted for the environment variables below at deploy time.
 
+### Environment variables
+
 Required:
 
 - `DATABASE_URL` - a PostgreSQL connection string (Neon, Supabase, RDS, ...)
 - `AUTH_SECRET` - a random secret: `openssl rand -base64 32`
-- `AUTH_TRUST_HOST` - `true`
 
-Optional:
+Optional (defaults shown):
 
+- `AUTH_SESSION_MAX_AGE` - session lifetime in seconds (default `86400`)
+- `SEED_USER_NAME`, `SEED_USER_EMAIL`, `SEED_USER_PASSWORD` - pre-provisions
+  an admin user. Without these you cannot sign in, so set them at deploy time.
 - `ALGOLIA_APP_ID`, `ALGOLIA_SEARCH_API_KEY`, `ALGOLIA_ADMIN_API_KEY`,
   `ALGOLIA_INDEX_NAME` - global search. Search gracefully degrades when
   unset; indexing runs via `npm run index:algolia`.
-- `SEED_USER_NAME`, `SEED_USER_EMAIL`, `SEED_USER_PASSWORD` - pre-provisions
-  an admin user via `npm run seed`.
+
+### Database setup & admin seeding
+
+Every build runs `npm run db:setup`, which automatically:
+
+1. applies all committed Prisma migrations (`prisma migrate deploy`),
+2. seeds the admin user from `SEED_USER_*` (idempotent — existing users are
+   left untouched),
+3. ensures a default company profile row exists.
+
+It is safe to run on every deploy. A database is required: if it is
+unreachable or migration/seeding fails, the build **fails loudly**, so a
+broken deployment is never shipped.
 
 ## License
 
