@@ -46,11 +46,11 @@ function loadDatabaseUrl() {
   try {
     url = new URL(raw);
   } catch {
-    fail(`DATABASE_URL is not a valid URL ${raw}`);
+    fail("DATABASE_URL is not a valid URL.");
   }
 
   if (!url.hostname) {
-    fail(`DATABASE_URL has no host ${raw}`);
+    fail("DATABASE_URL has no host.");
   }
 
   return {
