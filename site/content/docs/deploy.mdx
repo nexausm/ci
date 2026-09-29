@@ -132,6 +132,14 @@ All three work the same way afterwards; you just choose whichever you like.
 2. Sign in. If you filled in the `SEED_USER_*` settings, your login is already
    waiting - just use that email and password.
 
+   <Callout type="info">
+     The seed never changes an existing user. If `SEED_USER_EMAIL` already
+     belongs to someone, redeploying with a different `SEED_USER_PASSWORD` will
+     not make that new password work - the old one still does. Keep using the
+     password you signed up with, and pick a new `SEED_USER_EMAIL` if you want a
+     fresh account.
+   </Callout>
+
    If you skipped them, the app has no sign-up page, so create a user by running
    this once on your computer (paste your own database URL and a strong
    password)-
