@@ -5,9 +5,9 @@ export default function MarketingLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="dark text-foreground min-h-dvh bg-[#040404]">
+    <div className="bg-background text-foreground min-h-dvh overflow-x-clip">
       <Navbar />
-      {children}
+      <main className="site-container">{children}</main>
       <Footer />
     </div>
   );
