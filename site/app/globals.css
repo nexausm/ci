@@ -4,6 +4,10 @@
 @import "fumadocs-ui/style.css";
 
 @source "../node_modules/fumadocs-ui/dist";
+@source "../components/**/*.{ts,tsx}";
+@source "../app/**/*.{ts,tsx}";
+@source "../content/**/*.{md,mdx}";
+@source "../lib/**/*.ts";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -35,6 +39,41 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@theme {
+  --color-teal-50: #eefbfb;
+  --color-teal-100: #d6f6f7;
+  --color-teal-200: #b0ecee;
+  --color-teal-300: #7ee0e3;
+  --color-teal-400: #44cfd3;
+  --color-teal-500: #1fc2c6;
+  --color-teal-600: #0bb7ba;
+  --color-teal-700: #0b9aa0;
+  --color-teal-800: #087786;
+  --color-teal-900: #06555d;
+  --color-teal-950: #043038;
+}
+
+@layer components {
+  .site-container {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 72rem;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 40rem) {
+    .site-container {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .site-container {
+      padding-inline: 2rem;
+    }
+  }
 }
 
 :root {
