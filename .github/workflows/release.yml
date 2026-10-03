@@ -34,7 +34,14 @@ jobs:
           RELEASE_PR_JSON: ${{ steps.release.outputs.pr }}
         run: |
           pr_number="$(jq -r '.number' <<< "$RELEASE_PR_JSON")"
-          gh pr merge "$pr_number" --squash --auto -R "${{ github.repository }}"
+          pr_title="$(jq -r '.title' <<< "$RELEASE_PR_JSON")"
+
+          emojis=(🚀 📦 🔖 🎉 🏷️ ✨)
+          emoji="${emojis[$RANDOM % ${#emojis[@]}]}"
+          title="$emoji $pr_title"
+
+          gh pr edit "$pr_number" --title "$title" -R "${{ github.repository }}" || true
+          gh pr merge "$pr_number" --squash --auto --subject "$title" -R "${{ github.repository }}"
 
       - name: Revalidate marketing site download page
         if: ${{ steps.release.outputs.release_created == 'true' }}

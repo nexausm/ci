@@ -18,7 +18,7 @@ env:
 jobs:
   format:
     name: prettier
-    if: "${{ !startsWith(github.event.head_commit.message || '', 'style: apply prettier formatting [bot]') }}"
+    if: "${{ !contains(github.event.head_commit.message || '', 'style: apply prettier formatting [bot]') }}"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -65,10 +65,14 @@ jobs:
         run: |
           set -euo pipefail
 
+          emojis=(🎨 🧹 💅 ✨ 🧼)
+          emoji="${emojis[$RANDOM % ${#emojis[@]}]}"
+          title="$emoji $FORMAT_TITLE"
+
           git config user.name "${BOT_SLUG}[bot]"
           git config user.email "${BOT_APP_ID}+${BOT_SLUG}[bot]@users.noreply.github.com"
           git checkout -B "$FORMAT_BRANCH"
-          git commit -m "$FORMAT_TITLE"
+          git commit -m "$title"
 
           git push --force origin "HEAD:refs/heads/$FORMAT_BRANCH"
 
@@ -76,7 +80,7 @@ jobs:
             --state open --json url --jq '.[0].url // ""')"
           if [ -z "$pr" ]; then
             pr="$(gh pr create --base staging --head "$FORMAT_BRANCH" \
-              --title "$FORMAT_TITLE" \
+              --title "$title" \
               --body "Automated \`npm run format\` output, opened and merged by the format bot.")"
           fi
           echo "Formatting PR: $pr"
@@ -89,7 +93,7 @@ jobs:
           done
 
           if gh pr merge "$pr" --squash --delete-branch \
-            --subject "$FORMAT_TITLE" \
+            --subject "$title" \
             --body "Automated prettier run."; then
             echo "::notice::Merged $pr into staging"
             exit 0
