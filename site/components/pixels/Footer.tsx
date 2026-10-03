@@ -8,7 +8,7 @@ import { IFooterLink } from "./types";
 
 export default function Footer() {
   return (
-    <footer className="border-border text-muted-foreground mt-40 border-t py-6 text-sm">
+    <footer className="border-border text-muted-foreground mt-20 border-t py-6 text-sm">
       <div className="site-container">
         <div className="flex max-lg:flex-col max-lg:gap-10 lg:justify-between lg:gap-16">
           <nav className="grid gap-8 lg:grid-cols-3">
