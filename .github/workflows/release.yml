@@ -24,6 +24,7 @@ jobs:
         if: ${{ steps.release.outputs.prs_created == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.STAGING_FORMAT_TOKEN }}
+          RELEASE_PR_JSON: ${{ steps.release.outputs.pr }}
         run: |
-          pr_number="$(echo '${{ steps.release.outputs.pr }}' | jq -r '.number')"
+          pr_number="$(jq -r '.number' <<< "$RELEASE_PR_JSON")"
           gh pr merge "$pr_number" --squash --auto -R "${{ github.repository }}"

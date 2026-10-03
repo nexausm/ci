@@ -13,15 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Assert source is nexausm/ci:staging or a release-please PR
+        env:
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
-          repo="${{ github.event.pull_request.head.repo.full_name }}"
-          ref="${{ github.event.pull_request.head.ref }}"
-
-          if [ "$repo" = "nexausm/ci" ] && [ "$ref" = "staging" ]; then
+          if [ "$HEAD_REPO" = "nexausm/ci" ] && [ "$HEAD_REF" = "staging" ]; then
             echo "OK: PR into main originates from nexausm/ci:staging"
-          elif [ "$repo" = "nexausm/ci" ] && [[ "$ref" == release-please--branches--main* ]]; then
+          elif [ "$HEAD_REPO" = "nexausm/ci" ] && [ "$PR_AUTHOR" = "maamspy" ] && [[ "$HEAD_REF" == release-please--branches--main* ]]; then
             echo "OK: release-please automation PR"
           else
-            echo "::error::PRs into main are only allowed from nexausm/ci:staging or an automated release-please PR (got ${repo}:${ref})"
+            echo "::error::PRs into main are only allowed from nexausm/ci:staging or an automated release-please PR (got ${HEAD_REPO}:${HEAD_REF} by ${PR_AUTHOR})"
             exit 1
           fi

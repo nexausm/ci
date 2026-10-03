@@ -3,6 +3,7 @@
     ".": {
       "release-type": "node",
       "include-component-in-tag": false,
+      "exclude-paths": ["site"],
       "changelog-sections": [
         { "type": "feat", "section": "🚀 Features" },
         { "type": "fix", "section": "🐛 Bug Fixes" },
