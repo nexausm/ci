@@ -2,12 +2,12 @@
 
 # Cloud Invoice by Nexaus
 
-**Self-hosted release v{{VERSION}}**
+**Self-hosted release**
 
 </div>
 
-This is a pre-built, self-contained release of Cloud Invoice. Everything needed to run
-is inside this archive. No build step required. Bring a PostgreSQL database and go.
+This archive is a snapshot of the source at this release's tag. It does not include
+a pre-built `.next` bundle. Instead, it has the source code you need to run this app. So, you build it yourself. Bring a PostgreSQL database and go.
 
 ---
 
@@ -23,7 +23,7 @@ is inside this archive. No build step required. Bring a PostgreSQL database and 
 
 ```bash
 # 1. Unzip
-unzip nci-{{VERSION}}.zip -d cloud-invoice && cd cloud-invoice
+unzip ci-*.zip -d cloud-invoice && cd cloud-invoice
 
 # 2. Create the environment file (BEFORE npm ci)
 cp .env.example .env
@@ -32,10 +32,13 @@ cp .env.example .env
 # 3. Install dependencies (regenerates the Prisma client)
 npm ci
 
-# 4. Apply database migrations
+# 4. Build the production bundle
+npm run build
+
+# 5. Apply database migrations
 npm run db:deploy
 
-# 5. Start the server
+# 6. Start the server
 npm run start
 ```
 
@@ -47,7 +50,6 @@ Open http://localhost:3000 and sign in. See **First user** to create a login.
   (`prisma generate`) that reads `DATABASE_URL`, so a missing `.env` aborts the install.
 - **Use `npm ci`, not `npm install`.** The release is locked and verified; `npm install`
   may pull newer dependency ranges and break the build.
-- **Do not edit anything under `.next/`.** It is the compiled production bundle.
 - **Config is environment-only.** No secrets are baked into the build; every setting
   lives in `.env`. Rotate `AUTH_SECRET` and existing sessions become invalid.
 - **Back up before updating.** Keep your database (`.env` + database, not the code).
@@ -73,6 +75,7 @@ npm run seed
 
 | Command                 | Purpose                                                      |
 | ----------------------- | ------------------------------------------------------------ |
+| `npm run build`         | Build the production bundle                                  |
 | `npm run start`         | Production start (migrations → Prisma client → `next start`) |
 | `npm run db:deploy`     | Apply pending migrations                                     |
 | `npm run db:migrate`    | Create a new migration                                       |
@@ -84,7 +87,7 @@ npm run seed
 1. Stop the server.
 2. Snapshot the database (`pg_dump`), required, migrations run automatically on start.
 3. Extract the new archive over the existing install, keeping your `.env` and database.
-4. Run `npm ci && npm run db:deploy && npm run start`.
+4. Run `npm ci && npm run build && npm run db:deploy && npm run start`.
 
 ## Troubleshooting
 

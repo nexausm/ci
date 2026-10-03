@@ -12,13 +12,16 @@ jobs:
     name: verify-source-branch
     runs-on: ubuntu-latest
     steps:
-      - name: Assert source is nexausm/ci:staging
+      - name: Assert source is nexausm/ci:staging or a release-please PR
         run: |
           repo="${{ github.event.pull_request.head.repo.full_name }}"
           ref="${{ github.event.pull_request.head.ref }}"
+
           if [ "$repo" = "nexausm/ci" ] && [ "$ref" = "staging" ]; then
             echo "OK: PR into main originates from nexausm/ci:staging"
+          elif [ "$repo" = "nexausm/ci" ] && [[ "$ref" == release-please--branches--main* ]]; then
+            echo "OK: release-please automation PR"
           else
-            echo "::error::PRs into main are only allowed from nexausm/ci:staging (got ${repo}:${ref})"
+            echo "::error::PRs into main are only allowed from nexausm/ci:staging or an automated release-please PR (got ${repo}:${ref})"
             exit 1
           fi
