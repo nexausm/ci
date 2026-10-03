@@ -19,8 +19,6 @@ export interface GitHubRelease {
   assets: GitHubAsset[];
 }
 
-const DAY = 60 * 60 * 24;
-
 const GITHUB_API_RELEASES_URL = `${GITHUB_REPO_URL.replace(
   "https://github.com/",
   "https://api.github.com/repos/",
@@ -52,7 +50,7 @@ export async function getReleases(): Promise<GitHubRelease[]> {
         Accept: "application/vnd.github+json",
         "User-Agent": "cloud-invoice-site",
       },
-      next: { revalidate: DAY },
+      next: { revalidate: false },
     });
   } catch {
     return [];

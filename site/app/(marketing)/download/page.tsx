@@ -35,7 +35,7 @@ function latestZip(release: GitHubRelease): string {
 }
 
 function downloadName(release: GitHubRelease): string {
-  return `nci-${release.tag_name.replace(/^v/, "")}.zip`;
+  return `cloud-invoice-${release.tag_name.replace(/^v/, "")}-source.zip`;
 }
 
 function ReleaseCard({

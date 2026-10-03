@@ -12,6 +12,8 @@ Reason: the Cloudflare deployment pipeline (`npm run cf:deploy`, i.e.
 `opennextjs-cloudflare build && opennextjs-cloudflare deploy`) cannot handle
 the `proxy.ts` convention and fails with:
 
+
+
 > ERROR Node.js middleware is not currently supported. Consider switching to Edge Middleware.
 
 So `middleware.ts` is a required, non-negotiable part of the Cloudflare
