@@ -1,0 +1,16 @@
+.github export-ignore
+.agents export-ignore
+.claude export-ignore
+site export-ignore
+.gitattributes export-ignore
+.coderabbit.yaml export-ignore
+AGENTS.md export-ignore
+CONTRIBUTING.md export-ignore
+CODE_OF_CONDUCT.md export-ignore
+skills-lock.json export-ignore
+deno.lock export-ignore
+wrangler.jsonc export-ignore
+open-next.config.ts export-ignore
+netlify.toml export-ignore
+release-please-config.json export-ignore
+.release-please-manifest.json export-ignore
