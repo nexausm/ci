@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.2.0](https://github.com/nexausm/ci/compare/v1.1.0...v1.2.0) (2026-10-03)
+
+
+### 🚀 Features
+
+* **ci:** revalidate marketing download page on release ([1589eed](https://github.com/nexausm/ci/commit/1589eed850804a0079b9913ab13274b495f2b954))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close script-injection and branch-spoof gaps in release pipeline ([f870601](https://github.com/nexausm/ci/commit/f870601059ad0f0766175e118a5281d4be2080ee))
+* **ci:** resolve bot commit email in format workflow ([36ce360](https://github.com/nexausm/ci/commit/36ce360c06eaf51c6e443f1404565309231ddd44))
+* **ci:** resolve bot commit email in format workflow ([ca89a69](https://github.com/nexausm/ci/commit/ca89a69888178b08d94ed0387b4c0d2cefa49f5d))
+* **ci:** switch release and format workflows to GitHub App tokens ([fde89dc](https://github.com/nexausm/ci/commit/fde89dc40a3e3135fae114bf0c172d6132837a16))
+
+
+### 🔧 Maintenance
+
+* add spacing between pledge and standards sections ([f74300e](https://github.com/nexausm/ci/commit/f74300edbd356a23ce9a39cd2c0d83d8e18974da))
+* add spacing between pledge and standards sections ([f7eb3dc](https://github.com/nexausm/ci/commit/f7eb3dc2072a0b3b45b8fdae5fee92b8fd663c32))
+* **ci:** prefix format and release bot PR titles with emoji ([38d9819](https://github.com/nexausm/ci/commit/38d98192b5965dc336ff904c73699f503ec663c7))
+* **ci:** skip preview deploys on release config and lockfile changes ([6969d3f](https://github.com/nexausm/ci/commit/6969d3f44737e8eb3a449a828548742594e1e96d))
+* **site:** drop "by Nexaus" from site title ([61beca0](https://github.com/nexausm/ci/commit/61beca0fade815170d87b49394c4364a8116b365))
+* **site:** drop static export build and harden release revalidation ([e3b6217](https://github.com/nexausm/ci/commit/e3b6217081ecd38bec2c0f5d9b2dec32305ab352))
+
 ## [1.1.0](https://github.com/nexausm/ci/compare/v1.0.0...v1.1.0) (2026-10-03)
 
 
