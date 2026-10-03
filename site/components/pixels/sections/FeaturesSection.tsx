@@ -9,27 +9,18 @@ export default function FeaturesSection() {
   return (
     <div id="features" className="w-full">
       <SectionTitle
-        text1="Features"
         text2="Everything invoicing needs, nothing else"
         text3="Invoices, payment schedules, clients and a product catalogue with the PDF generated in your browser."
       />
       <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {featuresData.map((feature: IFeature, index: number) => (
+        {featuresData.map((feature: IFeature) => (
           <div
             key={feature.title}
-            className={`${
-              index === 1
-                ? "rounded-[13px] bg-linear-to-br from-teal-600 to-slate-800 p-px dark:to-slate-800"
-                : ""
-            }`}
+            className="bg-card text-card-foreground h-full space-y-4 rounded-xl p-6"
           >
-            <div className="border-border bg-card text-card-foreground h-full space-y-4 rounded-xl border p-6">
-              {feature.icon}
-              <h3 className="text-base font-medium">{feature.title}</h3>
-              <p className="text-muted-foreground pb-4">
-                {feature.description}
-              </p>
-            </div>
+            {feature.icon}
+            <h3 className="text-base font-medium">{feature.title}</h3>
+            <p className="text-muted-foreground pb-4">{feature.description}</p>
           </div>
         ))}
       </div>
