@@ -40,7 +40,6 @@ jobs:
           emoji="${emojis[$RANDOM % ${#emojis[@]}]}"
           title="$emoji $pr_title"
 
-          gh pr edit "$pr_number" --title "$title" -R "${{ github.repository }}" || true
           gh pr merge "$pr_number" --squash --auto --subject "$title" -R "${{ github.repository }}"
 
       - name: Revalidate marketing site download page
