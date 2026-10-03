@@ -12,7 +12,7 @@ import { IInvolvedCard } from "../types";
 export const involvedData: IInvolvedCard[] = [
   {
     icon: (
-      <TbMessagesFilled className="size-6 text-teal-800 dark:text-teal-300" />
+      <TbMessagesFilled className="size-6 text-teal-800" />
     ),
     title: "Discussions",
     description:
@@ -21,7 +21,7 @@ export const involvedData: IInvolvedCard[] = [
     href: `${GITHUB_REPO_URL}/discussions`,
   },
   {
-    icon: <RiBugFill className="size-6 text-teal-800 dark:text-teal-300" />,
+    icon: <RiBugFill className="size-6 text-teal-800" />,
     title: "Bug reports",
     description:
       "Found something broken? Search the tracker first, then open an issue with a clear reproduction.",
@@ -30,7 +30,7 @@ export const involvedData: IInvolvedCard[] = [
   },
   {
     icon: (
-      <RiGitPullRequestFill className="size-6 text-teal-800 dark:text-teal-300" />
+      <RiGitPullRequestFill className="size-6 text-teal-800" />
     ),
     title: "Contributions",
     description:
@@ -40,7 +40,7 @@ export const involvedData: IInvolvedCard[] = [
   },
   {
     icon: (
-      <RiFileTextFill className="size-6 text-teal-800 dark:text-teal-300" />
+      <RiFileTextFill className="size-6 text-teal-800" />
     ),
     title: "Release notes",
     description:
