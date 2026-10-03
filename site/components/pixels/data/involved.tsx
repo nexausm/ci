@@ -1,6 +1,5 @@
 import {
   RiBugFill,
-  RiChat3Fill,
   RiFileTextFill,
   RiGitPullRequestFill,
 } from "react-icons/ri";

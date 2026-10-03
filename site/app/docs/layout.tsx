@@ -28,7 +28,7 @@ export default function DocsPageLayout({
         {
           type: "main",
           text: "Features",
-          url: "/features",
+          url: "/#features",
           active: "nested-url",
         },
         {
