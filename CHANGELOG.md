@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.3.0](https://github.com/nexausm/ci/compare/v1.2.0...v1.3.0) (2026-10-03)
+
+
+### 🚀 Features
+
+* **ci:** add a manual trigger to revalidate the download page on demand ([e220c94](https://github.com/nexausm/ci/commit/e220c94871eecb6a53d904e0e04c9f09f0677924))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** stop editing the release PR title before merge ([10f83c6](https://github.com/nexausm/ci/commit/10f83c6b80a829da8b8f008fe4acfc9ad760d195))
+* **ci:** stop editing the release PR title before merge ([5b8d253](https://github.com/nexausm/ci/commit/5b8d2531a8534361349504dbaf4563ac8c63bd5e))
+
+
+### 🔧 Maintenance
+
+* **client:** improve dialog description wording ([9a5cac5](https://github.com/nexausm/ci/commit/9a5cac5515334deff2fe48acca5810abefe0cd65))
+
 ## [1.2.0](https://github.com/nexausm/ci/compare/v1.1.0...v1.2.0) (2026-10-03)
 
 
