@@ -25,7 +25,7 @@ export default function FeaturesSection() {
         ))}
       </div>
       <div className="relative mt-40 w-full">
-        <div className="pointer-events-none absolute -top-10 left-1/2 -z-50 aspect-square size-100 -translate-x-1/2 rounded-full bg-teal-500/30 blur-3xl dark:bg-teal-500/40"></div>
+        <div className="pointer-events-none absolute -top-10 left-1/2 -z-50 aspect-square size-100 -translate-x-1/2 rounded-full bg-teal-500/30 blur-3xl"></div>
         <p className="text-muted-foreground max-w-3xl text-left text-lg text-pretty">
           Payment schedules split an invoice into installments by amount or
           percentage. Payments are applied to the oldest unpaid installment
