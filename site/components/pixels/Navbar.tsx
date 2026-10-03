@@ -2,7 +2,7 @@
 import { MenuIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoLogoGithub } from "react-icons/io";
 
 import { ThemeToggle } from "@site/components/landing/theme-toggle";
@@ -29,6 +29,8 @@ function BrandMark() {
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -56,6 +58,42 @@ export default function Navbar() {
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, []);
+
+  useEffect(() => {
+    if (!isOpen || typeof document === "undefined") return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const focusable = dialog.querySelectorAll<HTMLElement>(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    first?.focus();
+
+    const trap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      if (focusable.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last?.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", trap);
+    const trigger = triggerRef.current;
+    return () => {
+      document.removeEventListener("keydown", trap);
+      trigger?.focus();
+    };
+  }, [isOpen]);
 
   const linkClass = (active: boolean) =>
     active
@@ -123,6 +161,7 @@ export default function Navbar() {
             <ThemeToggle className={iconButton} />
 
             <button
+              ref={triggerRef}
               type="button"
               aria-label="Open menu"
               aria-expanded={isOpen}
@@ -144,6 +183,7 @@ export default function Navbar() {
       />
 
       <aside
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Menu"
