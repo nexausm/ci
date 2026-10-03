@@ -24,9 +24,20 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug = [] } = await params;
   const doc = getDoc(slug.length ? `/docs/${slug.join("/")}` : "/docs");
+  const title = doc
+    ? `${doc.title} | Cloud Invoice Docs`
+    : "Cloud Invoice Docs";
+  const description =
+    doc?.description ?? "Cloud Invoice documentation and guides.";
+
   return {
-    title: doc ? `${doc.title} | Cloud Invoice Docs` : "Cloud Invoice Docs",
-    description: doc?.description,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+    },
   };
 }
 

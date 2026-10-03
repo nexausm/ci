@@ -1,14 +1,14 @@
-import { SiteFooter } from "@site/components/landing/site-footer";
-import { SiteHeader } from "@site/components/landing/site-header";
+import Footer from "@site/components/pixels/Footer";
+import Navbar from "@site/components/pixels/Navbar";
 
 export default function MarketingLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="bg-background flex min-h-svh flex-col">
-      <SiteHeader />
-      <main className="flex-1">{children}</main>
-      <SiteFooter />
+    <div className="bg-background text-foreground min-h-dvh overflow-x-clip">
+      <Navbar />
+      <main className="site-container">{children}</main>
+      <Footer />
     </div>
   );
 }
