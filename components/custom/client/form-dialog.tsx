@@ -59,7 +59,7 @@ export function ClientFormDialog({
           <DialogHeader>
             <DialogTitle>{client ? "Edit client" : "New client"}</DialogTitle>
             <DialogDescription>
-              Save client details once, reuse them across invoices.
+              Save client details once and reuse them across invoices.
             </DialogDescription>
           </DialogHeader>
 
