@@ -6,7 +6,7 @@ export const footerData: IFooter[] = [
   {
     title: "Product",
     links: [
-      { name: "Features", href: "/features" },
+      { name: "Features", href: "/#features" },
       { name: "Download", href: "/download" },
       { name: "Releases", href: `${GITHUB_REPO_URL}/releases`, external: true },
     ],

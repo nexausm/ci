@@ -1,6 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import SectionTitle from "../SectionTitle";
 import { featuresData } from "../data/features";
 import { IFeature } from "../types";
@@ -56,13 +55,6 @@ export default function FeaturesSection() {
               Outstanding, received, invoice count and client count computed
               from your own database.
             </p>
-            <Link
-              href="/features"
-              className="text-primary hover:text-primary/80 group mt-4 flex items-center gap-2"
-            >
-              See the full feature list
-              <ArrowUpRight className="size-5" />
-            </Link>
           </div>
         </div>
       </div>
