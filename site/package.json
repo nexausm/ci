@@ -4,7 +4,7 @@
   "license": "AGPL-3.0",
   "scripts": {
     "dev": "next dev -p 4000",
-    "build": "next build && rm -rf dist && mv out dist",
+    "build": "next build",
     "vercel-build": "next build",
     "start": "next start -p 4000",
     "lint": "eslint",

@@ -38,8 +38,10 @@ jobs:
 
       - name: Revalidate marketing site download page
         if: ${{ steps.release.outputs.release_created == 'true' }}
+        continue-on-error: true
         env:
           REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
         run: |
-          curl -fsS -X POST "https://invoice.nexaus.cloud/api/revalidate" \
+          curl -fsS --max-time 30 --retry 3 --retry-all-errors -X POST \
+            "https://invoice.nexaus.cloud/api/revalidate" \
             -H "x-revalidate-secret: $REVALIDATE_SECRET"
