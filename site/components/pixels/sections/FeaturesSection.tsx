@@ -34,7 +34,7 @@ export default function FeaturesSection() {
             <Image
               className="h-auto w-full"
               src="/assets/features-showcase-1.png"
-              alt="Placeholder screenshot — replace with a real Cloud Invoice installment schedule capture"
+              alt="Cloud Invoice installment schedule showing split payments"
               width={1017}
               height={678}
             />
@@ -43,7 +43,7 @@ export default function FeaturesSection() {
             <Image
               className="h-auto w-full"
               src="/assets/features-showcase-2.png"
-              alt="Placeholder screenshot — replace with a real Cloud Invoice dashboard capture"
+              alt="Cloud Invoice dashboard showing outstanding and received totals"
               width={646}
               height={546}
             />

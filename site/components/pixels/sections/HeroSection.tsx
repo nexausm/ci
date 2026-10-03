@@ -1,4 +1,3 @@
-"use client";
 import { CheckIcon, ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { IoLogoGithub } from "react-icons/io";
