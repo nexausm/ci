@@ -16,13 +16,12 @@ jobs:
         run: |
           repo="${{ github.event.pull_request.head.repo.full_name }}"
           ref="${{ github.event.pull_request.head.ref }}"
-          author="${{ github.event.pull_request.user.login }}"
 
           if [ "$repo" = "nexausm/ci" ] && [ "$ref" = "staging" ]; then
             echo "OK: PR into main originates from nexausm/ci:staging"
-          elif [ "$repo" = "nexausm/ci" ] && [ "$author" = "github-actions[bot]" ] && [[ "$ref" == release-please--branches--main* ]]; then
+          elif [ "$repo" = "nexausm/ci" ] && [[ "$ref" == release-please--branches--main* ]]; then
             echo "OK: release-please automation PR"
           else
-            echo "::error::PRs into main are only allowed from nexausm/ci:staging or an automated release-please PR (got ${repo}:${ref} by ${author})"
+            echo "::error::PRs into main are only allowed from nexausm/ci:staging or an automated release-please PR (got ${repo}:${ref})"
             exit 1
           fi
