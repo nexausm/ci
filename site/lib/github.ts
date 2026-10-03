@@ -1,4 +1,4 @@
-import { GITHUB_OWNER, GITHUB_REPO } from "@site/lib/site";
+import { GITHUB_REPO_URL } from "@site/lib/site";
 
 export interface GitHubAsset {
   name: string;
@@ -21,6 +21,11 @@ export interface GitHubRelease {
 
 const DAY = 60 * 60 * 24;
 
+const GITHUB_API_RELEASES_URL = `${GITHUB_REPO_URL.replace(
+  "https://github.com/",
+  "https://api.github.com/repos/",
+)}/releases`;
+
 function isGitHubRelease(value: unknown): value is GitHubRelease {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false;
@@ -42,16 +47,13 @@ function isGitHubRelease(value: unknown): value is GitHubRelease {
 export async function getReleases(): Promise<GitHubRelease[]> {
   let res: Response;
   try {
-    res = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases`,
-      {
-        headers: {
-          Accept: "application/vnd.github+json",
-          "User-Agent": `${GITHUB_OWNER}-site`,
-        },
-        next: { revalidate: DAY },
+    res = await fetch(GITHUB_API_RELEASES_URL, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        "User-Agent": "cloud-invoice-site",
       },
-    );
+      next: { revalidate: DAY },
+    });
   } catch {
     return [];
   }

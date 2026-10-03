@@ -21,14 +21,8 @@ export default function DocsPageLayout({
       links={[
         {
           type: "main",
-          text: "Home",
-          url: "/",
-          active: "nested-url",
-        },
-        {
-          type: "main",
           text: "Features",
-          url: "/features",
+          url: "/#features",
           active: "nested-url",
         },
         {
@@ -40,7 +34,7 @@ export default function DocsPageLayout({
         {
           type: "main",
           text: "Community",
-          url: "/community",
+          url: "/#community",
           active: "nested-url",
         },
       ]}

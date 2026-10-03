@@ -1,20 +1,24 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { IoMoonOutline, IoSunnyOutline } from "react-icons/io5";
 
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const { resolvedTheme, setTheme } = useTheme();
 
   return (
     <button
       type="button"
       aria-label="Toggle theme"
+      title="Toggle theme"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-      className="text-muted-foreground hover:text-foreground inline-flex size-8 items-center justify-center rounded-md transition-colors"
+      className={
+        className ??
+        "text-muted-foreground hover:text-foreground inline-flex size-8 items-center justify-center rounded-md transition-colors"
+      }
     >
-      <Sun className="size-4 dark:hidden" />
-      <Moon className="hidden size-4 dark:block" />
+      <IoSunnyOutline className="size-4 dark:hidden" />
+      <IoMoonOutline className="hidden size-4 dark:block" />
     </button>
   );
 }

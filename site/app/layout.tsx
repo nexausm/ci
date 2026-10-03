@@ -5,9 +5,15 @@ import { RootProvider } from "fumadocs-ui/provider/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Cloud Invoice by Nexaus",
+  title: "Cloud Invoice",
   description:
-    "Open-source, self-hostable cloud invoice manager. Create invoices, manage clients and products, and track payments on time.",
+    "Open-source, self-hostable cloud invoice manager. Create invoices, manage clients and products and track payments on time.",
+  openGraph: {
+    title: "Cloud Invoice",
+    description:
+      "Open-source, self-hostable cloud invoice manager. Create invoices, manage clients and products and track payments on time.",
+    type: "website",
+  },
 };
 
 const inter = localFont({
