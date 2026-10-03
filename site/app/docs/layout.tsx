@@ -40,7 +40,7 @@ export default function DocsPageLayout({
         {
           type: "main",
           text: "Community",
-          url: "/community",
+          url: "/#community",
           active: "nested-url",
         },
       ]}

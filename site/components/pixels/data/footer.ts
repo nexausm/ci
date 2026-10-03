@@ -14,7 +14,7 @@ export const footerData: IFooter[] = [
   {
     title: "Community",
     links: [
-      { name: "Community", href: "/community" },
+      { name: "Community", href: "/#community" },
       {
         name: "Discussions",
         href: `${GITHUB_REPO_URL}/discussions`,
