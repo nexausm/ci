@@ -5,3 +5,4 @@ reviews:
       - staging
     ignore_title_keywords:
       - "Staging"
+      - "chore(main): release"
