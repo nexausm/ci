@@ -11,9 +11,7 @@ import { IInvolvedCard } from "../types";
 
 export const involvedData: IInvolvedCard[] = [
   {
-    icon: (
-      <TbMessagesFilled className="size-6 text-teal-800" />
-    ),
+    icon: <TbMessagesFilled className="size-6 text-teal-800" />,
     title: "Discussions",
     description:
       "Ask a question, compare setups, or work through a workflow with other people running their own instance.",
@@ -29,9 +27,7 @@ export const involvedData: IInvolvedCard[] = [
     href: `${GITHUB_REPO_URL}/issues`,
   },
   {
-    icon: (
-      <RiGitPullRequestFill className="size-6 text-teal-800" />
-    ),
+    icon: <RiGitPullRequestFill className="size-6 text-teal-800" />,
     title: "Contributions",
     description:
       "The whole codebase is open. Pick an issue, fork the repository and open a pull request.",
@@ -39,9 +35,7 @@ export const involvedData: IInvolvedCard[] = [
     href: `${GITHUB_REPO_URL}/pulls`,
   },
   {
-    icon: (
-      <RiFileTextFill className="size-6 text-teal-800" />
-    ),
+    icon: <RiFileTextFill className="size-6 text-teal-800" />,
     title: "Release notes",
     description:
       "Every tagged release lists exactly what changed, so you can see what you are upgrading to.",
