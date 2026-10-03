@@ -216,7 +216,7 @@ export default function Navbar() {
           <Link
             href="/docs/quickstart"
             onClick={() => setIsOpen(false)}
-            className="block w-full rounded-full bg-teal-800 px-6 py-3 text-center font-semibold text-white transition-colors hover:bg-teal-900 dark:bg-teal-600 dark:hover:bg-teal-700"
+            className="block w-full rounded-full bg-teal-800 px-6 py-3 text-center font-semibold text-white transition-colors hover:bg-teal-900 dark:hover:bg-teal-700"
           >
             Get started
           </Link>
