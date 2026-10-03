@@ -17,6 +17,10 @@ on:
       - ".prettierrc.json"
       - ".prettierignore"
       - ".env.example"
+      - ".gitattributes"
+      - "deno.lock"
+      - "release-please-config.json"
+      - ".release-please-manifest.json"
 
 concurrency:
   group: preview-deploy-${{ github.event.pull_request.number }}

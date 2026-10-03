@@ -18,26 +18,21 @@ env:
 jobs:
   format:
     name: prettier
-    if: "${{ !startsWith(github.event.head_commit.message || '', 'style: apply prettier formatting [bot]') }}"
+    if: "${{ !contains(github.event.head_commit.message || '', 'style: apply prettier formatting [bot]') }}"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Mint a GitHub App installation token
+        id: app-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
         with:
           ref: staging
-          token: ${{ secrets.STAGING_FORMAT_TOKEN }}
-
-      - name: Fail early if no token is configured
-        env:
-          TOKEN: ${{ secrets.STAGING_FORMAT_TOKEN }}
-        run: |
-          if [ -z "$TOKEN" ]; then
-            echo "::error::STAGING_FORMAT_TOKEN is not set. Create a fine-grained"
-            echo "::error::PAT with Contents: write + Pull requests: write on"
-            echo "::error::$GITHUB_REPOSITORY and add its owner to the bypass list"
-            echo "::error::of the 'nmc' ruleset (for pull requests only)."
-            exit 1
-          fi
+          token: ${{ steps.app-token.outputs.token }}
 
       - uses: actions/setup-node@v4
         with:
@@ -64,14 +59,20 @@ jobs:
       - name: Open and merge a formatting PR
         if: steps.diff.outputs.changed == '1'
         env:
-          GH_TOKEN: ${{ secrets.STAGING_FORMAT_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BOT_SLUG: ${{ steps.app-token.outputs.app-slug }}
         run: |
           set -euo pipefail
 
-          git config user.name "opencode-format-bot"
-          git config user.email "opencode-format-bot@users.noreply.github.com"
+          emojis=(🎨 🧹 💅 ✨ 🧼)
+          emoji="${emojis[$RANDOM % ${#emojis[@]}]}"
+          title="$emoji $FORMAT_TITLE"
+
+          bot_user_id="$(gh api "users/${BOT_SLUG}[bot]" --jq '.id')"
+          git config user.name "${BOT_SLUG}[bot]"
+          git config user.email "${bot_user_id}+${BOT_SLUG}[bot]@users.noreply.github.com"
           git checkout -B "$FORMAT_BRANCH"
-          git commit -m "$FORMAT_TITLE"
+          git commit -m "$title"
 
           git push --force origin "HEAD:refs/heads/$FORMAT_BRANCH"
 
@@ -79,7 +80,7 @@ jobs:
             --state open --json url --jq '.[0].url // ""')"
           if [ -z "$pr" ]; then
             pr="$(gh pr create --base staging --head "$FORMAT_BRANCH" \
-              --title "$FORMAT_TITLE" \
+              --title "$title" \
               --body "Automated \`npm run format\` output, opened and merged by the format bot.")"
           fi
           echo "Formatting PR: $pr"
@@ -92,7 +93,7 @@ jobs:
           done
 
           if gh pr merge "$pr" --squash --delete-branch \
-            --subject "$FORMAT_TITLE" \
+            --subject "$title" \
             --body "Automated prettier run."; then
             echo "::notice::Merged $pr into staging"
             exit 0

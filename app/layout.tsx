@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui";
 import { DevConsoleFilter } from "@/components/docs/dev-console-filter";
 
 export const metadata: Metadata = {
-  title: "Cloud Invoice by Nexaus",
+  title: "Cloud Invoice",
   robots: { index: false, follow: false },
 };
 
