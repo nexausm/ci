@@ -1,4 +1,3 @@
-import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import SectionTitle from "../SectionTitle";
 import { featuresData } from "../data/features";

@@ -21,12 +21,6 @@ export default function DocsPageLayout({
       links={[
         {
           type: "main",
-          text: "Home",
-          url: "/",
-          active: "nested-url",
-        },
-        {
-          type: "main",
           text: "Features",
           url: "/#features",
           active: "nested-url",
