@@ -51,7 +51,6 @@
     "db:setup": "tsx scripts/setup-db.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "release": "bash scripts/release.sh",
     "deploy": "npm run cf:build && npx wrangler deploy",
     "postinstall": "prisma generate",
     "cf:build": "npm run db:setup && CF_PAGES=1 opennextjs-cloudflare build",
