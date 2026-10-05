@@ -26,6 +26,13 @@ import {
   AlertDialogTitle,
   Card,
   CardContent,
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  Skeleton,
 } from "@/components/ui";
 
 import { useProducts } from "@/lib/storage";
@@ -144,34 +151,41 @@ export default function Page() {
             <TableBody>
               {!loaded ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-muted-foreground h-24 text-center"
-                  >
-                    Loading…
+                  <TableCell colSpan={5} className="h-24">
+                    <Skeleton className="h-6 w-full" />
                   </TableCell>
                 </TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center">
-                    <div className="text-muted-foreground flex flex-col items-center gap-2">
-                      <Package className="size-8" />
-                      <p>
-                        {products.length === 0
-                          ? "No products yet. Add your first product to get started."
-                          : "No products match your search."}
-                      </p>
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={5}>
+                    <Empty>
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <Package />
+                        </EmptyMedia>
+                        <EmptyTitle>
+                          {products.length === 0
+                            ? "No products yet"
+                            : "No matches"}
+                        </EmptyTitle>
+                        <EmptyDescription>
+                          {products.length === 0
+                            ? "Add your first product to reuse it across invoices."
+                            : "No products match your search."}
+                        </EmptyDescription>
+                      </EmptyHeader>
                       {products.length === 0 && (
-                        <Button
-                          size="sm"
-                          className="mt-1"
-                          onClick={() => setDialogOpen(true)}
-                        >
-                          <Plus className="size-4" />
-                          Add your first product
-                        </Button>
+                        <EmptyContent>
+                          <Button
+                            variant="outline"
+                            onClick={() => setDialogOpen(true)}
+                          >
+                            <Plus data-icon="inline-start" />
+                            Add your first product
+                          </Button>
+                        </EmptyContent>
                       )}
-                    </div>
+                    </Empty>
                   </TableCell>
                 </TableRow>
               ) : (

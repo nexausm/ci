@@ -3,7 +3,6 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Loader2 } from "lucide-react";
 import {
   Button,
   Input,
@@ -14,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function LoginPage() {
   return (
@@ -97,7 +97,7 @@ function LoginForm() {
             </p>
           )}
           <Button type="submit" className="w-full" disabled={submitting}>
-            {submitting && <Loader2 className="size-4 animate-spin" />}
+            {submitting && <Spinner />}
             {submitting ? "Signing in…" : "Sign in"}
           </Button>
         </form>

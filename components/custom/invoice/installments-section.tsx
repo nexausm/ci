@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Download, Loader2, Plus, Trash2 } from "lucide-react";
+import { Download, Plus, Trash2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Badge,
   Button,
@@ -281,7 +282,7 @@ export function InstallmentsSection({
                               onClick={() => handleDownloadInstallment(inst)}
                             >
                               {downloadingId === inst.id ? (
-                                <Loader2 className="size-4 animate-spin" />
+                                <Spinner />
                               ) : (
                                 <Download className="size-4" />
                               )}

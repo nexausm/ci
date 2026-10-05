@@ -53,11 +53,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   Badge,
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  Skeleton,
 } from "@/components/ui";
 
 import { StatusBadge } from "@/components/custom/shared/status-badge";
 import { DoughnutChart } from "@/components/custom/dashboard/doughnut-chart";
-import { LineChart } from "@/components/custom/dashboard/line-chart";
+import {
+  InvoicedReceivedChart,
+  type MonthlyPoint,
+} from "@/components/custom/dashboard/invoiced-received-chart";
 import { useClients, useInvoices } from "@/lib/storage";
 import {
   computeTotals,
@@ -90,12 +100,14 @@ const STATUS_FILTERS: { value: InvoiceStatus | "all"; label: string }[] = [
   { value: "overdue", label: "Overdue" },
 ];
 
+// Theme-aware chart tokens rather than raw hex, so the doughnut follows the
+// active theme in both light and dark mode.
 const STATUS_CHART_COLOR: Record<InvoiceStatus, string> = {
-  draft: "#94a3b8",
-  sent: "#3b82f6",
-  partial: "#f59e0b",
-  paid: "#10b981",
-  overdue: "#ef4444",
+  draft: "var(--chart-3)",
+  sent: "var(--chart-1)",
+  partial: "var(--chart-4)",
+  paid: "var(--chart-2)",
+  overdue: "var(--chart-5)",
 };
 
 const STATUS_ORDER: InvoiceStatus[] = [
@@ -105,9 +117,6 @@ const STATUS_ORDER: InvoiceStatus[] = [
   "overdue",
   "draft",
 ];
-
-const INVOICED_COLOR = "#3b82f6";
-const RECEIVED_COLOR = "#10b981";
 
 function monthKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -236,7 +245,7 @@ function Dashboard() {
     return best;
   }, [invoices]);
 
-  const monthly = useMemo(() => {
+  const monthly = useMemo<MonthlyPoint[]>(() => {
     const months: { key: string; label: string }[] = [];
     const now = new Date();
     for (let i = 11; i >= 0; i--) {
@@ -247,29 +256,21 @@ function Dashboard() {
       });
     }
 
-    const invoiced = new Map(
-      months.map((m) => [m.key, { label: m.label, value: 0 }]),
-    );
-    const received = new Map(
-      months.map((m) => [m.key, { label: m.label, value: 0 }]),
+    const buckets = new Map(
+      months.map((m) => [m.key, { label: m.label, invoiced: 0, received: 0 }]),
     );
 
     for (const inv of invoices) {
       if (inv.currency !== dominantCurrency) continue;
-      const issueKey = monthKey(new Date(inv.createdAt));
-      const issueBucket = invoiced.get(issueKey);
-      if (issueBucket) issueBucket.value += computeTotals(inv).total;
+      const issueBucket = buckets.get(monthKey(new Date(inv.createdAt)));
+      if (issueBucket) issueBucket.invoiced += computeTotals(inv).total;
       for (const payment of inv.payments) {
-        const payKey = (payment.date || "").slice(0, 7);
-        const payBucket = received.get(payKey);
-        if (payBucket) payBucket.value += Number(payment.amount) || 0;
+        const payBucket = buckets.get((payment.date || "").slice(0, 7));
+        if (payBucket) payBucket.received += Number(payment.amount) || 0;
       }
     }
 
-    return {
-      invoiced: [...invoiced.values()],
-      received: [...received.values()],
-    };
+    return [...buckets.values()];
   }, [invoices, dominantCurrency]);
 
   const statusBreakdown = useMemo(() => {
@@ -477,6 +478,7 @@ function Dashboard() {
               <CardContent className="flex justify-center px-6 pt-3 pb-2">
                 <DoughnutChart
                   data={statusBreakdown.map((s) => ({
+                    key: s.key,
                     label: STATUS_LABEL[s.key],
                     value: s.count,
                     color: STATUS_CHART_COLOR[s.key],
@@ -499,56 +501,48 @@ function Dashboard() {
                 <CardTitle>Invoiced vs Received</CardTitle>
                 <CardDescription>
                   Last 12 months{" "}
-                  {monthly.invoiced.some((m) => m.value > 0) ||
-                  monthly.received.some((m) => m.value > 0)
+                  {monthly.some((m) => m.invoiced > 0 || m.received > 0)
                     ? `· ${symbol}`
                     : ""}
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-3 pt-2 pb-2">
-                <LineChart
-                  series={[
-                    {
-                      name: "Invoiced",
-                      color: INVOICED_COLOR,
-                      points: monthly.invoiced,
-                    },
-                    {
-                      name: "Received",
-                      color: RECEIVED_COLOR,
-                      points: monthly.received,
-                    },
-                  ]}
-                />
+                <InvoicedReceivedChart data={monthly} symbol={symbol} />
               </CardContent>
-              <CardFooter className="text-muted-foreground items-center gap-5 bg-transparent px-6 py-3 text-xs">
-                <LegendDot color={INVOICED_COLOR} label="Invoiced" />
-                <LegendDot color={RECEIVED_COLOR} label="Received" />
-              </CardFooter>
             </Card>
           </div>
         </>
       ) : (
-        <div className="space-y-6">
+        <div className="flex flex-col gap-5">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {[0, 1, 2, 3].map((i) => (
               <Card key={i}>
-                <CardContent className="space-y-3 px-5 pt-5 pb-4">
-                  <div className="bg-muted h-9 w-9 animate-pulse rounded-full" />
-                  <div className="bg-muted h-4 w-1/2 animate-pulse rounded" />
+                <CardContent className="flex flex-col gap-3">
+                  <Skeleton className="size-9 rounded-full" />
+                  <Skeleton className="h-4 w-1/2" />
                 </CardContent>
               </Card>
             ))}
           </div>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            <Card className="h-64">
-              <CardContent className="text-muted-foreground flex items-center justify-center p-6 text-sm">
-                Loading…
+          <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-3">
+            <Card className="h-64 md:col-span-1">
+              <CardHeader>
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-32" />
+              </CardHeader>
+              <CardContent className="flex justify-center pt-3 pb-2">
+                <Skeleton className="size-40 rounded-full" />
               </CardContent>
             </Card>
             <Card className="h-64 md:col-span-2">
-              <CardContent className="text-muted-foreground flex items-center justify-center p-6 text-sm">
-                Loading…
+              <CardHeader>
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-24" />
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3 pt-2">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <Skeleton key={i} className="h-6 w-full" />
+                ))}
               </CardContent>
             </Card>
           </div>
@@ -617,35 +611,42 @@ function Dashboard() {
             <TableBody>
               {!loaded ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={7}
-                    className="text-muted-foreground h-24 text-center"
-                  >
-                    Loading…
+                  <TableCell colSpan={7} className="h-24">
+                    <Skeleton className="h-6 w-full" />
                   </TableCell>
                 </TableRow>
               ) : rows.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center">
-                    <div className="text-muted-foreground flex flex-col items-center gap-2">
-                      <FileText className="size-8" />
-                      <p>
-                        {invoices.length === 0
-                          ? "No invoices yet."
-                          : "No invoices match your filters."}
-                      </p>
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={7}>
+                    <Empty>
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <FileText />
+                        </EmptyMedia>
+                        <EmptyTitle>
+                          {invoices.length === 0
+                            ? "No invoices yet"
+                            : "No matching invoices"}
+                        </EmptyTitle>
+                        <EmptyDescription>
+                          {invoices.length === 0
+                            ? "Create your first invoice to start tracking what you are owed."
+                            : "Try a different search term or status filter."}
+                        </EmptyDescription>
+                      </EmptyHeader>
                       {invoices.length === 0 && (
-                        <Button
-                          size="sm"
-                          className="mt-1"
-                          nativeButton={false}
-                          render={<Link href="/invoices/new" />}
-                        >
-                          <Plus className="size-4" />
-                          Create your first invoice
-                        </Button>
+                        <EmptyContent>
+                          <Button
+                            variant="outline"
+                            nativeButton={false}
+                            render={<Link href="/invoices/new" />}
+                          >
+                            <Plus data-icon="inline-start" />
+                            Create your first invoice
+                          </Button>
+                        </EmptyContent>
                       )}
-                    </div>
+                    </Empty>
                   </TableCell>
                 </TableRow>
               ) : (

@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Building2, MoreHorizontal, Plus, Search, User } from "lucide-react";
+import {
+  Building2,
+  MoreHorizontal,
+  Plus,
+  Search,
+  User,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   Button,
@@ -28,6 +35,12 @@ import {
   AlertDialogTitle,
   Card,
   CardContent,
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  Skeleton,
 } from "@/components/ui";
 
 import { useClients, useInvoices } from "@/lib/storage";
@@ -132,22 +145,30 @@ export default function Page() {
             <TableBody>
               {!loaded ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-muted-foreground h-24 text-center"
-                  >
-                    Loading…
+                  <TableCell colSpan={6} className="h-24">
+                    <Skeleton className="h-6 w-full" />
                   </TableCell>
                 </TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-muted-foreground h-24 text-center"
-                  >
-                    {clients.length === 0
-                      ? "No clients yet. Add your first client to get started."
-                      : "No clients match your search."}
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={6}>
+                    <Empty>
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <Users />
+                        </EmptyMedia>
+                        <EmptyTitle>
+                          {clients.length === 0
+                            ? "No clients yet"
+                            : "No matches"}
+                        </EmptyTitle>
+                        <EmptyDescription>
+                          {clients.length === 0
+                            ? "Add your first client to start billing them."
+                            : "No clients match your search."}
+                        </EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
                   </TableCell>
                 </TableRow>
               ) : (

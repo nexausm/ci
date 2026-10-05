@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Building2, Loader2 } from "lucide-react";
+import { Building2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import {
   Button,
@@ -171,7 +172,7 @@ function CompanyForm({ initial }: { initial: CompanyInfo }) {
 
             <div className="flex justify-end pt-2">
               <Button type="submit" disabled={saving}>
-                {saving && <Loader2 className="size-4 animate-spin" />}
+                {saving && <Spinner />}
                 {saving ? "Saving…" : "Save profile"}
               </Button>
             </div>
