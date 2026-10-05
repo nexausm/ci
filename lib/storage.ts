@@ -20,10 +20,6 @@ async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
 
 // --- company profile ---
 
-export async function fetchCompanyProfile(): Promise<CompanyInfo> {
-  return apiFetch("/api/company");
-}
-
 export async function updateCompanyProfile(
   profile: CompanyInfo,
 ): Promise<CompanyInfo> {

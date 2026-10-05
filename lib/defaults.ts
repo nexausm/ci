@@ -1,6 +1,6 @@
 import type {
   Client,
-  CompanyProfile,
+  CompanyInfo,
   CurrencyCode,
   Installment,
   InvoiceData,
@@ -107,8 +107,7 @@ export function createDefaultClient(): Client {
   };
 }
 
-export function createDefaultCompanyProfile(): Omit<CompanyProfile, "id"> {
-  const now = new Date().toISOString();
+export function createDefaultCompanyProfile(): CompanyInfo {
   return {
     companyName: "",
     numberLabel: "",
@@ -117,17 +116,13 @@ export function createDefaultCompanyProfile(): Omit<CompanyProfile, "id"> {
     phone: "",
     email: "",
     logoUrl: null,
-    createdAt: now,
-    updatedAt: now,
   };
 }
 
-export function sanitizeCompanyProfile(
-  raw: unknown,
-): Omit<CompanyProfile, "id"> {
+export function sanitizeCompanyProfile(raw: unknown): CompanyInfo {
   const defaults = createDefaultCompanyProfile();
   if (!raw || typeof raw !== "object") return defaults;
-  const stored = raw as Partial<CompanyProfile>;
+  const stored = raw as Partial<CompanyInfo>;
   const logo = stored.logoUrl;
   const trimmed = typeof logo === "string" ? logo.trim() : "";
   return {

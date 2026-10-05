@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Building2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -14,35 +14,19 @@ import {
   CardTitle,
 } from "@/components/ui";
 
-import { fetchCompanyProfile, updateCompanyProfile } from "@/lib/storage";
+import { updateCompanyProfile } from "@/lib/storage";
+import { useCompany, useSetCompany } from "@/app/providers/company-provider";
 import type { CompanyInfo } from "@/lib/types";
 
-const EMPTY: CompanyInfo = {
-  companyName: "",
-  numberLabel: "",
-  numberValue: "",
-  addressLines: [],
-  phone: "",
-  email: "",
-  logoUrl: null,
-};
-
 export default function Page() {
-  const [form, setForm] = useState<CompanyInfo>(EMPTY);
-  const [loaded, setLoaded] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const company = useCompany();
+  return <CompanyForm key={JSON.stringify(company)} initial={company} />;
+}
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchCompanyProfile().then((info) => {
-      if (cancelled) return;
-      setForm(info);
-      setLoaded(true);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+function CompanyForm({ initial }: { initial: CompanyInfo }) {
+  const setCompany = useSetCompany();
+  const [form, setForm] = useState(initial);
+  const [saving, setSaving] = useState(false);
 
   function update(patch: Partial<CompanyInfo>) {
     setForm((f) => ({ ...f, ...patch }));
@@ -52,8 +36,7 @@ export default function Page() {
     e.preventDefault();
     setSaving(true);
     try {
-      const saved = await updateCompanyProfile(form);
-      setForm(saved);
+      setCompany(await updateCompanyProfile(form));
       toast.success("Company profile saved");
     } catch {
       toast.error("Failed to save company profile");
@@ -187,7 +170,7 @@ export default function Page() {
             </div>
 
             <div className="flex justify-end pt-2">
-              <Button type="submit" disabled={saving || !loaded}>
+              <Button type="submit" disabled={saving}>
                 {saving && <Loader2 className="size-4 animate-spin" />}
                 {saving ? "Saving…" : "Save profile"}
               </Button>
