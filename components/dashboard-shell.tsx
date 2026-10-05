@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   LogOut,
   Package,
+  Receipt,
   Settings,
   Users,
 } from "lucide-react";
@@ -45,6 +46,12 @@ const NAV_MAIN = [
     href: "/dashboard",
     label: "Dashboard",
     icon: LayoutDashboard,
+    exact: true,
+  },
+  {
+    href: "/invoices",
+    label: "Invoices",
+    icon: Receipt,
     exact: true,
   },
   { href: "/clients", label: "Clients", icon: Users, exact: false },

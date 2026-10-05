@@ -142,7 +142,7 @@ export default function Page() {
                   <TableRow key={client.id}>
                     <TableCell className="truncate font-medium">
                       <Link
-                        href={`/?clientId=${client.id}`}
+                        href={`/invoices?clientId=${client.id}`}
                         className="hover:underline"
                       >
                         {client.name}
@@ -197,7 +197,9 @@ export default function Page() {
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            render={<Link href={`/?clientId=${client.id}`} />}
+                            render={
+                              <Link href={`/invoices?clientId=${client.id}`} />
+                            }
                           >
                             View invoices
                           </DropdownMenuItem>
