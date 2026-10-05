@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import type {
   Client,
   CompanyInfo,
@@ -123,156 +123,203 @@ export async function deleteProduct(id: string): Promise<{ ok: true }> {
   return apiFetch(`/api/products/${id}`, { method: "DELETE" });
 }
 
+// --- shared collections ---
+
+type Listener = () => void;
+
+type Collection<T> = {
+  subscribe: (listener: Listener) => () => void;
+  peek: () => T | undefined;
+  patch: (fn: (prev: T) => T) => void;
+  failure: () => Error | null;
+};
+
+function createCollection<T>(url: string): Collection<T> {
+  let data: T | undefined;
+  let error: Error | null = null;
+  let inFlight: Promise<void> | null = null;
+  const listeners = new Set<Listener>();
+
+  const emit = () => listeners.forEach((listener) => listener());
+
+  function load() {
+    if (data !== undefined) return Promise.resolve();
+    inFlight ??= apiFetch<T>(url)
+      .then((value) => {
+        data = value;
+        error = null;
+      })
+      .catch((err: Error) => {
+        error = err;
+      })
+      .finally(() => {
+        inFlight = null;
+        emit();
+      });
+    return inFlight;
+  }
+
+  return {
+    subscribe(listener) {
+      listeners.add(listener);
+      void load();
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    peek: () => data,
+    patch(fn) {
+      if (data !== undefined) {
+        data = fn(data);
+        emit();
+        return;
+      }
+
+      void load().then(() => {
+        if (data === undefined) return;
+        data = fn(data);
+        emit();
+      });
+    },
+    failure: () => error,
+  };
+}
+
+const clientCollection = createCollection<Client[]>("/api/clients");
+const invoiceCollection = createCollection<InvoiceData[]>("/api/invoices");
+const productCollection = createCollection<Product[]>("/api/products");
+
+const NO_CLIENTS: Client[] = [];
+const NO_INVOICES: InvoiceData[] = [];
+const NO_PRODUCTS: Product[] = [];
+
+function useCollection<T>(collection: Collection<T>, empty: T) {
+  const data = useSyncExternalStore(
+    collection.subscribe,
+    collection.peek,
+    () => undefined,
+  );
+  return {
+    data: data ?? empty,
+    loaded: data !== undefined,
+    error: collection.failure(),
+  };
+}
+
+function peekInvoice(id: string): InvoiceData | undefined {
+  return invoiceCollection.peek()?.find((inv) => inv.id === id);
+}
+
 // --- hooks ---
 
 export function useProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const {
+    data: products,
+    loaded,
+    error,
+  } = useCollection(productCollection, NO_PRODUCTS);
 
-  useEffect(() => {
-    let cancelled = false;
-    apiFetch<Product[]>("/api/products").then((data) => {
-      if (cancelled) return;
-      setProducts(data);
-      setLoaded(true);
-    });
-    return () => {
-      cancelled = true;
-    };
+  const upsertProduct = useCallback(async (product: Product) => {
+    const exists = productCollection.peek()?.some((p) => p.id === product.id);
+    const saved = exists
+      ? await updateProduct(product.id, product)
+      : await createProduct(product);
+    productCollection.patch((prev) =>
+      prev.some((p) => p.id === saved.id)
+        ? prev.map((p) => (p.id === saved.id ? saved : p))
+        : [...prev, saved],
+    );
+    return saved;
   }, []);
-
-  const upsertProduct = useCallback(
-    async (product: Product) => {
-      const exists = products.some((p) => p.id === product.id);
-      const saved = exists
-        ? await updateProduct(product.id, product)
-        : await createProduct(product);
-      setProducts((prev) => {
-        const found = prev.some((p) => p.id === saved.id);
-        return found
-          ? prev.map((p) => (p.id === saved.id ? saved : p))
-          : [...prev, saved];
-      });
-      return saved;
-    },
-    [products],
-  );
 
   const removeProduct = useCallback(async (id: string) => {
     await deleteProduct(id);
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+    productCollection.patch((prev) => prev.filter((p) => p.id !== id));
   }, []);
 
-  return { products, loaded, upsertProduct, removeProduct };
+  return { products, loaded, error, upsertProduct, removeProduct };
 }
 
 export function useClients() {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const {
+    data: clients,
+    loaded,
+    error,
+  } = useCollection(clientCollection, NO_CLIENTS);
 
-  useEffect(() => {
-    let cancelled = false;
-    apiFetch<Client[]>("/api/clients").then((data) => {
-      if (cancelled) return;
-      setClients(data);
-      setLoaded(true);
-    });
-    return () => {
-      cancelled = true;
-    };
+  const upsertClient = useCallback(async (client: Client) => {
+    const exists = clientCollection.peek()?.some((c) => c.id === client.id);
+    const saved = exists
+      ? await updateClient(client.id, client)
+      : await createClient(client);
+    clientCollection.patch((prev) =>
+      prev.some((c) => c.id === saved.id)
+        ? prev.map((c) => (c.id === saved.id ? saved : c))
+        : [...prev, saved],
+    );
+    return saved;
   }, []);
-
-  const upsertClient = useCallback(
-    async (client: Client) => {
-      const exists = clients.some((c) => c.id === client.id);
-      const saved = exists
-        ? await updateClient(client.id, client)
-        : await createClient(client);
-      setClients((prev) => {
-        const found = prev.some((c) => c.id === saved.id);
-        return found
-          ? prev.map((c) => (c.id === saved.id ? saved : c))
-          : [...prev, saved];
-      });
-      return saved;
-    },
-    [clients],
-  );
 
   const removeClient = useCallback(async (id: string) => {
     await deleteClient(id);
-    setClients((prev) => prev.filter((c) => c.id !== id));
+    clientCollection.patch((prev) => prev.filter((c) => c.id !== id));
   }, []);
 
-  return { clients, loaded, upsertClient, removeClient };
+  return { clients, loaded, error, upsertClient, removeClient };
 }
 
 export function useInvoices() {
-  const [invoices, setInvoices] = useState<InvoiceData[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const {
+    data: invoices,
+    loaded,
+    error,
+  } = useCollection(invoiceCollection, NO_INVOICES);
 
-  useEffect(() => {
-    let cancelled = false;
-    apiFetch<InvoiceData[]>("/api/invoices").then((data) => {
-      if (cancelled) return;
-      setInvoices(data);
-      setLoaded(true);
-    });
-    return () => {
-      cancelled = true;
-    };
+  const upsertInvoice = useCallback(async (invoice: InvoiceData) => {
+    const prev = invoiceCollection.peek()?.find((i) => i.id === invoice.id);
+    if (!prev) {
+      const created = await createInvoice(invoice);
+      invoiceCollection.patch((list) =>
+        list.some((i) => i.id === created.id)
+          ? list.map((i) => (i.id === created.id ? created : i))
+          : [...list, created],
+      );
+      return created;
+    }
+
+    const { id, payments = [], ...patch } = invoice;
+    const saved = await updateInvoice(id, patch);
+    const prevIds = new Set((prev.payments ?? []).map((p) => p.id));
+    const nextIds = new Set(payments.map((p) => p.id));
+    for (const p of payments) {
+      const body = { ...p, invoiceId: id };
+      if (prevIds.has(p.id)) await updatePayment(p.id, body);
+      else await createPayment(body);
+    }
+    for (const p of prev.payments ?? []) {
+      if (!nextIds.has(p.id)) await deletePayment(p.id);
+    }
+
+    const refreshed: InvoiceData = { ...saved, payments };
+    invoiceCollection.patch((list) =>
+      list.map((i) => (i.id === refreshed.id ? refreshed : i)),
+    );
+    return refreshed;
   }, []);
-
-  const upsertInvoice = useCallback(
-    async (invoice: InvoiceData) => {
-      const prev = invoices.find((i) => i.id === invoice.id);
-      if (prev) {
-        const { id, payments = [], ...patch } = invoice;
-        const saved = await updateInvoice(id, patch);
-        const prevIds = new Set((prev.payments ?? []).map((p) => p.id));
-        const nextIds = new Set(payments.map((p) => p.id));
-        for (const p of payments) {
-          const body = { ...p, invoiceId: id };
-          if (prevIds.has(p.id)) {
-            await updatePayment(p.id, body);
-          } else {
-            await createPayment(body);
-          }
-        }
-        for (const p of prev.payments ?? []) {
-          if (!nextIds.has(p.id)) {
-            await deletePayment(p.id);
-          }
-        }
-        const refreshed: InvoiceData = { ...saved, payments };
-        setInvoices((list) =>
-          list.map((i) => (i.id === refreshed.id ? refreshed : i)),
-        );
-        return refreshed;
-      }
-      const saved = await createInvoice(invoice);
-      setInvoices((list) => {
-        const exists = list.some((i) => i.id === saved.id);
-        return exists
-          ? list.map((i) => (i.id === saved.id ? saved : i))
-          : [...list, saved];
-      });
-      return saved;
-    },
-    [invoices],
-  );
 
   const removeInvoice = useCallback(async (id: string) => {
     await deleteInvoice(id);
-    setInvoices((prev) => prev.filter((i) => i.id !== id));
+    invoiceCollection.patch((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
-  return { invoices, loaded, upsertInvoice, removeInvoice };
+  return { invoices, loaded, error, upsertInvoice, removeInvoice };
 }
 
 export async function fetchInvoiceById(
   id: string,
 ): Promise<InvoiceData | null> {
+  const cached = peekInvoice(id);
+  if (cached) return cached;
   const res = await fetch(`/api/invoices/${id}`);
   if (!res.ok) return null;
   return res.json();
