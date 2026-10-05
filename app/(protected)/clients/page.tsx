@@ -2,18 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  Building2,
-  MoreHorizontal,
-  Plus,
-  Search,
-  User,
-  Users,
-} from "lucide-react";
+import { Building2, MoreHorizontal, Plus, User, Users } from "lucide-react";
 import { toast } from "sonner";
 import {
   Button,
-  Input,
   Badge,
   Table,
   TableBody,
@@ -50,7 +42,6 @@ import type { Client } from "@/lib/types";
 export default function Page() {
   const { clients, loaded, upsertClient, removeClient } = useClients();
   const { invoices } = useInvoices();
-  const [query, setQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
   const [deleting, setDeleting] = useState<Client | null>(null);
@@ -64,17 +55,10 @@ export default function Page() {
     return map;
   }, [invoices]);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const sorted = [...clients].sort((a, b) => a.name.localeCompare(b.name));
-    if (!q) return sorted;
-    return sorted.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.email.toLowerCase().includes(q) ||
-        c.phone.toLowerCase().includes(q),
-    );
-  }, [clients, query]);
+  const sorted = useMemo(
+    () => [...clients].sort((a, b) => a.name.localeCompare(b.name)),
+    [clients],
+  );
 
   async function handleSaved(client: Client) {
     const isNew = !clients.some((c) => c.id === client.id);
@@ -117,19 +101,7 @@ export default function Page() {
         </Button>
       </div>
 
-      <div className="mt-6 max-w-sm">
-        <div className="relative">
-          <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
-          <Input
-            placeholder="Search clients…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-      </div>
-
-      <Card className="mt-4 py-0">
+      <Card className="mt-6 py-0">
         <CardContent className="p-0">
           <Table className="table-fixed">
             <TableHeader>
@@ -149,7 +121,7 @@ export default function Page() {
                     <Skeleton className="h-6 w-full" />
                   </TableCell>
                 </TableRow>
-              ) : filtered.length === 0 ? (
+              ) : sorted.length === 0 ? (
                 <TableRow className="hover:bg-transparent">
                   <TableCell colSpan={6}>
                     <Empty>
@@ -157,22 +129,16 @@ export default function Page() {
                         <EmptyMedia variant="icon">
                           <Users />
                         </EmptyMedia>
-                        <EmptyTitle>
-                          {clients.length === 0
-                            ? "No clients yet"
-                            : "No matches"}
-                        </EmptyTitle>
+                        <EmptyTitle>No clients yet</EmptyTitle>
                         <EmptyDescription>
-                          {clients.length === 0
-                            ? "Add your first client to start billing them."
-                            : "No clients match your search."}
+                          Add your first client to start billing them.
                         </EmptyDescription>
                       </EmptyHeader>
                     </Empty>
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((client) => (
+                sorted.map((client) => (
                   <TableRow key={client.id}>
                     <TableCell className="truncate font-medium">
                       <Link

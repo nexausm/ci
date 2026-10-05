@@ -38,7 +38,6 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { AlgoliaSearch } from "@/components/custom/algolia-search";
 import { useCompany } from "@/app/providers/company-provider";
 
 const NAV_MAIN = [
@@ -80,13 +79,7 @@ function getBrand(pathname: string) {
   return match?.name ?? "Dashboard";
 }
 
-export function DashboardShell({
-  children,
-  algolia,
-}: {
-  children: React.ReactNode;
-  algolia?: { appId: string; searchKey: string; indexName: string };
-}) {
+export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { logoUrl } = useCompany();
 
@@ -193,13 +186,6 @@ export function DashboardShell({
           </Breadcrumb>
 
           <div className="ml-auto flex items-center gap-2">
-            {algolia ? (
-              <AlgoliaSearch
-                appId={algolia.appId}
-                searchKey={algolia.searchKey}
-                indexName={algolia.indexName}
-              />
-            ) : null}
             <Button
               variant="ghost"
               size="icon"

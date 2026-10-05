@@ -12,7 +12,6 @@ import {
   MoreHorizontal,
   Plus,
   RefreshCw,
-  Search,
   Trash2,
   TrendingUp,
   Users,
@@ -22,7 +21,6 @@ import {
 } from "lucide-react";
 import {
   Button,
-  Input,
   Card,
   CardContent,
   CardHeader,
@@ -180,14 +178,9 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 export default function Home() {
   return (
     <Suspense>
-      <DashboardWithQuery />
+      <Dashboard />
     </Suspense>
   );
-}
-
-function DashboardWithQuery() {
-  const searchParams = useSearchParams();
-  return <Dashboard key={searchParams.get("q") ?? ""} />;
 }
 
 function Dashboard() {
@@ -199,7 +192,6 @@ function Dashboard() {
   const { clients } = useClients();
   const { invoices, loaded, removeInvoice } = useInvoices();
 
-  const [query, setQuery] = useState<string>(() => searchParams.get("q") ?? "");
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">(
     "all",
   );
@@ -219,16 +211,8 @@ function Dashboard() {
       .map((inv) => ({ inv, totals: computeTotals(inv) }))
       .map((row) => ({ ...row, status: computeStatus(row.inv, row.totals) }))
       .filter((row) => statusFilter === "all" || row.status === statusFilter)
-      .filter((row) => {
-        const q = query.trim().toLowerCase();
-        if (!q) return true;
-        return (
-          row.inv.invoiceNumber.toLowerCase().includes(q) ||
-          row.inv.billToName.toLowerCase().includes(q)
-        );
-      })
       .sort((a, b) => b.inv.updatedAt.localeCompare(a.inv.updatedAt));
-  }, [invoices, clientId, statusFilter, query]);
+  }, [invoices, clientId, statusFilter]);
 
   const dominantCurrency = useMemo<CurrencyCode>(() => {
     let best: CurrencyCode = "USD";
@@ -550,15 +534,6 @@ function Dashboard() {
       )}
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative max-w-sm flex-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
-          <Input
-            placeholder="Search by invoice # or client…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="pl-8"
-          />
-        </div>
         <Select
           value={statusFilter}
           onValueChange={(v) => setStatusFilter(v as InvoiceStatus | "all")}

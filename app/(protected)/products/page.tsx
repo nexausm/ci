@@ -1,11 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { MoreHorizontal, Package, Plus, Search } from "lucide-react";
+import { MoreHorizontal, Package, Plus } from "lucide-react";
 import { toast } from "sonner";
 import {
   Button,
-  Input,
   Table,
   TableBody,
   TableCell,
@@ -37,51 +36,19 @@ import {
 
 import { useProducts } from "@/lib/storage";
 import { ProductFormDialog } from "@/components/custom/product/form-dialog";
+import { formatMoney } from "@/lib/totals";
 import type { Product } from "@/lib/types";
-
-function formatPrice(value: number): string {
-  return (Number(value) || 0).toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
-function PriceCell({
-  base,
-  discounted,
-}: {
-  base: number;
-  discounted: number | null | undefined;
-}) {
-  return (
-    <div className="flex flex-col items-end">
-      <span className="tabular-nums">{formatPrice(base)}</span>
-      {discounted != null && (
-        <span className="text-muted-foreground text-xs tabular-nums">
-          disc. {formatPrice(discounted)}
-        </span>
-      )}
-    </div>
-  );
-}
 
 export default function Page() {
   const { products, loaded, upsertProduct, removeProduct } = useProducts();
-  const [query, setQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [deleting, setDeleting] = useState<Product | null>(null);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const sorted = [...products].sort((a, b) => a.name.localeCompare(b.name));
-    if (!q) return sorted;
-    return sorted.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q),
-    );
-  }, [products, query]);
+  const sorted = useMemo(
+    () => [...products].sort((a, b) => a.name.localeCompare(b.name)),
+    [products],
+  );
 
   async function handleSaved(product: Product) {
     const isNew = !products.some((p) => p.id === product.id);
@@ -124,19 +91,7 @@ export default function Page() {
         </Button>
       </div>
 
-      <div className="mt-6 max-w-sm">
-        <div className="relative">
-          <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
-          <Input
-            placeholder="Search products…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-      </div>
-
-      <Card className="mt-4 py-0">
+      <Card className="mt-6 py-0">
         <CardContent className="p-0">
           <Table className="table-fixed">
             <TableHeader>
@@ -155,7 +110,7 @@ export default function Page() {
                     <Skeleton className="h-6 w-full" />
                   </TableCell>
                 </TableRow>
-              ) : filtered.length === 0 ? (
+              ) : sorted.length === 0 ? (
                 <TableRow className="hover:bg-transparent">
                   <TableCell colSpan={5}>
                     <Empty>
@@ -163,15 +118,9 @@ export default function Page() {
                         <EmptyMedia variant="icon">
                           <Package />
                         </EmptyMedia>
-                        <EmptyTitle>
-                          {products.length === 0
-                            ? "No products yet"
-                            : "No matches"}
-                        </EmptyTitle>
+                        <EmptyTitle>No products yet</EmptyTitle>
                         <EmptyDescription>
-                          {products.length === 0
-                            ? "Add your first product to reuse it across invoices."
-                            : "No products match your search."}
+                          Add your first product to reuse it across invoices.
                         </EmptyDescription>
                       </EmptyHeader>
                       {products.length === 0 && (
@@ -189,7 +138,7 @@ export default function Page() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((product) => (
+                sorted.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell className="truncate font-medium">
                       {product.name}
@@ -198,16 +147,14 @@ export default function Page() {
                       {product.description || "—"}
                     </TableCell>
                     <TableCell className="text-right">
-                      <PriceCell
-                        base={Number(product.basePriceUsd) || 0}
-                        discounted={product.discountedPriceUsd}
-                      />
+                      {product.basePriceUsd
+                        ? formatMoney(product.basePriceUsd, "$")
+                        : "—"}
                     </TableCell>
                     <TableCell className="text-right">
-                      <PriceCell
-                        base={Number(product.basePriceBdt) || 0}
-                        discounted={product.discountedPriceBdt}
-                      />
+                      {product.basePriceBdt
+                        ? formatMoney(product.basePriceBdt, "৳")
+                        : "—"}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -221,6 +168,7 @@ export default function Page() {
                           }
                         >
                           <MoreHorizontal className="size-4" />
+                          <span className="sr-only">Open menu</span>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
@@ -263,8 +211,8 @@ export default function Page() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {deleting?.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes the product from your catalog. Invoices that already
-              use it are not changed.
+              This removes the product. Existing invoices keep their saved line
+              items, but will no longer link back to it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

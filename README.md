@@ -57,9 +57,6 @@ Optional (defaults shown):
 - `AUTH_SESSION_MAX_AGE` - session lifetime in seconds (default `86400`)
 - `SEED_USER_NAME`, `SEED_USER_EMAIL`, `SEED_USER_PASSWORD` - pre-provisions
   an admin user. Without these you cannot sign in, so set them at deploy time.
-- `ALGOLIA_APP_ID`, `ALGOLIA_SEARCH_API_KEY`, `ALGOLIA_ADMIN_API_KEY`,
-  `ALGOLIA_INDEX_NAME` - global search. Search gracefully degrades when
-  unset; indexing runs via `npm run index:algolia`.
 
 ### Database setup & admin seeding
 

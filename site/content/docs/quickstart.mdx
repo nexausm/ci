@@ -46,15 +46,11 @@ Fill in at least the required variables:
 
 Optional features:
 
-| Variable                 | Description                                 |
-| ------------------------ | ------------------------------------------- |
-| `SEED_USER_NAME`         | Name of the seeded admin user               |
-| `SEED_USER_EMAIL`        | Email of the seeded admin user              |
-| `SEED_USER_PASSWORD`     | Password of the seeded admin user           |
-| `ALGOLIA_APP_ID`         | Enable full-text search (empty disables it) |
-| `ALGOLIA_ADMIN_API_KEY`  | Algolia admin API key                       |
-| `ALGOLIA_SEARCH_API_KEY` | Algolia search-only key                     |
-| `ALGOLIA_INDEX_NAME`     | Algolia index name                          |
+| Variable             | Description                       |
+| -------------------- | --------------------------------- |
+| `SEED_USER_NAME`     | Name of the seeded admin user     |
+| `SEED_USER_EMAIL`    | Email of the seeded admin user    |
+| `SEED_USER_PASSWORD` | Password of the seeded admin user |
 
 ## 3. Apply migrations
 
@@ -81,15 +77,14 @@ This creates a user from `SEED_USER_NAME`, `SEED_USER_EMAIL`, and
 
 ## Common scripts
 
-| Command                 | Purpose                                               |
-| ----------------------- | ----------------------------------------------------- |
-| `npm run dev`           | Start the dev server                                  |
-| `npm run build`         | Production build                                      |
-| `npm run start`         | Production start (migrations → Prisma → `next start`) |
-| `npm run lint`          | Run ESLint                                            |
-| `npm run typecheck`     | Type-check root + docs site                           |
-| `npm run db:deploy`     | Apply pending migrations                              |
-| `npm run db:generate`   | Regenerate the Prisma client                          |
-| `npm run seed`          | Create the first user                                 |
-| `npm run index:algolia` | Re-index records to Algolia (optional)                |
-| `npm run format`        | Format the codebase with Prettier                     |
+| Command               | Purpose                                               |
+| --------------------- | ----------------------------------------------------- |
+| `npm run dev`         | Start the dev server                                  |
+| `npm run build`       | Production build                                      |
+| `npm run start`       | Production start (migrations → Prisma → `next start`) |
+| `npm run lint`        | Run ESLint                                            |
+| `npm run typecheck`   | Type-check root + docs site                           |
+| `npm run db:deploy`   | Apply pending migrations                              |
+| `npm run db:generate` | Regenerate the Prisma client                          |
+| `npm run seed`        | Create the first user                                 |
+| `npm run format`      | Format the codebase with Prettier                     |

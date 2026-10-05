@@ -21,8 +21,8 @@
   "vars": {
     "CF_PAGES": "1",
     // Non-secret runtime vars. Secrets (DATABASE_URL, AUTH_SECRET,
-    // SEED_USER_PASSWORD, ALGOLIA_*) are prompted by the one-click deploy
-    // button via the declarations in package.json + .env.example.
+    // SEED_USER_PASSWORD) are prompted by the one-click deploy button via the
+    // declarations in package.json + .env.example.
     "AUTH_SESSION_MAX_AGE": "86400",
     "SEED_USER_NAME": "John Doe"
   }
