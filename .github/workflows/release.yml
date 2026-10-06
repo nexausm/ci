@@ -74,9 +74,16 @@ jobs:
         env:
           REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
         run: |
-          curl -fsS --max-time 30 --retry 3 --retry-all-errors -X POST \
+          response="$(curl -sS --max-time 30 --retry 3 --retry-all-errors -w '\n%{http_code}' -X POST \
             "https://invoice.nexaus.cloud/api/revalidate" \
-            -H "x-revalidate-secret: $REVALIDATE_SECRET"
+            -H "x-revalidate-secret: $REVALIDATE_SECRET")"
+          code="${response##*$'\n'}"
+          body="${response%$'\n'*}"
+          if [ "$code" != "200" ] || ! grep -q '"revalidated":true' <<< "$body"; then
+            echo "::error::Download page revalidation failed (HTTP $code): $body"
+            exit 1
+          fi
+          echo "Download page revalidated: $body"
 
   revalidate:
     if: github.event_name == 'workflow_dispatch'
@@ -86,6 +93,13 @@ jobs:
         env:
           REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
         run: |
-          curl -fsS --max-time 30 --retry 3 --retry-all-errors -X POST \
+          response="$(curl -sS --max-time 30 --retry 3 --retry-all-errors -w '\n%{http_code}' -X POST \
             "https://invoice.nexaus.cloud/api/revalidate" \
-            -H "x-revalidate-secret: $REVALIDATE_SECRET"
+            -H "x-revalidate-secret: $REVALIDATE_SECRET")"
+          code="${response##*$'\n'}"
+          body="${response%$'\n'*}"
+          if [ "$code" != "200" ] || ! grep -q '"revalidated":true' <<< "$body"; then
+            echo "::error::Download page revalidation failed (HTTP $code): $body"
+            exit 1
+          fi
+          echo "Download page revalidated: $body"

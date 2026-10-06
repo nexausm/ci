@@ -50,7 +50,7 @@ export async function getReleases(): Promise<GitHubRelease[]> {
         Accept: "application/vnd.github+json",
         "User-Agent": "cloud-invoice-site",
       },
-      next: { revalidate: false },
+      next: { revalidate: false, tags: ["github-releases"] },
     });
   } catch {
     return [];
