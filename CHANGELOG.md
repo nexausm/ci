@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.4.0](https://github.com/nexausm/ci/compare/v1.3.1...v1.4.0) (2026-10-06)
+
+
+### 🚀 Features
+
+* enhance release management with revalidation and display of all releases ([11fe3a7](https://github.com/nexausm/ci/commit/11fe3a70a9040cf34e8bf50ba7b5a904ac715eda))
+* implement separate workflows for Cloudflare, Netlify and Vercel preview deployments ([b5f8557](https://github.com/nexausm/ci/commit/b5f8557e237d7099556f2096c696365068e840a0))
+
+
+### 🔧 Maintenance
+
+* **env:** clear default values in .env.example and wrangler.jsonc ([4ad27b8](https://github.com/nexausm/ci/commit/4ad27b8284e88e8c5153836260953e0cd90654bb))
+* **netlify:** update environment variable descriptions in netlify.toml ([05c1850](https://github.com/nexausm/ci/commit/05c18501273a10cd40962786a84a39b958ef62a4))
+* **release:** add immediate release check for merged PRs ([7040f8a](https://github.com/nexausm/ci/commit/7040f8a74b653f4b673200bd3fe0f62fc55b02be))
+
 ## [1.3.1](https://github.com/nexausm/ci/compare/v1.3.0...v1.3.1) (2026-10-06)
 
 
