@@ -1,6 +1,6 @@
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
-import { getCompanyInfoSafe } from "@/lib/company";
+import { getCompanyInfo } from "@/lib/company";
 import { CompanyProvider } from "@/app/providers/company-provider";
 import { DashboardShell } from "@/components/dashboard-shell";
 
@@ -11,20 +11,12 @@ export default async function ProtectedLayout({
 }>) {
   const session = await auth();
 
-  const company = await getCompanyInfoSafe();
-
-  const appId = process.env.ALGOLIA_APP_ID;
-  const searchKey = process.env.ALGOLIA_SEARCH_API_KEY;
-  const indexName = process.env.ALGOLIA_INDEX_NAME;
-  const algolia =
-    appId && searchKey && indexName
-      ? { appId, searchKey, indexName }
-      : undefined;
+  const company = await getCompanyInfo();
 
   return (
     <CompanyProvider company={company}>
       <SessionProvider session={session}>
-        <DashboardShell algolia={algolia}>{children}</DashboardShell>
+        <DashboardShell>{children}</DashboardShell>
       </SessionProvider>
     </CompanyProvider>
   );

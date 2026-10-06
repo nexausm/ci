@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@/lib/prisma-client";
 import { prisma } from "@/lib/prisma";
 import { sanitizeProduct } from "@/lib/defaults";
-import { indexProduct, unindexProduct } from "@/lib/search";
 
 const PATCH_FIELDS = [
   "name",
@@ -32,7 +31,6 @@ export async function createProduct(req: Request) {
     create: { id, ...data },
     update: data,
   });
-  await indexProduct(product);
   return NextResponse.json(product);
 }
 
@@ -57,7 +55,6 @@ export async function updateProduct(
       where: { id },
       data: set as Prisma.ProductUpdateInput,
     });
-    await indexProduct(sanitizeProduct(doc));
     return NextResponse.json(doc);
   } catch (err) {
     if (
@@ -76,6 +73,5 @@ export async function deleteProduct(
 ) {
   const { id } = await params;
   await prisma.product.deleteMany({ where: { id } });
-  await unindexProduct(id);
   return NextResponse.json({ ok: true });
 }

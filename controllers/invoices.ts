@@ -7,7 +7,6 @@ import {
   sanitizeInstallment,
 } from "@/lib/defaults";
 import { paymentInstallmentAssignments } from "@/lib/totals";
-import { indexInvoice, unindexInvoice } from "@/lib/search";
 import type {
   ExternalCostInfo,
   Installment,
@@ -253,7 +252,6 @@ export async function createInvoice(req: Request) {
     include: { payments: true, externalCosts: true, installments: true },
   });
   if (!doc) {
-    await indexInvoice(invoice);
     return NextResponse.json(invoice);
   }
   const {
@@ -269,7 +267,6 @@ export async function createInvoice(req: Request) {
     payments: storedPayments.map(toPayment),
     installments: installmentDocs.map(toInstallment),
   });
-  await indexInvoice(result);
   return NextResponse.json(result);
 }
 
@@ -331,7 +328,6 @@ export async function updateInvoice(
     payments: payments.map(toPayment),
     installments: installments.map(toInstallment),
   });
-  await indexInvoice(result);
   return NextResponse.json(result);
 }
 
@@ -363,6 +359,5 @@ export async function deleteInvoice(
 ) {
   const { id } = await params;
   await prisma.invoice.deleteMany({ where: { id } });
-  await unindexInvoice(id);
   return NextResponse.json({ ok: true });
 }
