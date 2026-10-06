@@ -104,6 +104,59 @@ function ReleaseCard({
   );
 }
 
+function AllReleases({ releases }: { releases: GitHubRelease[] }) {
+  if (releases.length === 0) return null;
+
+  return (
+    <div className="mt-12">
+      <h2 className="text-xl font-bold">All releases</h2>
+      <ul className="border-border bg-card mt-4 divide-y rounded-2xl border">
+        {releases.map((release, i) => (
+          <li
+            key={release.tag_name}
+            className="flex flex-wrap items-center justify-between gap-3 px-6 py-4"
+          >
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="font-medium">
+                {release.tag_name.replace(/^v/, "")}
+              </span>
+              {i === 0 ? (
+                <Badge variant="outline">Latest</Badge>
+              ) : release.prerelease ? (
+                <Badge variant="outline">Insider</Badge>
+              ) : null}
+              <span className="text-muted-foreground text-sm">
+                {formatDate(release.published_at)}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <a
+                href={latestZip(release)}
+                download={downloadName(release)}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                )}
+              >
+                <Download />
+                Download
+              </a>
+              <a
+                href={release.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+              >
+                <ArrowRight />
+                Changelog
+              </a>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default async function DownloadPage() {
   const releases = await getReleases();
 
@@ -148,6 +201,7 @@ export default async function DownloadPage() {
             <ReleaseCard key={c.title} {...c} />
           ))}
         </div>
+        <AllReleases releases={releases} />
         <div className="mt-6 text-center">
           <Link
             href={`${GITHUB_REPO_URL}/releases`}
@@ -155,7 +209,7 @@ export default async function DownloadPage() {
             rel="noopener noreferrer"
             className="text-primary text-sm font-medium hover:underline"
           >
-            Looking for a specific version? Browse all releases →
+            Looking for release notes on GitHub? Open the releases page →
           </Link>
         </div>
       </section>

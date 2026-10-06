@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 function isAuthorized(request: NextRequest): boolean {
@@ -21,6 +21,12 @@ export async function POST(request: NextRequest) {
 
   const path = request.nextUrl.searchParams.get("path") || "/download";
   revalidatePath(path);
+  revalidateTag("github-releases", "max");
 
-  return NextResponse.json({ revalidated: true, path, now: Date.now() });
+  return NextResponse.json({
+    revalidated: true,
+    path,
+    tag: "github-releases",
+    now: Date.now(),
+  });
 }
