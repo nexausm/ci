@@ -19,9 +19,9 @@
 
 <div align="center">
 
-![Cloudflare](https://img.shields.io/badge/Cloudflare%20Pages-build%20passing-brightgreen?style=flat&logo=cloudflare&logoColor=FF5F09)
-![Vercel](https://img.shields.io/badge/Vercel-build%20passing-brightgreen?style=flat&logo=vercel&logoColor=white)
-![Netlify](https://img.shields.io/badge/Netlify-build%20passing-brightgreen?style=flat&logo=netlify&logoColor=05A29E)
+[![Cloudflare](https://img.shields.io/github/actions/workflow/status/nexausm/ci/deploy-preview-cf.yml?event=pull_request&label=Cloudflare%20Pages&style=flat&logo=cloudflare&logoColor=FF5F09)](https://github.com/nexausm/ci/actions/workflows/deploy-preview-cf.yml)
+[![Vercel](https://img.shields.io/github/actions/workflow/status/nexausm/ci/deploy-preview-vercel.yml?event=pull_request&label=Vercel&style=flat&logo=vercel&logoColor=white)](https://github.com/nexausm/ci/actions/workflows/deploy-preview-vercel.yml)
+[![Netlify](https://img.shields.io/github/actions/workflow/status/nexausm/ci/deploy-preview-netlify.yml?event=pull_request&label=Netlify&style=flat&logo=netlify&logoColor=05A29E)](https://github.com/nexausm/ci/actions/workflows/deploy-preview-netlify.yml)
 
 </div>
 

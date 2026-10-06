@@ -1,0 +1,169 @@
+name: Vercel preview deploy
+
+on:
+  pull_request:
+    branches: [staging]
+    types: [opened, synchronize, reopened, closed]
+    paths-ignore:
+      - "site/**"
+      - ".github/**"
+      - "*.md"
+      - "LICENSE"
+      - ".claude/**"
+      - ".agents/**"
+      - "skills-lock.json"
+      - ".coderabbit.yaml"
+      - ".editorconfig"
+      - ".prettierrc.json"
+      - ".prettierignore"
+      - ".env.example"
+      - ".gitattributes"
+      - "deno.lock"
+      - "release-please-config.json"
+      - ".release-please-manifest.json"
+
+concurrency:
+  group: preview-deploy-vercel-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+
+jobs:
+  preflight:
+    name: DB Preflight
+    if: github.event.action != 'closed' && github.event.pull_request.head.ref != 'chore/prettier-autofix'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check the database is reachable
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run db:preflight
+
+  deploy:
+    name: Deploy Vercel preview
+    if: github.event.action != 'closed' && github.event.pull_request.head.ref != 'chore/prettier-autofix'
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write build-time env
+        run: |
+          cat > .env <<'EOF'
+          AUTH_SECRET=${{ secrets.AUTH_SECRET }}
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          EOF
+
+      - name: Deploy Vercel preview
+        id: vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          mkdir -p .vercel
+          cat > .vercel/project.json <<EOF
+          {"orgId":"${VERCEL_ORG_ID}","projectId":"${VERCEL_PROJECT_ID}"}
+          EOF
+          npx --yes vercel@59.16.0 pull --yes --environment=preview --scope="$VERCEL_ORG_ID"
+          npx --yes vercel@59.16.0 build --yes --scope="$VERCEL_ORG_ID"
+          URL=$(npx --yes vercel@59.16.0 deploy --prebuilt --yes --scope="$VERCEL_ORG_ID" \
+            | grep -oE 'https://[^[:space:]]+' | tail -1)
+          test -n "$URL" || exit 1
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test preview URL
+        id: smoke
+        if: always() && steps.vercel.outputs.url != ''
+        run: |
+          url="${{ steps.vercel.outputs.url }}"
+          code=000
+          for attempt in 1 2 3; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' -L --max-time 120 "$url" || true)
+            case "$code" in
+              2*|3*) break ;;
+            esac
+            sleep 15
+          done
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+
+      - name: Post preview URL on the PR
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          URL: ${{ steps.vercel.outputs.url }}
+          CODE: ${{ steps.smoke.outputs.code }}
+        with:
+          script: |
+            const url = process.env.URL || null;
+            const code = process.env.CODE || "";
+            const ok = /^[23]\d\d$/.test(code);
+            const status = !url ? "failed" : ok ? code : `failed (${code})`;
+            const marker = "<!-- preview-deploy-report-vercel -->";
+            const body = [
+              "### Vercel preview deployment",
+              "",
+              "| Status | URL |",
+              "|---|---|",
+              `| ${status} | ${url ? `[${url}](${url})` : "-"} |`,
+              "",
+              marker,
+            ].join("\n");
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((c) => c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Fail if preview is missing or unhealthy
+        if: always()
+        env:
+          URL: ${{ steps.vercel.outputs.url }}
+          CODE: ${{ steps.smoke.outputs.code }}
+        run: |
+          if [ -z "$URL" ]; then
+            echo "Vercel deploy failed (no URL produced)"
+            exit 1
+          fi
+          case "$CODE" in
+            2??|3??) ;;
+            *) echo "unhealthy preview: $CODE"; exit 1 ;;
+          esac
