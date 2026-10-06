@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.1](https://github.com/nexausm/ci/compare/v1.3.0...v1.3.1) (2026-10-06)
+
+
+### 🔧 Maintenance
+
+* **client:** centralize collection state in external stores ([cd4c8c3](https://github.com/nexausm/ci/commit/cd4c8c3488f4ed1cc88f795c96bd49b7e7dd4c73))
+* **client:** centralize company profile state in provider ([95a2613](https://github.com/nexausm/ci/commit/95a26134fc9620d9baa9eb7cebdd48453505f5c7))
+* **deps:** add cn, drop react-icons, pin recharts to 3.8.0 ([31e396c](https://github.com/nexausm/ci/commit/31e396cffbf4f703e604e74817d6c30c3ac64f5d))
+* **invoices:** extract list from dashboard into dedicated page ([abb6f9d](https://github.com/nexausm/ci/commit/abb6f9d531457aecc09b33b021a44e64d740cef5))
+* **search:** drop algolia integration ([1824df8](https://github.com/nexausm/ci/commit/1824df8161a219ba9b7ab7ffda5e77cb503e296c))
+* **ui:** add breadcrumb, chart, empty and spinner components ([6263c9f](https://github.com/nexausm/ci/commit/6263c9f0e42ecd33688625f6faa41261bf8f4407))
+* **ui:** adopt new sidebar, breadcrumb, chart, empty, skeleton and spinner components ([8db1044](https://github.com/nexausm/ci/commit/8db104466352a3b1e2f527b0df71e3719801f286))
+* **ui:** drop ring border from card ([b652d14](https://github.com/nexausm/ci/commit/b652d140c476da8b97f9432eb02ef3136fc9fcff))
+
 ## [1.3.0](https://github.com/nexausm/ci/compare/v1.2.0...v1.3.0) (2026-10-03)
 
 ### 🚀 Features
