@@ -2,11 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Building2, MoreHorizontal, Plus, Search, User } from "lucide-react";
+import { Building2, MoreHorizontal, Plus, User, Users } from "lucide-react";
 import { toast } from "sonner";
 import {
   Button,
-  Input,
   Badge,
   Table,
   TableBody,
@@ -28,6 +27,12 @@ import {
   AlertDialogTitle,
   Card,
   CardContent,
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  Skeleton,
 } from "@/components/ui";
 
 import { useClients, useInvoices } from "@/lib/storage";
@@ -37,7 +42,6 @@ import type { Client } from "@/lib/types";
 export default function Page() {
   const { clients, loaded, upsertClient, removeClient } = useClients();
   const { invoices } = useInvoices();
-  const [query, setQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
   const [deleting, setDeleting] = useState<Client | null>(null);
@@ -51,17 +55,10 @@ export default function Page() {
     return map;
   }, [invoices]);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const sorted = [...clients].sort((a, b) => a.name.localeCompare(b.name));
-    if (!q) return sorted;
-    return sorted.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.email.toLowerCase().includes(q) ||
-        c.phone.toLowerCase().includes(q),
-    );
-  }, [clients, query]);
+  const sorted = useMemo(
+    () => [...clients].sort((a, b) => a.name.localeCompare(b.name)),
+    [clients],
+  );
 
   async function handleSaved(client: Client) {
     const isNew = !clients.some((c) => c.id === client.id);
@@ -104,19 +101,7 @@ export default function Page() {
         </Button>
       </div>
 
-      <div className="mt-6 max-w-sm">
-        <div className="relative">
-          <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
-          <Input
-            placeholder="Search clients…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-      </div>
-
-      <Card className="mt-4 py-0">
+      <Card className="mt-6 py-0">
         <CardContent className="p-0">
           <Table className="table-fixed">
             <TableHeader>
@@ -132,30 +117,32 @@ export default function Page() {
             <TableBody>
               {!loaded ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-muted-foreground h-24 text-center"
-                  >
-                    Loading…
+                  <TableCell colSpan={6} className="h-24">
+                    <Skeleton className="h-6 w-full" />
                   </TableCell>
                 </TableRow>
-              ) : filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-muted-foreground h-24 text-center"
-                  >
-                    {clients.length === 0
-                      ? "No clients yet. Add your first client to get started."
-                      : "No clients match your search."}
+              ) : sorted.length === 0 ? (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={6}>
+                    <Empty>
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <Users />
+                        </EmptyMedia>
+                        <EmptyTitle>No clients yet</EmptyTitle>
+                        <EmptyDescription>
+                          Add your first client to start billing them.
+                        </EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((client) => (
+                sorted.map((client) => (
                   <TableRow key={client.id}>
                     <TableCell className="truncate font-medium">
                       <Link
-                        href={`/?clientId=${client.id}`}
+                        href={`/invoices?clientId=${client.id}`}
                         className="hover:underline"
                       >
                         {client.name}
@@ -210,7 +197,9 @@ export default function Page() {
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            render={<Link href={`/?clientId=${client.id}`} />}
+                            render={
+                              <Link href={`/invoices?clientId=${client.id}`} />
+                            }
                           >
                             View invoices
                           </DropdownMenuItem>

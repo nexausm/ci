@@ -8,6 +8,16 @@ import {
   withInstallmentAllocations,
 } from "@/lib/totals";
 import { CURRENCIES } from "@/lib/currency";
+import {
+  Card,
+  CardContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui";
 import type { PaymentMethod } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -114,54 +124,56 @@ export default async function PublicInvoicePage({
         ))}
 
         {scheduled.length > 0 && (
-          <div className="overflow-hidden rounded-md border text-sm">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-muted/50 text-muted-foreground border-b text-left">
-                  <th className="px-3 py-2 font-medium">Installment</th>
-                  <th className="px-3 py-2 font-medium">Due date</th>
-                  <th className="px-3 py-2 text-right font-medium">Amount</th>
-                  <th className="px-3 py-2 text-right font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {scheduled.map((inst) => {
-                  const status =
-                    inst.status === "paid"
-                      ? "Paid"
-                      : inst.status === "partial"
-                        ? "Partial"
-                        : "Unpaid";
-                  return (
-                    <tr key={inst.id} className="border-b last:border-0">
-                      <td className="px-3 py-2">
-                        <span className="font-medium">#{inst.seq + 1}</span>
-                        {inst.label ? (
-                          <span className="text-muted-foreground ml-2">
-                            {inst.label}
-                          </span>
-                        ) : null}
-                      </td>
-                      <td className="text-muted-foreground px-3 py-2">
-                        {formatDateLong(inst.dueDate) || "—"}
-                      </td>
-                      <td className="px-3 py-2 text-right">
-                        {money(inst.amount)}
-                        {inst.paidAmount ? (
-                          <span className="text-muted-foreground block text-xs">
-                            {money(inst.paidAmount)} paid
-                          </span>
-                        ) : null}
-                      </td>
-                      <td className="text-muted-foreground px-3 py-2 text-right">
-                        {status}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <Card className="py-0">
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Installment</TableHead>
+                    <TableHead>Due date</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead className="text-right">Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {scheduled.map((inst) => {
+                    const status =
+                      inst.status === "paid"
+                        ? "Paid"
+                        : inst.status === "partial"
+                          ? "Partial"
+                          : "Unpaid";
+                    return (
+                      <TableRow key={inst.id}>
+                        <TableCell>
+                          <span className="font-medium">#{inst.seq + 1}</span>
+                          {inst.label ? (
+                            <span className="text-muted-foreground ml-2">
+                              {inst.label}
+                            </span>
+                          ) : null}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDateLong(inst.dueDate) || "—"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {money(inst.amount)}
+                          {inst.paidAmount ? (
+                            <span className="text-muted-foreground block text-xs">
+                              {money(inst.paidAmount)} paid
+                            </span>
+                          ) : null}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-right">
+                          {status}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         )}
       </div>
     </main>

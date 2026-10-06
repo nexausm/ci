@@ -56,13 +56,12 @@ Open http://localhost:3000 and sign in. See **First user** to create a login.
 
 ## Configuration
 
-| Variable                                                                                     | Required | Description                                                                        |
-| -------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------- |
-| `DATABASE_URL`                                                                               | yes      | PostgreSQL connection string, e.g. `postgresql://user:pass@localhost:5432/invoice` |
-| `AUTH_SECRET`                                                                                | yes      | Session signing secret. Generate: `openssl rand -base64 32`                        |
-| `AUTH_SESSION_MAX_AGE`                                                                       | no       | Session lifetime in seconds (default 86400)                                        |
-| `SEED_USER_NAME` / `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`                                  | no       | Used by `npm run seed` to create the first user                                    |
-| `ALGOLIA_APP_ID` / `ALGOLIA_ADMIN_API_KEY` / `ALGOLIA_SEARCH_API_KEY` / `ALGOLIA_INDEX_NAME` | no       | Optional full-text search; leave empty to disable                                  |
+| Variable                                                    | Required | Description                                                                        |
+| ----------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                              | yes      | PostgreSQL connection string, e.g. `postgresql://user:pass@localhost:5432/invoice` |
+| `AUTH_SECRET`                                               | yes      | Session signing secret. Generate: `openssl rand -base64 32`                        |
+| `AUTH_SESSION_MAX_AGE`                                      | no       | Session lifetime in seconds (default 86400)                                        |
+| `SEED_USER_NAME` / `SEED_USER_EMAIL` / `SEED_USER_PASSWORD` | no       | Used by `npm run seed` to create the first user                                    |
 
 ### First user
 
@@ -73,14 +72,13 @@ npm run seed
 
 ### Available scripts
 
-| Command                 | Purpose                                                      |
-| ----------------------- | ------------------------------------------------------------ |
-| `npm run build`         | Build the production bundle                                  |
-| `npm run start`         | Production start (migrations → Prisma client → `next start`) |
-| `npm run db:deploy`     | Apply pending migrations                                     |
-| `npm run db:migrate`    | Create a new migration                                       |
-| `npm run seed`          | Create the first user from `SEED_USER_*`                     |
-| `npm run index:algolia` | Re-index records to Algolia (optional)                       |
+| Command              | Purpose                                                      |
+| -------------------- | ------------------------------------------------------------ |
+| `npm run build`      | Build the production bundle                                  |
+| `npm run start`      | Production start (migrations → Prisma client → `next start`) |
+| `npm run db:deploy`  | Apply pending migrations                                     |
+| `npm run db:migrate` | Create a new migration                                       |
+| `npm run seed`       | Create the first user from `SEED_USER_*`                     |
 
 ## Updating to a newer release
 

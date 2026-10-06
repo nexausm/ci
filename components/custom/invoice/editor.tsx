@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { Download, Loader2, Plus, Settings2, Trash2 } from "lucide-react";
+import { Download, Plus, Settings2, Trash2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Button,
   Input,
@@ -802,15 +803,11 @@ export function InvoiceEditor({ id }: { id?: string }) {
               onClick={handleDownload}
               disabled={downloading}
             >
-              {downloading ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Download className="size-4" />
-              )}
+              {downloading ? <Spinner /> : <Download className="size-4" />}
               <span className="hidden sm:inline">Download PDF</span>
             </Button>
             <Button size="sm" onClick={handleSave} disabled={saving}>
-              {saving && <Loader2 className="size-4 animate-spin" />}
+              {saving && <Spinner />}
               Save invoice
             </Button>
           </div>

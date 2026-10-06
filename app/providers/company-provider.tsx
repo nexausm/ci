@@ -1,9 +1,12 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 import type { CompanyInfo } from "@/lib/types";
 
-const CompanyContext = createContext<CompanyInfo | null>(null);
+const CompanyContext = createContext<{
+  company: CompanyInfo;
+  setCompany: (next: CompanyInfo) => void;
+} | null>(null);
 
 export function CompanyProvider({
   company,
@@ -12,17 +15,26 @@ export function CompanyProvider({
   company: CompanyInfo;
   children: React.ReactNode;
 }) {
+  const [current, setCompany] = useState(company);
+  const value = useMemo(() => ({ company: current, setCompany }), [current]);
+
   return (
-    <CompanyContext.Provider value={company}>
-      {children}
-    </CompanyContext.Provider>
+    <CompanyContext.Provider value={value}>{children}</CompanyContext.Provider>
   );
 }
 
-export function useCompany(): CompanyInfo {
-  const company = useContext(CompanyContext);
-  if (!company) {
+function useCompanyContext() {
+  const ctx = useContext(CompanyContext);
+  if (!ctx) {
     throw new Error("useCompany must be used within a CompanyProvider");
   }
-  return company;
+  return ctx;
+}
+
+export function useCompany() {
+  return useCompanyContext().company;
+}
+
+export function useSetCompany() {
+  return useCompanyContext().setCompany;
 }

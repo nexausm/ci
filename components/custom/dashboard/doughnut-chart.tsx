@@ -1,9 +1,16 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Cell, Pie, PieChart } from "recharts";
+
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 
 export type DoughnutSegment = {
+  key: string;
   label: string;
   value: number;
   color: string;
@@ -23,13 +30,34 @@ export function DoughnutChart({
   const total = data.reduce((sum, d) => sum + d.value, 0);
   const innerRadius = (size - thickness) / 2;
 
+  const config = Object.fromEntries(
+    data.map((d) => [d.key, { label: d.label, color: d.color }]),
+  ) as ChartConfig;
+
   return (
     <div
-      className={cn("relative", className)}
+      className="relative shrink-0"
       style={{ width: size, height: size }}
+      data-slot="doughnut-chart"
     >
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
+      <ChartContainer
+        config={config}
+        className={`aspect-auto ${className ?? ""}`}
+        initialDimension={{ width: size, height: size }}
+      >
+        <PieChart accessibilityLayer>
+          <ChartTooltip
+            content={
+              <ChartTooltipContent
+                nameKey="label"
+                hideLabel
+                hideIndicator
+                formatter={(value) =>
+                  Number(value ?? 0).toLocaleString("en-US")
+                }
+              />
+            }
+          />
           <Pie
             data={data}
             dataKey="value"
@@ -41,26 +69,18 @@ export function DoughnutChart({
             stroke="none"
             startAngle={90}
             endAngle={-270}
+            isAnimationActive={false}
           >
             {data.map((segment) => (
-              <Cell key={segment.label} fill={segment.color} />
+              <Cell key={segment.key} fill={`var(--color-${segment.key})`} />
             ))}
           </Pie>
-          <Tooltip
-            content={({ active, payload }) => {
-              if (!active || !payload || payload.length === 0) return null;
-              return (
-                <div className="border-border bg-card text-card-foreground rounded-lg border px-3 py-1.5 text-sm font-medium shadow-sm">
-                  {Number(payload[0].value ?? 0).toLocaleString("en-US")}
-                </div>
-              );
-            }}
-          />
         </PieChart>
-      </ResponsiveContainer>
+      </ChartContainer>
+
       {total > 0 && (
-        <div className="text-card-foreground pointer-events-none absolute inset-0 flex items-center justify-center text-2xl font-semibold">
-          {total}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <span className="text-2xl font-semibold">{total}</span>
         </div>
       )}
     </div>
