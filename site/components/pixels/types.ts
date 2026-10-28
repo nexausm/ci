@@ -39,3 +39,10 @@ export interface IInvolvedCard {
   cta: string;
   href: string;
 }
+
+export interface ISponsor {
+  name: string;
+  href: string;
+  logo: string;
+  description: string;
+}
