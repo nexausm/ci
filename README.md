@@ -28,7 +28,7 @@
 <div align="center">
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/nexausm/ci)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnexausm%2Fci&project-name=cloud-invoice&repository-name=cloud-invoice&env=AUTH_SECRET,DATABASE_URL,AUTH_SESSION_MAX_AGE,SEED_USER_EMAIL,SEED_USER_PASSWORD,SEED_USER_NAME&envDefaults=%7B%22AUTH_SESSION_MAX_AGE%22%3A%2286400%22%2C%22SEED_USER_NAME%22%3A%22Admin%22%7D&envDescription=DATABASE_URL%3A%20PostgreSQL%20connection%20string%20%28Neon%2C%20Supabase%2C%20RDS...%29.%20Migrations%20and%20the%20admin%20seed%20run%20automatically%20on%20build.%20AUTH_SECRET%3A%20random%20secret%2C%20generate%20with%3A%20openssl%20rand%20-base64%2032.%20AUTH_SESSION_MAX_AGE%3A%20session%20lifetime%20in%20seconds%20%28default%2086400%29.%20SEED_USER_EMAIL%20%2F%20SEED_USER_PASSWORD%20%2F%20SEED_USER_NAME%3A%20pre-provisions%20the%20admin%20user%20%28needed%20to%20log%20in%29.)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnexausm%2Fci&project-name=cloud-invoice&repository-name=cloud-invoice&env=AUTH_SECRET,DATABASE_URL,AUTH_SESSION_MAX_AGE,SEED_USER_EMAIL,SEED_USER_PASSWORD,SEED_USER_NAME&envDefaults=%7B%22AUTH_SESSION_MAX_AGE%22%3A%2286400%22%2C%22SEED_USER_NAME%22%3A%22Admin%22%7D&envDescription=DATABASE_URL%3A%20Your%20Neon%20Postgres%20connection%20string.%20Create%20a%20free%20serverless%20Postgres%20database%20at%20https%3A%2F%2Fneon.com%20and%20copy%20its%20connection%20string.%20Migrations%20and%20the%20admin%20seed%20run%20automatically%20on%20build.%20AUTH_SECRET%3A%20random%20secret%2C%20generate%20with%3A%20openssl%20rand%20-base64%2032.%20AUTH_SESSION_MAX_AGE%3A%20session%20lifetime%20in%20seconds%20%28default%2086400%29.%20SEED_USER_EMAIL%20%2F%20SEED_USER_PASSWORD%20%2F%20SEED_USER_NAME%3A%20pre-provisions%20the%20admin%20user%20%28needed%20to%20log%20in%29.)
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nexausm/ci)
 
 </div>
@@ -37,6 +37,15 @@
 
 To learn about features, setup, contribution and more, visit
 **[docs](https://invoice.nexaus.cloud/docs)**.
+
+## Sponsors
+
+Cloud Invoice is proudly supported by [Neon](https://neon.com), the
+serverless Postgres platform, through the Neon Open Source Program.
+
+<a href="https://neon.com" target="_blank" rel="noopener noreferrer">
+  <img src="public/images/logo/neon-logo.svg" alt="Neon" width="220" />
+</a>
 
 ## Deploy your own instance
 
@@ -49,7 +58,9 @@ you are prompted for the environment variables below at deploy time.
 
 Required:
 
-- `DATABASE_URL` - a PostgreSQL connection string (Neon, Supabase, RDS, ...)
+- `DATABASE_URL` - your [Neon](https://neon.com) Postgres connection string.
+  Neon's free serverless Postgres is all Cloud Invoice needs: create a project
+  and copy its connection string from the **Connect** dialog.
 - `AUTH_SECRET` - a random secret: `openssl rand -base64 32`
 
 Optional (defaults shown):

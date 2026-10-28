@@ -21,6 +21,7 @@ export const footerData: IFooter[] = [
         external: true,
       },
       { name: "Documentation", href: "/docs" },
+      { name: "Sponsors", href: "/sponsors" },
     ],
   },
   {
