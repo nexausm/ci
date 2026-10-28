@@ -5,7 +5,7 @@
   "cloudflare": {
     "bindings": {
       "DATABASE_URL": {
-        "description": "PostgreSQL connection string (Neon, Supabase, RDS, ...). Required for the app and for `db:setup` (migrations & admin seed)."
+        "description": "Your Neon Postgres connection string (https://neon.com, free serverless Postgres). Required for the app and for `db:setup` (migrations & admin seed)."
       },
       "AUTH_SECRET": {
         "description": "Random secret used to sign auth cookies."
